@@ -125,19 +125,19 @@ const Dashboard = () => {
         <div className="modules-section">
           <div className="module-card">
             <h3>Email & Memos</h3>
-            <button>PRACTISE</button>
+            <button>PRACTICE</button>
           </div>
           <div className="module-card">
             <h3>Letters & Applications</h3>
-            <button>PRACTISE</button>
+            <button>PRACTICE</button>
           </div>
           <div className="module-card">
             <h3>Writing Essentials</h3>
-            <button>PRACTISE</button>
+            <button>PRACTICE</button>
           </div>
           <div className="module-card">
             <h3>Reports & Briefs</h3>
-            <button>PRACTISE</button>
+            <button>PRACTICE</button>
           </div>
         </div>
       </div>
