@@ -61,7 +61,7 @@ const SignupForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            autoComplete="email"
+            autoComplete="true"
           />
         </div>
 
@@ -75,21 +75,21 @@ const SignupForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-  autoComplete="new-password"
-/>
+            autoComplete="true"
+          />
         </div>
 
         <div className="form-group">
           <label htmlFor="confirm-password">Confirm Password</label>
           <input
-  type="password"
-  id="confirm-password"
-  className="form-input"
+            type="password"
+            id="confirm-password"
+            className="form-input"
             placeholder="Confirm your password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            autoComplete="new-password"
+            autoComplete="true"
           />
         </div>
 

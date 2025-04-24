@@ -7,28 +7,15 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  // Modified login logic: any value grants access
+  const handleLogin = (e) => {
     e.preventDefault();
     setError("");
-
-    try {
-      const response = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate("/dashboard");
-      } else {
-        setError(data.message);
-      }
-    } catch (error) {
-      setError("Failed to connect to server");
+    // If both fields have any value, allow access
+    if (email && password) {
+      navigate("/dashboard");
+    } else {
+      setError("Please enter both email and password.");
     }
   };
 
