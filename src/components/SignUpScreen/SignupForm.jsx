@@ -1,18 +1,24 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const LoginForm = () => {
+const SignupForm = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch("http://localhost:5000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -23,7 +29,8 @@ const LoginForm = () => {
       const data = await response.json();
 
       if (response.ok) {
-        navigate("/dashboard");
+        // Redirect to login page after successful signup
+        navigate("/login");
       } else {
         setError(data.message);
       }
@@ -33,13 +40,13 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="login-form-section">
-      <h1 className="welcome-title">Welcome Back!</h1>
-      <p className="resume-learning">Resume learning</p>
+    <div className="signup-form-section">
+      <h1 className="welcome-title">Create Account</h1>
+      <p className="start-learning">Start your learning journey</p>
 
       {error && <p className="error-message" style={{ color: "red" }}>{error}</p>}
 
-      <form className="login-form" onSubmit={handleLogin}>
+      <form className="signup-form" onSubmit={handleSignup}>
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
@@ -66,47 +73,39 @@ const LoginForm = () => {
           />
         </div>
 
-        <a 
-          href="/forgot-password" 
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("/forgot-password");
-          }}
-          className="forgot-password"
-        >
-          Forgot Password?
-        </a>
+        <div className="form-group">
+          <label htmlFor="confirm-password">Confirm Password</label>
+          <input
+            type="password"
+            id="confirm-password"
+            className="form-input"
+            placeholder="Confirm your password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
 
-        <button type="submit" className="login-button">
-          Log in
+        <button type="submit" className="signup-button">
+          Sign Up
         </button>
       </form>
 
-      <div className="login-divider">
-        <span className="divider-line"></span>
-        <span className="divider-text">or</span>
-        <span className="divider-line"></span>
-      </div>
-
-      <button className="secondary-button">
-        Log in with Email
-      </button>
-
-      <p className="signup-redirect">
-        Don't have an account?{" "}
-        <a 
-          href="/signup" 
+      <p className="login-redirect">
+        Already have an account?{" "}
+        <a
+          href="/login"
           onClick={(e) => {
             e.preventDefault();
-            navigate("/signup");
-          }} 
-          className="signup-link"
+            navigate("/login");
+          }}
+          className="login-link"
         >
-          Sign Up
+          Log In
         </a>
       </p>
     </div>
   );
 };
 
-export default LoginForm;
+export default SignupForm;
