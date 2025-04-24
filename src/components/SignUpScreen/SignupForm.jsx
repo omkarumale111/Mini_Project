@@ -54,13 +54,14 @@ const SignupForm = () => {
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
-            type="email"
-            id="email"
+  type="email"
+  id="email"
             className="form-input"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
           />
         </div>
 
@@ -74,19 +75,21 @@ const SignupForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-          />
+  autoComplete="new-password"
+/>
         </div>
 
         <div className="form-group">
           <label htmlFor="confirm-password">Confirm Password</label>
           <input
-            type="password"
-            id="confirm-password"
-            className="form-input"
+  type="password"
+  id="confirm-password"
+  className="form-input"
             placeholder="Confirm your password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            autoComplete="new-password"
           />
         </div>
 
