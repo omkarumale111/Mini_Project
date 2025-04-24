@@ -1,0 +1,56 @@
+import React from "react";
+import "./LandingPage.css";
+import logo from "../assets/Logo.png";
+import heroImage from "../assets/Pre_sign1.jpg";
+import icon1 from "../assets/1.png";
+import icon2 from "../assets/2.png";
+import icon3 from "../assets/3.png";
+
+const LandingPage = () => {
+  return (
+    <div className="landing-root">
+      {/* Header/Nav */}
+      <header className="landing-header">
+        <div className="landing-logo-group">
+          <img src={logo} alt="WriteEdge Logo" className="landing-logo" />
+          <span className="landing-logo-text">WriteEdge</span>
+        </div>
+        <nav className="landing-nav">
+          <a href="#" className="nav-link active">Home</a>
+          <a href="#" className="nav-link">About</a>
+          <a href="#" className="nav-link">Courses</a>
+          <a href="#" className="nav-link">Modules</a>
+          <a href="#" className="nav-link login-link">Log in</a>
+        </nav>
+      </header>
+
+      {/* Hero/Main Section */}
+      <main className="landing-main">
+        <div className="landing-hero-row">
+          <div className="landing-hero-img-wrap">
+            <img src={heroImage} alt="Content Clarity Credibility" className="landing-hero-img" />
+            <div className="landing-hero-text-overlay no-bg">
+              <h2 className="landing-hero-overlay-title no-bg">Content.<br />Clarity.<br />Credibility.</h2>
+            </div>
+          </div>
+        </div>
+        <div className="landing-content-row">
+          <div className="landing-desc-row">
+            <div className="landing-desc-text">
+              WriteEdge empowers students and professionals to master real-world, corporate writing.<br />
+              With structured modules, AI-driven feedback, and prompt-based simulations, learning is practical and effective.
+            </div>
+            <button className="landing-register-btn">REGISTER NOW</button>
+          </div>
+          <div className="landing-icons-row">
+            <img src={icon1} alt="Quick Access 1" className="landing-icon" />
+            <img src={icon2} alt="Quick Access 2" className="landing-icon" />
+            <img src={icon3} alt="Quick Access 3" className="landing-icon" />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default LandingPage;

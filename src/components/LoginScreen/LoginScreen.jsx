@@ -1,7 +1,7 @@
 import React from "react";
 import "./LoginScreen.css";
 import LoginForm from "./LoginForm";
-import LoginImage from "./LoginImage";
+import loginImage from "../../assets/download.jpg";
 
 const LoginScreen = () => {
   return (
@@ -10,7 +10,9 @@ const LoginScreen = () => {
         <div className="login-form-container">
           <LoginForm />
         </div>
-        <LoginImage />
+        <div className="login-image-section">
+          <img src={loginImage} alt="Signin visual" className="login-image" />
+        </div>
       </div>
     </div>
   );

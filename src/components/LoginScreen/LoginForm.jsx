@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaGlobe } from "react-icons/fa";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -7,11 +8,9 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // Modified login logic: any value grants access
   const handleLogin = (e) => {
     e.preventDefault();
     setError("");
-    // If both fields have any value, allow access
     if (email && password) {
       navigate("/dashboard");
     } else {
@@ -21,73 +20,65 @@ const LoginForm = () => {
 
   return (
     <div className="login-form-section">
-      <h1 className="welcome-title">Welcome Back!</h1>
-      <p className="resume-learning">Resume learning</p>
-
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h1 className="welcome-title" style={{ margin: 0 }}>Welcome Back!</h1>
+        <p className="resume-learning" style={{ margin: 0, color: '#888', fontWeight: 400 }}>Resume learning</p>
+      </div>
       {error && <p className="error-message" style={{ color: "red" }}>{error}</p>}
-
-      <form className="login-form" onSubmit={handleLogin}>
+      <form className="login-form" onSubmit={handleLogin} style={{ marginBottom: 8 }}>
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
             type="email"
             id="email"
             className="form-input"
-            placeholder="Enter your email"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
-
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <input
             type="password"
             id="password"
             className="form-input"
-            placeholder="Enter your password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-
-        <a 
-          href="/forgot-password" 
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("/forgot-password");
-          }}
-          className="forgot-password"
-        >
-          Forgot Password?
-        </a>
-
-        <button type="submit" className="login-button">
-          Log in
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div></div>
+          <a
+            href="/forgot-password"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/forgot-password");
+            }}
+            className="forgot-password"
+            style={{ fontSize: 13, color: '#888' }}
+          >
+            Forgot Password?
+          </a>
+        </div>
+        <button type="submit" className="login-button" style={{ width: '100%', background: '#222', color: '#fff', borderRadius: 24, padding: '0.8rem 0', fontWeight: 600, fontSize: 18, marginTop: 4 }}>Log In</button>
       </form>
-
-      <div className="login-divider">
-        <span className="divider-line"></span>
-        <span className="divider-text">or</span>
-        <span className="divider-line"></span>
-      </div>
-
-      <button className="secondary-button">
-        Log in with Email
+      <button className="secondary-button" style={{ width: '100%', borderRadius: 8, background: '#f5f5f5', color: '#222', fontWeight: 500, fontSize: 16, padding: '0.7rem 0', marginBottom: 10, border: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <FaGlobe size={18} /> Log in with Email
       </button>
-
-      <p className="signup-redirect">
-        Don't have an account?{" "}
-        <a 
-          href="/signup" 
+      <p className="signup-redirect" style={{ textAlign: 'center', marginTop: 18 }}>
+        Don't have an account?{' '}
+        <a
+          href="/signup"
           onClick={(e) => {
             e.preventDefault();
             navigate("/signup");
-          }} 
+          }}
           className="signup-link"
+          style={{ color: '#222', fontWeight: 600 }}
         >
           Sign Up
         </a>

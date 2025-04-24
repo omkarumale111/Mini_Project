@@ -1,0 +1,232 @@
+body, .landing-root {
+  background: #0e3145;
+  font-family: 'Inter', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+}
+
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.2rem 3vw 1.2rem 3vw;
+  background: #0e3145;
+}
+.landing-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.landing-logo {
+  height: 48px;
+  width: auto;
+}
+.landing-logo-text {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+.landing-nav {
+  display: flex;
+  gap: 2.1rem;
+}
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.12rem;
+  font-weight: 500;
+  padding-bottom: 3px;
+  border-bottom: 2px solid transparent;
+  transition: border 0.2s, color 0.2s;
+}
+.nav-link.active, .nav-link:hover {
+  color: #e5b96c;
+  border-bottom: 2px solid #e5b96c;
+}
+.login-link {
+  margin-left: 2rem;
+  color: #4ca0af;
+  font-weight: 600;
+}
+
+.landing-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.landing-hero-row {
+  margin-top: 1.5rem;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.landing-hero-img-wrap {
+  position: relative;
+  width: 80vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.landing-hero-img {
+  width: 80vw;
+  height: 40vh;
+  object-fit: cover;
+  border-radius: 1.2rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: block;
+  margin: 0 auto;
+}
+.landing-hero-text-overlay.no-bg {
+  position: absolute;
+  bottom: 4%;
+  left: 3%;
+  width: auto;
+  text-align: left;
+  background: none;
+  box-shadow: none;
+  padding: 0 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+.landing-hero-overlay-title.no-bg {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #111;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  line-height: 1.18;
+}
+.landing-desc-row {
+  margin-top: 2.2rem;
+  width: 56vw;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 1.2rem;
+  position: static;
+  left: unset;
+  bottom: unset;
+  background: none;
+  box-shadow: none;
+  padding: 0 1.2rem 0 1.2rem;
+  text-align: left;
+}
+.landing-desc-row .landing-desc-text {
+  font-size: 1.12rem;
+  color: #fff;
+  max-width: 420px;
+  line-height: 1.3;
+  text-align: left;
+}
+.landing-register-btn {
+  margin-top: 1.2rem;
+  margin-bottom: 0.2rem;
+  margin-left: 0;
+  margin-top: 0.4rem;
+  padding: 1rem 2.8rem;
+  background: #7f604b;
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  font-size: 1.12rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+}
+.landing-register-btn:hover {
+  background: #d1a44a;
+}
+.landing-icons-row {
+  margin-top: 0;
+  display: flex;
+  gap: 2.7rem;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 0;
+}
+.landing-icon {
+  width: 160px;
+  height: 160px;
+  min-width: 120px;
+  object-fit: contain;
+  background: #e8e2d6;
+  border-radius: 0.2rem;
+  box-shadow: none;
+  padding: 1.2rem;
+}
+@media (max-width: 900px) {
+  .landing-hero-img {
+    height: 28vh;
+  }
+  .landing-hero-overlay-title.no-bg {
+    font-size: 1.35rem;
+  }
+  .landing-hero-text-overlay.no-bg {
+    bottom: 2%;
+    left: 2%;
+    gap: 0.7rem;
+  }
+  .landing-desc-row {
+    width: 94vw;
+    max-width: 98vw;
+    padding: 0 0.4rem 0 0.4rem;
+  }
+  .landing-icons-row .landing-icon {
+    width: 90px;
+    height: 90px;
+    min-width: 70px;
+    padding: 0.7rem;
+  }
+}
+@media (max-width: 600px) {
+  .landing-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.2rem 3vw 1rem 3vw;
+    gap: 0.7rem;
+  }
+  .landing-logo {
+    height: 36px;
+  }
+  .landing-logo-text {
+    font-size: 1.3rem;
+  }
+  .landing-main {
+    align-items: stretch;
+  }
+  .landing-hero-img {
+    height: 18vh;
+  }
+  .landing-hero-text-overlay.no-bg {
+    bottom: 2%;
+    left: 2%;
+    gap: 0.4rem;
+  }
+  .landing-hero-overlay-title.no-bg {
+    font-size: 1rem;
+  }
+  .landing-desc-row {
+    width: 99vw;
+    max-width: 99vw;
+    padding: 0 0.2rem 0 0.2rem;
+  }
+  .landing-icons-row .landing-icon {
+    width: 45px;
+    height: 45px;
+    min-width: 40px;
+    padding: 0.2rem;
+  }
+}
