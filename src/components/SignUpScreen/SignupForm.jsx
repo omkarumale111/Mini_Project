@@ -10,6 +10,7 @@ const SignupForm = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    console.log("Signup form submitted");
     setError("");
 
     if (password !== confirmPassword) {
@@ -18,6 +19,7 @@ const SignupForm = () => {
     }
 
     try {
+      console.log('Attempting to sign up with:', { email });
       const response = await fetch("http://localhost:5000/api/signup", {
         method: "POST",
         headers: {
@@ -27,6 +29,7 @@ const SignupForm = () => {
       });
 
       const data = await response.json();
+      console.log('Signup response:', data);
 
       if (response.ok) {
         // Redirect to login page after successful signup
@@ -35,6 +38,7 @@ const SignupForm = () => {
         setError(data.message);
       }
     } catch (error) {
+      console.error('Signup error:', error);
       setError("Failed to connect to server");
     }
   };
@@ -46,7 +50,7 @@ const SignupForm = () => {
 
       {error && <p className="error-message" style={{ color: "red" }}>{error}</p>}
 
-      <form className="signup-form" onSubmit={handleSignup}>
+      <form className="signup-form" onSubmit={handleSignup} autoComplete="on">
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
