@@ -36,7 +36,14 @@ const LoginForm = () => {
           />
         </div>
 
-        <a href="#forgot" className="forgot-password">
+        <a 
+          href="/forgot-password" 
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/forgot-password");
+          }}
+          className="forgot-password"
+        >
           Forgot Password?
         </a>
 
