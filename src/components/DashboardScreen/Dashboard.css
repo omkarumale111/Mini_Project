@@ -18,7 +18,8 @@
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: flex-start;
   position: fixed;
   height: 100vh;
   top: 0;
@@ -58,8 +59,18 @@
   font-weight: bold;
 }
 
+.nav-menu {
+  margin-top: 0.5rem;
+  flex: 0 0 auto;
+}
+
 .bottom-menu {
   margin-top: auto;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 0 0 auto;
 }
 
 .menu-icon {
@@ -120,6 +131,26 @@
   color: #042862;
 }
 
+.logo1-group, .logo-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dashboard-logo {
+  height: 36px;
+  width: 36px;
+  object-fit: contain;
+  margin-right: 0.2rem;
+}
+
+.logo1, .logo {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #042862;
+  letter-spacing: 0.5px;
+}
+
 .logo {
   font-size: 1.8rem;
   font-weight: bold;
@@ -134,22 +165,25 @@
 
 /* Content Header */
 .content-header {
+  width: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+  justify-content: center;
 }
 
 .content-header h1 {
-  font-size: 1.5rem;
-  color: #ffffff;
-  margin: 0;
+  color: #111;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1.2rem 0;
+  letter-spacing: 1px;
+  text-align: center;
 }
 
 /* Donut Chart Styles */
 .donut-chart-container {
   display: flex;
   justify-content: center;
+  width: 100%;
   margin: 2rem 0;
 }
 
@@ -191,6 +225,9 @@
 }
 
 .progress-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   flex: 2;
   background-color: #ffffff;
   border-radius: 8px;
@@ -230,27 +267,39 @@
 }
 
 .module-card h3 {
+  text-align: center;
+  width: 100%;
   color: #132f5b;
   margin-top: 0;
   margin-bottom: 1.5rem;
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .module-card button {
-  background-color: #132f5b;
-  color: white;
+  width: 80%;
+  height: 3.5rem;
+  font-size: 1.6rem;
+  background-color: #5c9ad5;
+  color: #fff;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 8px;
+  margin: 1.2rem auto 0 auto;
+  display: block;
   cursor: pointer;
-  width: 100%;
+  font-weight: 600;
+  transition: background 0.2s;
 }
 
 .module-card button:hover {
-  background-color: #1e4a8a;
+  background-color: #4178b3;
 }
 
 /* Leaderboard Section */
 .leaderboard-section h2 {
+  text-align: center;
+  width: 100%;
   color: #132f5b;
   margin-top: 0;
   margin-bottom: 1rem;

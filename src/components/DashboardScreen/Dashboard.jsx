@@ -6,6 +6,7 @@ import { GrNotes } from "react-icons/gr";
 import { TiMessageTyping } from "react-icons/ti";
 import { IoMdSettings, IoIosHelpCircleOutline } from "react-icons/io";
 import { MdLogout, MdMenu } from "react-icons/md";
+import logo from '../../assets/Logo.png';
 
 const Dashboard = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -22,17 +23,12 @@ const Dashboard = () => {
           <button className="sidebar-toggle1" onClick={toggleSidebar}>
             <MdMenu />
           </button>
-          <div className="logo1">WriteEdge</div>
         </div>
         <nav className="nav-menu">
           <ul>
             <li className="active">
               <ImHome3 className="menu-icon" />
               {sidebarVisible && "DASHBOARD"}
-            </li>
-            <li>
-              <IoPersonCircleOutline className="menu-icon" />
-              {sidebarVisible && "MY PROFILE"}
             </li>
             <li>
               <GrNotes className="menu-icon" />
@@ -71,7 +67,10 @@ const Dashboard = () => {
           <button className="sidebar-toggle" onClick={toggleSidebar}>
             <MdMenu />
           </button>
-          <div className="logo">WriteEdge</div>
+          <div className="logo-group">
+            <img src={logo} alt="WriteEdge Logo" className="dashboard-logo" />
+            <span className="logo">WriteEdge</span>
+          </div>
         </div>
 
         <div className="top-section">
@@ -124,19 +123,19 @@ const Dashboard = () => {
 
         <div className="modules-section">
           <div className="module-card">
+            <h3>Writing Essentials</h3>
+            <button onClick={() => window.location.href = '/writing-essentials'}>PRACTICE</button>
+          </div>
+          <div className="module-card">
+            <h3>Reports & Briefs</h3>
+            <button>PRACTICE</button>
+          </div>
+          <div className="module-card">
             <h3>Email & Memos</h3>
             <button>PRACTICE</button>
           </div>
           <div className="module-card">
             <h3>Letters & Applications</h3>
-            <button>PRACTICE</button>
-          </div>
-          <div className="module-card">
-            <h3>Writing Essentials</h3>
-            <button>PRACTICE</button>
-          </div>
-          <div className="module-card">
-            <h3>Reports & Briefs</h3>
             <button>PRACTICE</button>
           </div>
         </div>
