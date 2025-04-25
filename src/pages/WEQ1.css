@@ -6,25 +6,30 @@ body, .weq1-root {
   margin: 0;
   padding: 0;
 }
+
 .weq1-header {
   padding: 2.5rem 2vw 1.5rem 2vw;
 }
+
 .weq1-logo-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.2rem;
 }
+
 .weq1-logo-text {
   font-size: 2.1rem;
   font-weight: 800;
   letter-spacing: 2px;
   color: #ffe066;
 }
+
 .weq1-nav {
   display: flex;
   gap: 2.2rem;
 }
+
 .weq1-nav a {
   color: #fff;
   font-size: 1.1rem;
@@ -33,25 +38,30 @@ body, .weq1-root {
   letter-spacing: 0.5px;
   transition: color 0.15s;
 }
+
 .weq1-nav a:hover {
   color: #ffe066;
 }
+
 .weq1-title-row {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   margin-top: 1.1rem;
 }
+
 .weq1-section {
   font-size: 1.4rem;
   font-weight: 700;
   color: #fff;
 }
+
 .weq1-question {
   font-size: 1.25rem;
   font-weight: 600;
   color: #fff;
 }
+
 .weq1-problem-label {
   color: #ffe066;
   font-size: 1.2rem;
@@ -60,6 +70,7 @@ body, .weq1-root {
   margin: 0.7rem 0 0.1rem 0;
   letter-spacing: 1px;
 }
+
 .weq1-problem-box {
   background: #e6e6e6;
   color: #24303b;
@@ -73,6 +84,7 @@ body, .weq1-root {
   text-align: center;
   box-shadow: 0 2px 10px 0 rgba(44, 62, 80, 0.07);
 }
+
 .fit-main-row {
   width: 98vw;
   max-width: 1400px;
@@ -82,6 +94,7 @@ body, .weq1-root {
   display: flex;
   justify-content: center;
 }
+
 .fit-editor {
   flex: 1.2;
   min-width: 420px;
@@ -95,6 +108,7 @@ body, .weq1-root {
   box-shadow: 0 2px 10px 0 rgba(44, 62, 80, 0.09);
   padding: 2.2rem 2rem 2rem 2rem;
 }
+
 .fit-editor-area {
   min-height: 250px;
   font-size: 1.25rem;
@@ -106,36 +120,67 @@ body, .weq1-root {
   background: #fff;
   color: #24303b;
 }
+
 .fit-feedback {
   flex: 1;
   min-width: 350px;
   max-width: 480px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 1.6rem;
+  gap: 1.5rem;
+  position: relative;
 }
-.weq1-feedback-box {
+
+.feedback-box {
   min-height: 90px;
-  font-size: 1.15rem;
   border-radius: 18px;
   padding: 1.2rem 1.5rem;
   background: #e6e6e6;
   color: #24303b;
   box-shadow: 0 1px 5px 0 rgba(44, 62, 80, 0.07);
-  display: flex;
-  align-items: flex-start;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
+
+.feedback-box.active {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  min-height: 100%;
+  background: #d1e3f6;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.feedback-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #24303b;
+  margin-bottom: 0.5rem;
+}
+
+.feedback-content {
+  font-size: 1.1rem;
+  color: #24303b;
+  line-height: 1.5;
+  margin-top: 1rem;
+}
+
 .weq1-wordcount {
   color: #24303b;
   font-size: 1.08rem;
-  margin-bottom: 0.7rem;
+  margin: 1rem 0;
 }
+
 .weq1-submit {
   background: #073042;
   color: #fff;
   border: none;
-  padding: 0.6rem 2.2rem;
+  padding: 0.8rem 2.5rem;
   border-radius: 2rem;
   font-size: 1.1rem;
   font-weight: 700;
@@ -145,44 +190,9 @@ body, .weq1-root {
   cursor: pointer;
   transition: background 0.18s;
 }
+
 .weq1-submit:hover {
   background: #24303b;
-}
-.expandable {
-  cursor: pointer;
-  transition: box-shadow 0.18s, background 0.18s, max-height 0.22s cubic-bezier(0.4,0,0.2,1);
-  overflow: hidden;
-  min-height: 60px;
-  max-height: 90px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-.expandable .expandable-title {
-  font-weight: 700;
-  font-size: 1.09rem;
-  color: #24303b;
-  margin-bottom: 0.3rem;
-  flex-shrink: 0;
-  min-height: 1.5em;
-  display: block;
-}
-.expandable .expandable-content {
-  margin-top: 0.6rem;
-  font-size: 1.08rem;
-  color: #24303b;
-  white-space: normal;
-}
-.expandable.expanded {
-  background: #d1e3f6;
-  color: #073042;
-  box-shadow: 0 4px 16px 0 rgba(44, 62, 80, 0.13);
-  min-height: 120px;
-  max-height: 400px;
-}
-.expandable.expanded .expandable-title {
-  color: #073042;
-  margin-bottom: 0.3rem;
 }
 
 @media (max-width: 1100px) {
@@ -194,6 +204,9 @@ body, .weq1-root {
   .fit-editor, .fit-feedback {
     min-width: 90vw;
     max-width: 98vw;
-    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+    padding: 1.5rem;
+  }
+  .feedback-box.active {
+    min-height: 250px;
   }
 }
