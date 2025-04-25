@@ -18,7 +18,20 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
+
+// Test database connection
+pool.getConnection()
+  .then(connection => {
+    console.log('Database connected successfully');
+    connection.release();
+  })
+  .catch(err => {
+    console.error('Error connecting to the database:', err);
+  });
 
 // Create users table if not exists
 async function initializeDatabase() {
@@ -46,6 +59,10 @@ app.post('/api/signup', async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+    
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
@@ -57,6 +74,7 @@ app.post('/api/signup', async (req, res) => {
     
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
+    console.error('Signup error:', error);
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ message: 'Email already exists' });
     }
@@ -64,10 +82,14 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/signin', async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     // Find user
     const [users] = await pool.query(
       'SELECT * FROM users WHERE email = ?',
@@ -75,17 +97,21 @@ app.post('/api/login', async (req, res) => {
     );
     
     if (users.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
     
     // Check password
     const isValidPassword = await bcrypt.compare(password, users[0].password);
     if (!isValidPassword) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
     
-    res.json({ message: 'Login successful' });
+    res.json({ 
+      message: 'Login successful',
+      user: { id: users[0].id, email: users[0].email }
+    });
   } catch (error) {
+    console.error('Signin error:', error);
     res.status(500).json({ message: 'Error during login' });
   }
 });

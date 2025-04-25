@@ -8,13 +8,39 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-    if (email && password) {
-      navigate("/dashboard");
-    } else {
+    
+    if (!email || !password) {
       setError("Please enter both email and password.");
+      return;
+    }
+
+    try {
+      console.log('Attempting to sign in...');
+      const response = await fetch("http://localhost:5000/api/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      if (response.ok) {
+        // Store user data if needed
+        localStorage.setItem('user', JSON.stringify(data.user));
+        // Redirect to dashboard
+        navigate("/dashboard");
+      } else {
+        setError(data.message || "Login failed. Please check your credentials.");
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError("Failed to connect to server. Please try again later.");
     }
   };
 
