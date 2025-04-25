@@ -5,6 +5,7 @@ import heroImage from "../assets/Pre_sign1.jpg";
 import icon1 from "../assets/1.png";
 import icon2 from "../assets/2.png";
 import icon3 from "../assets/3.png";
+import preSign2 from "../assets/Pre_sign2.png";
 
 const LandingPage = () => {
   return (
@@ -36,19 +37,36 @@ const LandingPage = () => {
         </div>
         <div className="landing-content-row">
           <div className="landing-desc-row">
-            <div className="landing-desc-text">
-              WriteEdge empowers students and professionals to master real-world, corporate writing.<br />
-              With structured modules, AI-driven feedback, and prompt-based simulations, learning is practical and effective.
+            <div className="landing-text-and-icons">
+              <div className="landing-desc-left">
+                <div className="landing-desc-text">
+                  WriteEdge empowers students and professionals to master real-world, corporate writing.<br />
+                  With structured modules, AI-driven feedback, and prompt-based simulations, learning is practical and effective.
+                </div>
+                <button className="landing-register-btn">REGISTER NOW</button>
+              </div>
+              <div className="landing-icons-row">
+                <img src={icon1} alt="Quick Access 1" className="landing-icon" />
+                <img src={icon2} alt="Quick Access 2" className="landing-icon" />
+                <img src={icon3} alt="Quick Access 3" className="landing-icon" />
+              </div>
             </div>
-            <button className="landing-register-btn">REGISTER NOW</button>
-          </div>
-          <div className="landing-icons-row">
-            <img src={icon1} alt="Quick Access 1" className="landing-icon" />
-            <img src={icon2} alt="Quick Access 2" className="landing-icon" />
-            <img src={icon3} alt="Quick Access 3" className="landing-icon" />
           </div>
         </div>
       </main>
+      {/* Scroll-down Section */}
+      <div className="landing-scroll-section">
+        <img src={preSign2} alt="WriteEdge Context" className="landing-scroll-img" />
+        <div className="landing-scroll-content">
+          <img src={logo} alt="WriteEdge Logo" className="landing-scroll-logo" />
+          <div className="landing-scroll-title">WriteEdge</div>
+          <div className="landing-scroll-subtitle">Sharpen Your Writing ,Gain the Edge</div>
+          <div className="landing-scroll-text">
+            From basics to brilliance–learn to write like a pro.
+          </div>
+          <button className="landing-scroll-btn">Start Learning</button>
+        </div>
+      </div>
     </div>
   );
 };
