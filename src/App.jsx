@@ -5,7 +5,8 @@ import Dashboard from "./components/DashboardScreen/Dashboard";
 import SignScreen from './components/SignUpScreen/SignScreen';
 import ForgotPassword from "./components/ForgotPasswordScreen/ForgotPassword";
 import LandingPage from "./pages/LandingPage";
-import WritingEssentials from "./pages/WritingEssentials"; // Assuming the WritingEssentials page is located at this path
+import WritingEssentials from "./pages/WritingEssentials";
+import WEQ1 from "./pages/WEQ1";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/signup" element={<SignScreen />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/writing-essentials" element={<WritingEssentials />} />
+      <Route path="/weq1" element={<WEQ1 />} />
     </Routes>
   );
 }

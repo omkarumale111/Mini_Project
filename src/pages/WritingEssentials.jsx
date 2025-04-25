@@ -1,6 +1,7 @@
 import React from "react";
 import "./WritingEssentials.css";
 import { FaLock, FaArrowRight } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const LEVELS = [
   { name: "Level 1", unlocked: true },
@@ -10,6 +11,7 @@ const LEVELS = [
 ];
 
 const WritingEssentials = () => {
+  const navigate = useNavigate();
   return (
     <div className="we-container">
       <header className="we-header">
@@ -29,6 +31,9 @@ const WritingEssentials = () => {
                   <button
                     className={`we-btn${level.unlocked && qNum === 1 && idx === 0 ? " we-unlocked" : ""}`}
                     disabled={!(level.unlocked && qNum === 1 && idx === 0)}
+                    onClick={() => {
+                      if (level.unlocked && qNum === 1 && idx === 0) navigate("/weq1");
+                    }}
                   >
                     {level.unlocked && qNum === 1 && idx === 0 ? <FaArrowRight /> : <FaLock />}
                   </button>
