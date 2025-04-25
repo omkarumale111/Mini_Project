@@ -8,16 +8,23 @@ import { IoMdSettings, IoIosHelpCircleOutline } from "react-icons/io";
 import { MdLogout, MdMenu } from "react-icons/md";
 import logo from '../../assets/Logo.png';
 
+/**
+ * Dashboard component provides the main layout for authenticated users.
+ * It features a collapsible sidebar for navigation, a progress chart, leaderboard,
+ * and quick access to writing modules.
+ */
 const Dashboard = () => {
+  // State to track sidebar visibility
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
+  // Toggles the sidebar open/closed
   const toggleSidebar = () => {
     setSidebarVisible(!sidebarVisible);
   };
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
+      {/* Sidebar navigation for main sections and user actions */}
       <div className={`sidebar ${sidebarVisible ? "" : "hidden"}`}>
         <div className="top-bar">
           <button className="sidebar-toggle1" onClick={toggleSidebar}>
@@ -58,10 +65,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Backdrop (click to close sidebar) */}
+      {/* Backdrop overlays content when sidebar is open; clicking closes sidebar */}
       {sidebarVisible && <div className="backdrop" onClick={toggleSidebar}></div>}
 
-      {/* Main Content */}
+      {/* Main content area with progress, leaderboard, and modules */}
       <div className="main-content">
         <div className="top-bar">
           <button className="sidebar-toggle" onClick={toggleSidebar}>
@@ -73,6 +80,7 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Progress donut chart */}
         <div className="top-section">
           <div className="progress-section">
             <div className="content-header">
@@ -87,6 +95,7 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Leaderboard table for top users */}
           <div className="leaderboard-section">
             <h2>LEADER BOARD</h2>
             <table>
@@ -121,6 +130,7 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Module cards for quick access to different writing modules */}
         <div className="modules-section">
           <div className="module-card">
             <h3>Writing Essentials</h3>

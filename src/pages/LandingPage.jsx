@@ -8,11 +8,16 @@ import icon2 from "../assets/2.png";
 import icon3 from "../assets/3.png";
 import preSign2 from "../assets/Pre_sign2.png";
 
+/**
+ * LandingPage is the public homepage for WriteEdge.
+ * It introduces the platform, its value, and provides navigation to key sections.
+ * Features a hero section, summary of features, and call-to-action buttons.
+ */
 const LandingPage = () => {
   const navigate = useNavigate();
   return (
     <div className="landing-root">
-      {/* Header/Nav */}
+      {/* Header with logo and navigation links */}
       <header className="landing-header">
         <div className="landing-logo-group">
           <img src={logo} alt="WriteEdge Logo" className="landing-logo" />
@@ -27,7 +32,7 @@ const LandingPage = () => {
         </nav>
       </header>
 
-      {/* Hero/Main Section */}
+      {/* Hero section with main slogan and image */}
       <main className="landing-main">
         <div className="landing-hero-row">
           <div className="landing-hero-img-wrap">
@@ -56,7 +61,7 @@ const LandingPage = () => {
           </div>
         </div>
       </main>
-      {/* Scroll-down Section */}
+      {/* Scroll-down section highlighting WriteEdge's mission and call to action */}
       <div className="landing-scroll-section">
         <img src={preSign2} alt="WriteEdge Context" className="landing-scroll-img" />
         <div className="landing-scroll-content">
