@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../assets/Logo.png";
 import heroImage from "../assets/Pre_sign1.jpg";
@@ -8,6 +9,7 @@ import icon3 from "../assets/3.png";
 import preSign2 from "../assets/Pre_sign2.png";
 
 const LandingPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="landing-root">
       {/* Header/Nav */}
@@ -43,7 +45,7 @@ const LandingPage = () => {
                   WriteEdge empowers students and professionals to master real-world, corporate writing.<br />
                   With structured modules, AI-driven feedback, and prompt-based simulations, learning is practical and effective.
                 </div>
-                <button className="landing-register-btn">REGISTER NOW</button>
+                <button className="landing-register-btn" onClick={() => navigate('/signup')}>REGISTER NOW</button>
               </div>
               <div className="landing-icons-row">
                 <img src={icon1} alt="Quick Access 1" className="landing-icon" />
@@ -64,7 +66,7 @@ const LandingPage = () => {
           <div className="landing-scroll-text">
             From basics to brilliance–learn to write like a pro.
           </div>
-          <button className="landing-scroll-btn">Start Learning</button>
+          <button className="landing-scroll-btn" onClick={() => navigate('/signup')}>Start Learning</button>
         </div>
       </div>
     </div>
