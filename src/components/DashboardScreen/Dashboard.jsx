@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import { ImHome3 } from "react-icons/im";
 import { IoPersonCircleOutline } from "react-icons/io5";
@@ -16,6 +17,7 @@ import logo from '../../assets/Logo.png';
 const Dashboard = () => {
   // State to track sidebar visibility
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const navigate = useNavigate();
 
   // Toggles the sidebar open/closed
   const toggleSidebar = () => {
@@ -55,7 +57,12 @@ const Dashboard = () => {
             </li>
             <li>
               <MdLogout className="menu-icon" />
-              {sidebarVisible && "LOG OUT"}
+              {sidebarVisible && (
+                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/login')}>LOG OUT</span>
+              )}
+              {!sidebarVisible && (
+                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/login')}></span>
+              )}
             </li>
             <li>
               <IoIosHelpCircleOutline className="menu-icon" />

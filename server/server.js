@@ -85,34 +85,28 @@ app.post('/api/signup', async (req, res) => {
 app.post('/api/signin', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
-
-    // Find user
-    const [users] = await pool.query(
-      'SELECT * FROM users WHERE email = ?',
-      [email]
-    );
-    
-    if (users.length === 0) {
+    // Find user by email
+    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-    
-    // Check password
-    const isValidPassword = await bcrypt.compare(password, users[0].password);
-    if (!isValidPassword) {
+    const user = rows[0];
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-    
-    res.json({ 
+    // Success: return user info (excluding password)
+    res.json({
       message: 'Login successful',
-      user: { id: users[0].id, email: users[0].email }
+      user: { id: user.id, email: user.email }
     });
   } catch (error) {
     console.error('Signin error:', error);
-    res.status(500).json({ message: 'Error during login' });
+    res.status(500).json({ message: 'Error signing in' });
   }
 });
 

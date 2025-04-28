@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./WEQ1.css";
 
 const PROBLEM_STATEMENT = "Respond to a customer complaint about a delayed product delivery, ensuring professionalism and offering a resolution.";
@@ -9,6 +10,7 @@ const WEQ1 = () => {
   const [text, setText] = useState(initialText);
   const [activeBox, setActiveBox] = useState(null);
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const navigate = useNavigate();
 
   const feedbackBoxes = [
     {
@@ -37,7 +39,7 @@ const WEQ1 = () => {
           <nav className="weq1-nav">
             <a href="/modules">MODULES</a>
             <a href="/dashboard">DASHBOARD</a>
-            <a href="/login">LOG OUT</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>LOG OUT</a>
           </nav>
         </div>
         <div className="weq1-title-row">
