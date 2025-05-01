@@ -20,7 +20,7 @@ const SignupForm = () => {
 
     try {
       console.log('Attempting to sign up with:', { email });
-      const response = await fetch("http://localhost:5000/api/signup", {
+      const response = await fetch("http://localhost:5001/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,8 +54,8 @@ const SignupForm = () => {
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
-  type="email"
-  id="email"
+            type="email"
+            id="email"
             className="form-input"
             placeholder="Enter your email"
             value={email}

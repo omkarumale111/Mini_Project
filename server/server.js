@@ -25,8 +25,27 @@ const pool = mysql.createPool({
 
 // Test database connection
 pool.getConnection()
-  .then(connection => {
+  .then(async connection => {
     console.log('Database connected successfully');
+    try {
+      // Check if database exists
+      const [databases] = await connection.query('SHOW DATABASES');
+      console.log('Available databases:', databases.map(db => db.Database));
+      
+      // Check if we can use the database
+      await connection.query('USE mini_project_db');
+      console.log('Successfully connected to mini_project_db');
+      
+      // Test query to check table structure
+      const [rows] = await connection.query('DESCRIBE users');
+      console.log('Users table structure:', rows);
+      
+      // Test query to check existing users
+      const [users] = await connection.query('SELECT * FROM users');
+      console.log('Existing users:', users);
+    } catch (error) {
+      console.error('Error querying database:', error);
+    }
     connection.release();
   })
   .catch(err => {
@@ -56,21 +75,25 @@ initializeDatabase();
 
 // Routes
 app.post('/api/signup', async (req, res) => {
+  console.log('Received signup request:', req.body);
   try {
     const { email, password } = req.body;
     
     if (!email || !password) {
+      console.log('Missing email or password');
       return res.status(400).json({ message: 'Email and password are required' });
     }
     
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Password hashed successfully');
     
     // Insert user
     const [result] = await pool.query(
       'INSERT INTO users (email, password) VALUES (?, ?)',
       [email, hashedPassword]
     );
+    console.log('User inserted successfully:', result);
     
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
@@ -110,7 +133,7 @@ app.post('/api/signin', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001; // Changed port to 5001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
