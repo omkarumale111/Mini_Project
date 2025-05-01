@@ -24,6 +24,11 @@ const Dashboard = () => {
     setSidebarVisible(!sidebarVisible);
   };
 
+  // Navigate to a module
+  const navigateToModule = (path) => {
+    navigate(path);
+  };
+
   return (
     <div className="dashboard-container">
       {/* Sidebar navigation for main sections and user actions */}
@@ -141,19 +146,19 @@ const Dashboard = () => {
         <div className="modules-section">
           <div className="module-card">
             <h3>Writing Essentials</h3>
-            <button onClick={() => window.location.href = '/writing-essentials'}>PRACTICE</button>
+            <button onClick={() => navigateToModule('/writing-essentials')}>PRACTICE</button>
           </div>
           <div className="module-card">
             <h3>Reports & Briefs</h3>
-            <button>PRACTICE</button>
+            <button onClick={() => navigateToModule('/reports-brief')}>PRACTICE</button>
           </div>
           <div className="module-card">
             <h3>Email & Memos</h3>
-            <button>PRACTICE</button>
+            <button onClick={() => navigateToModule('/emails-memos')}>PRACTICE</button>
           </div>
           <div className="module-card">
             <h3>Letters & Applications</h3>
-            <button>PRACTICE</button>
+            <button onClick={() => navigateToModule('/letters-applications')}>PRACTICE</button>
           </div>
         </div>
       </div>

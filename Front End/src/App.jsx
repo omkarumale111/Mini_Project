@@ -7,6 +7,12 @@ import LandingPage from "./pages/LandingPage";
 import WritingEssentials from "./pages/WritingEssentials";
 import WEQ1 from "./pages/WEQ1";
 import SignupScreen from "./components/SignUpScreen/SignupScreen";
+import ReportsBrief from "./pages/ReportsBrief";
+import EmailsMemos from "./pages/EmailsMemos";
+import LettersApplications from "./pages/LettersApplications";
+import RBQ1 from "./pages/RBQ1";
+import EMQ1 from "./pages/EMQ1";
+import LAQ1 from "./pages/LAQ1";
 
 /**
  * App is the root component that defines all client-side routes for the application.
@@ -25,10 +31,22 @@ function App() {
       <Route path="/signup" element={<SignupScreen/>} />
       {/* Password recovery page */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      
       {/* Writing Essentials module */}
       <Route path="/writing-essentials" element={<WritingEssentials />} />
-      {/* Writing Essentials Quiz 1 module */}
       <Route path="/weq1" element={<WEQ1 />} />
+      
+      {/* Reports & Brief module */}
+      <Route path="/reports-brief" element={<ReportsBrief />} />
+      <Route path="/rbq1" element={<RBQ1 />} />
+      
+      {/* Emails & Memos module */}
+      <Route path="/emails-memos" element={<EmailsMemos />} />
+      <Route path="/emq1" element={<EMQ1 />} />
+      
+      {/* Letters & Applications module */}
+      <Route path="/letters-applications" element={<LettersApplications />} />
+      <Route path="/laq1" element={<LAQ1 />} />
     </Routes>
   );
 }

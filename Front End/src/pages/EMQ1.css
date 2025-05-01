@@ -1,0 +1,212 @@
+body, .emq1-root {
+  background: #073042;
+  min-height: 100vh;
+  color: #fff;
+  font-family: 'Inter', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.emq1-header {
+  padding: 2.5rem 2vw 1.5rem 2vw;
+}
+
+.emq1-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.emq1-logo-text {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #ffe066;
+}
+
+.emq1-nav {
+  display: flex;
+  gap: 2.2rem;
+}
+
+.emq1-nav a {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.15s;
+}
+
+.emq1-nav a:hover {
+  color: #ffe066;
+}
+
+.emq1-title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 1.1rem;
+}
+
+.emq1-section {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.emq1-question {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.emq1-problem-label {
+  color: #ffe066;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0.7rem 0 0.1rem 0;
+  letter-spacing: 1px;
+}
+
+.emq1-problem-box {
+  background: #e6e6e6;
+  color: #24303b;
+  border-radius: 16px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 1.1rem 1rem;
+  margin: 0 auto 1.8rem auto;
+  width: 80vw;
+  max-width: 900px;
+  text-align: center;
+  box-shadow: 0 2px 10px 0 rgba(44, 62, 80, 0.07);
+}
+
+.fit-main-row {
+  width: 98vw;
+  max-width: 1400px;
+  margin: 0 auto;
+  gap: 3vw;
+  align-items: stretch;
+  display: flex;
+  justify-content: center;
+}
+
+.fit-editor {
+  flex: 1.2;
+  min-width: 420px;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  background: #ede7db;
+  border-radius: 20px;
+  box-shadow: 0 2px 10px 0 rgba(44, 62, 80, 0.09);
+  padding: 2.2rem 2rem 2rem 2rem;
+}
+
+.fit-editor-area {
+  min-height: 250px;
+  font-size: 1.25rem;
+  padding: 1.2rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+  resize: vertical;
+  box-shadow: 0 1px 3px 0 rgba(44, 62, 80, 0.06);
+  background: #fff;
+  color: #24303b;
+}
+
+.fit-feedback {
+  flex: 1;
+  min-width: 350px;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.feedback-box {
+  min-height: 90px;
+  border-radius: 18px;
+  padding: 1.2rem 1.5rem;
+  background: #e6e6e6;
+  color: #24303b;
+  box-shadow: 0 1px 5px 0 rgba(44, 62, 80, 0.07);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.feedback-box.active {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  min-height: 100%;
+  background: #d1e3f6;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.feedback-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #24303b;
+  margin-bottom: 0.5rem;
+}
+
+.feedback-content {
+  font-size: 1.1rem;
+  color: #24303b;
+  line-height: 1.5;
+  margin-top: 1rem;
+}
+
+.emq1-wordcount {
+  color: #24303b;
+  font-size: 1.08rem;
+  margin: 1rem 0;
+}
+
+.emq1-submit {
+  background: #073042;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 2.5rem;
+  border-radius: 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin: 0 auto;
+  display: block;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.emq1-submit:hover {
+  background: #24303b;
+}
+
+@media (max-width: 1100px) {
+  .fit-main-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+  .fit-editor, .fit-feedback {
+    min-width: 90vw;
+    max-width: 98vw;
+    padding: 1.5rem;
+  }
+  .feedback-box.active {
+    min-height: 250px;
+  }
+}
