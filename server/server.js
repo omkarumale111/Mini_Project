@@ -3,10 +3,16 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
+import { CohereClient } from 'cohere-ai';
 
 dotenv.config();
 
 const app = express();
+
+// Initialize Cohere
+const cohere = new CohereClient({
+  token: process.env.COHERE_API_KEY
+});
 
 // Middleware
 app.use(cors());
@@ -192,6 +198,54 @@ app.post('/api/weq1', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001; 
+// Text analysis endpoint
+app.post('/api/analyze-text', async (req, res) => {
+  try {
+    console.log('Received text for analysis:', req.body.text);
+    console.log('Using OpenAI API Key:', process.env.OPENAI_API_KEY?.substring(0, 10) + '...');
+    const { text } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ message: 'Text content is required' });
+    }
+
+    console.log('Starting grammar check...');
+    // Grammar and Spell Check
+    const grammarResponse = await cohere.generate({
+      prompt: `Identify the grammatical errors and spelling errors in a short and concise manner:\n\nText: ${text}`,
+      maxTokens: 150,
+      temperature: 0.3,
+    });
+
+    console.log('Starting content feedback...');
+    // Content Feedback
+    const feedbackResponse = await cohere.generate({
+      prompt: `Analyze the following text and provide detailed feedback on content strength, clarity, organization, and overall impact:\n\nText: ${text}`,
+      maxTokens: 150,
+      temperature: 0.3,
+    });
+
+    console.log('Starting suggestions...');
+    // Suggestions
+    const suggestionsResponse = await cohere.generate({
+      prompt: `Provide specific, actionable suggestions for improving the following text, focusing on style, structure, and engagement:\n\nText: ${text}`,
+      maxTokens: 150,
+      temperature: 0.3,
+    });
+
+    res.json({
+      spellAndGrammar: grammarResponse.generations[0].text,
+      contentFeedback: feedbackResponse.generations[0].text,
+      suggestions: suggestionsResponse.generations[0].text
+    });
+
+  } catch (error) {
+    console.error('Text analysis error:', error.message);
+    console.error('Full error:', error);
+    res.status(500).json({ message: 'Error analyzing text' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

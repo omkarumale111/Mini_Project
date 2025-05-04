@@ -10,6 +10,7 @@ const WEQ1 = () => {
   const [text, setText] = useState(initialText);
   const [activeBox, setActiveBox] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const navigate = useNavigate();
 
@@ -21,7 +22,7 @@ const WEQ1 = () => {
 
     try {
       setIsSubmitting(true);
-      // Get the current user from localStorage (assuming you store it there after login)
+      // Get the current user from localStorage
       const currentUser = JSON.parse(localStorage.getItem('user'));
       
       if (!currentUser || !currentUser.id) {
@@ -30,7 +31,30 @@ const WEQ1 = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5001/api/weq1', {
+      // First, analyze the text
+      const analysisResponse = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text
+        })
+      });
+
+      if (!analysisResponse.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const analysisResult = await analysisResponse.json();
+      setFeedback({
+        spellAndGrammar: analysisResult.spellAndGrammar,
+        contentFeedback: analysisResult.contentFeedback,
+        suggestions: analysisResult.suggestions
+      });
+
+      // Then save the response
+      const saveResponse = await fetch('http://localhost:5001/api/weq1', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,15 +65,15 @@ const WEQ1 = () => {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to submit response');
+      if (!saveResponse.ok) {
+        throw new Error('Failed to save response');
       }
 
-      const result = await response.json();
-      alert('Your response has been submitted successfully!');
+      const result = await saveResponse.json();
+      console.log('Response saved successfully');
     } catch (error) {
-      console.error('Error submitting response:', error);
-      alert('Failed to submit your response. Please try again.');
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -58,15 +82,15 @@ const WEQ1 = () => {
   const feedbackBoxes = [
     {
       title: "Spell & Grammar Check",
-      content: "No spelling errors found. Sentence structure is clear. (Expanded details: All sentences are grammatically correct. No passive voice detected.)"
+      content: feedback?.spellAndGrammar || "Submit your text to see spelling and grammar analysis"
     },
     {
       title: "Content Feedback",
-      content: "Good use of apology and assurance. Consider adding a specific resolution. (Expanded details: The response is polite and empathetic. You could mention a compensation or estimated delivery date.)"
+      content: feedback?.contentFeedback || "Submit your text to see content feedback"
     },
     {
       title: "Suggestions",
-      content: "Try to personalize the response and mention a delivery date if possible. (Expanded details: Address the customer by name and offer a direct contact for further assistance.)"
+      content: feedback?.suggestions || "Submit your text to see suggestions for improvement"
     }
   ];
 
