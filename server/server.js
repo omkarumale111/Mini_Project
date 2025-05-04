@@ -64,6 +64,14 @@ async function initializeDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS WEQ1 (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     connection.release();
     console.log('Database initialized successfully');
   } catch (error) {
@@ -133,7 +141,57 @@ app.post('/api/signin', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5001; // Changed port to 5001
+// Add problem statement endpoint
+app.post('/api/problem-statements', async (req, res) => {
+  try {
+    const { userId, content } = req.body;
+    
+    if (!userId || !content) {
+      return res.status(400).json({ message: 'User ID and content are required' });
+    }
+
+    // Insert problem statement
+    const [result] = await pool.query(
+      'INSERT INTO problem_statements (user_id, content) VALUES (?, ?)',
+      [userId, content]
+    );
+
+    res.status(201).json({ 
+      message: 'Problem statement saved successfully',
+      id: result.insertId
+    });
+  } catch (error) {
+    console.error('Error saving problem statement:', error);
+    res.status(500).json({ message: 'Error saving problem statement' });
+  }
+});
+
+// Add WEQ1 submission endpoint
+app.post('/api/weq1', async (req, res) => {
+  try {
+    const { userId, content } = req.body;
+    
+    if (!userId || !content) {
+      return res.status(400).json({ message: 'User ID and content are required' });
+    }
+
+    // Insert into WEQ1 table
+    const [result] = await pool.query(
+      'INSERT INTO WEQ1 (user_id, content) VALUES (?, ?)',
+      [userId, content]
+    );
+
+    res.status(201).json({ 
+      message: 'WEQ1 submission saved successfully',
+      id: result.insertId
+    });
+  } catch (error) {
+    console.error('Error saving WEQ1 submission:', error);
+    res.status(500).json({ message: 'Error saving submission' });
+  }
+});
+
+const PORT = process.env.PORT || 5001; 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

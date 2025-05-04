@@ -9,8 +9,51 @@ const initialText = "";
 const WEQ1 = () => {
   const [text, setText] = useState(initialText);
   const [activeBox, setActiveBox] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    if (!text.trim()) {
+      alert("Please enter your response before submitting.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      // Get the current user from localStorage (assuming you store it there after login)
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      
+      if (!currentUser || !currentUser.id) {
+        alert("Please log in to submit your response.");
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch('http://localhost:5001/api/weq1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          content: text
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit response');
+      }
+
+      const result = await response.json();
+      alert('Your response has been submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting response:', error);
+      alert('Failed to submit your response. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const feedbackBoxes = [
     {
@@ -58,9 +101,16 @@ const WEQ1 = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Type your response here..."
+              disabled={isSubmitting}
             />
             <div className="weq1-wordcount">Word Count {wordCount}</div>
-            <button className="weq1-submit">SUBMIT</button>
+            <button 
+              className="weq1-submit" 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+            </button>
           </div>
           <div className="weq1-feedback-col fit-feedback">
             {feedbackBoxes.map((box, index) => (
