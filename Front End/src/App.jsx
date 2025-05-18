@@ -3,7 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import LoginScreen from "./components/LoginScreen/LoginScreen";
 import Dashboard from "./components/DashboardScreen/Dashboard";
 import ForgotPassword from "./components/ForgotPasswordScreen/ForgotPassword";
-import LandingPage from "./pages/LandingPage";
+import LandingPage from './pages/LandingPage'
+import AboutPage from './pages/AboutPage';
 import WritingEssentials from "./pages/WritingEssentials";
 import WEQ1 from "./pages/WEQ1";
 import SignupScreen from "./components/SignUpScreen/SignupScreen";
@@ -23,6 +24,7 @@ function App() {
     <Routes>
       {/* Landing page shown at root URL */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/about" element={<AboutPage />} />
       {/* Login screen for user authentication */}
       <Route path="/login" element={<LoginScreen />} />
       {/* Dashboard for logged-in users */}
