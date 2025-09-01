@@ -43,8 +43,8 @@ const LandingPage = () => {
         <nav className="landing-nav">
           <a href="/" className="nav-link active">HOME</a>
           <a href="/about" className="nav-link">ABOUT</a>
-          <a href="#" className="nav-link">COURSES</a>
-          <a href="#" className="nav-link">MODULES</a>
+          <a className="nav-link" onClick={() => navigate('/login')}>COURSES</a>
+          <a className="nav-link" onClick={() => navigate('/login')}>MODULES</a>
           <button className="login-button" onClick={() => navigate('/login')}>LOG IN</button>
         </nav>
       </header>
@@ -64,7 +64,7 @@ const LandingPage = () => {
           </div>
           <div className="hero-buttons fade-in-5">
             <button className="register-btn" onClick={() => navigate('/signup')}>Register Now</button>
-            <button className="learn-more-btn">Learn More</button>
+            <button className="learn-more-btn" onClick={() => navigate('/about')}>Learn More</button>
           </div>
         </div>
       </main>
@@ -106,7 +106,7 @@ const LandingPage = () => {
             <button className="cta-register-btn" onClick={() => navigate('/signup')}>Register as Student</button>
           </div>
           <div className="scroll-fade-cta-4">
-            <button className="cta-admin-btn" onClick={() => navigate('/admin')}>Register as Administrator</button>
+            <button className="cta-admin-btn" onClick={() => navigate('/signup')}>Register as Administrator</button>
           </div>
         </div>
       </section>
@@ -128,7 +128,7 @@ const LandingPage = () => {
               <nav>
                 <a href="/">Home</a>
                 <a href="/about">About</a>
-                <a href="/courses">Courses</a>
+                <a href="/login">Courses</a>
                 <a href="/login">Login</a>
               </nav>
             </div>
