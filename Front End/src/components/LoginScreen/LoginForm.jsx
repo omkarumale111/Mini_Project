@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Logo from '../../assets/Logo.png';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -45,6 +46,10 @@ const LoginForm = () => {
 
   return (
     <div className="login-form-section">
+      <div className="login-logo-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', marginBottom: '2rem' }}>
+        <img src={Logo} alt="WriteEdge Logo" style={{ height: '50px', width: 'auto' }} />
+        <span style={{ fontSize: '1.8rem', fontWeight: 600, color: '#ffd700' }}>WriteEdge</span>
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1 className="welcome-title" style={{ margin: 0 }}>Welcome Back!</h1>
         <p className="resume-learning" style={{ margin: 0, color: '#888', fontWeight: 400 }}>Resume learning</p>
@@ -89,7 +94,7 @@ const LoginForm = () => {
             Forgot Password?
           </a>
         </div>
-        <button type="submit" className="login-button" style={{ width: '100%', background: '#222', color: '#fff', borderRadius: 24, padding: '0.8rem 0', fontWeight: 600, fontSize: 18, marginTop: 4 }}>Log In</button>
+        <button type="submit" className="login-button">Log In</button>
       </form>
       <button className="secondary-button" style={{ width: '100%', borderRadius: 8, background: '#f5f5f5', color: '#222', fontWeight: 500, fontSize: 16, padding: '0.7rem 0', marginBottom: 10, border: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <img 
@@ -108,7 +113,6 @@ const LoginForm = () => {
             navigate("/signup");
           }}
           className="signup-link"
-          style={{ color: '#222', fontWeight: 600 }}
         >
           Sign Up
         </a>
