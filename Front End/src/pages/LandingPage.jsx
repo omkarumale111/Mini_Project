@@ -103,10 +103,7 @@ const LandingPage = () => {
         <p className="scroll-fade-cta-2">Join thousands of students and professionals who are enhancing their writing abilities with WriteEdge.</p>
         <div className="cta-buttons">
           <div className="scroll-fade-cta-3">
-            <button className="cta-register-btn" onClick={() => navigate('/signup')}>Register as Student</button>
-          </div>
-          <div className="scroll-fade-cta-4">
-            <button className="cta-admin-btn" onClick={() => navigate('/signup')}>Register as Administrator</button>
+            <button className="cta-register-btn" onClick={() => navigate('/signup')}>Let's Learn Together</button>
           </div>
         </div>
       </section>
