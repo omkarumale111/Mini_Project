@@ -62,14 +62,18 @@ pool.getConnection()
 async function initializeDatabase() {
   try {
     const connection = await pool.getConnection();
+    
+    // First create the users table if it doesn't exist
     await connection.query(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        role ENUM('admin', 'student') DEFAULT 'student' NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    
     await connection.query(`
       CREATE TABLE IF NOT EXISTS WEQ1 (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -91,21 +95,25 @@ initializeDatabase();
 app.post('/api/signup', async (req, res) => {
   console.log('Received signup request:', req.body);
   try {
-    const { email, password } = req.body;
+    const { email, password, role = 'student' } = req.body;
     
     if (!email || !password) {
       console.log('Missing email or password');
       return res.status(400).json({ message: 'Email and password are required' });
     }
     
+    if (!['admin', 'student'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role. Must be either admin or student' });
+    }
+    
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log('Password hashed successfully');
     
-    // Insert user
+    // Insert user with role
     const [result] = await pool.query(
-      'INSERT INTO users (email, password) VALUES (?, ?)',
-      [email, hashedPassword]
+      'INSERT INTO users (email, password, role) VALUES (?, ?, ?)',
+      [email, hashedPassword, role]
     );
     console.log('User inserted successfully:', result);
     

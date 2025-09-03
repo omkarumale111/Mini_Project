@@ -7,6 +7,7 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("student");
   const [error, setError] = useState("");
 
   const handleSignup = async (e) => {
@@ -27,7 +28,7 @@ const SignupForm = () => {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role }),
       });
 
       console.log('Response status:', response.status);
@@ -54,17 +55,69 @@ const SignupForm = () => {
   };
 
   return (
-    <div className="signup-form-section">
-      <div className="signup-logo-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', marginBottom: '2rem' }}>
-        <img src={Logo} alt="WriteEdge Logo" style={{ height: '50px', width: 'auto' }} />
-        <span style={{ fontSize: '1.8rem', fontWeight: 600, color: '#ffd700' }}>WriteEdge</span>
+    <div className="signup-form-section" style={{ maxWidth: '450px', margin: '2rem auto', padding: '1.5rem', background: '#fff', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <div className="signup-logo-group" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <img src={Logo} alt="WriteEdge Logo" style={{ height: '50px', width: 'auto' }} />
+          <span style={{ fontSize: '1.8rem', fontWeight: 600, color: '#ffd700' }}>WriteEdge</span>
+        </div>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#333', margin: 0 }}>Create Account</h1>
+        <p style={{ color: '#666', margin: 0 }}>Start your learning journey</p>
       </div>
-      <h1 className="welcome-title">Create Account</h1>
-      <p className="start-learning">Start your learning journey</p>
 
-      {error && <p className="error-message" style={{ color: "red" }}>{error}</p>}
+      {/* Role Selection Toggle */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '0.5rem', 
+        margin: '1.5rem auto',
+        padding: '0.25rem',
+        borderRadius: '8px',
+        backgroundColor: '#f8f9fa',
+        maxWidth: '280px'
+      }}>
+        <button
+          type="button"
+          onClick={() => setRole('student')}
+          style={{
+            padding: '0.6rem 1rem',
+            borderRadius: '6px',
+            border: 'none',
+            background: role === 'student' ? '#4CAF50' : 'transparent',
+            color: role === 'student' ? 'white' : '#666',
+            fontWeight: role === 'student' ? '600' : '400',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            flex: 1,
+            textAlign: 'center',
+            fontSize: '0.9rem'
+          }}
+        >
+          I am a Student
+        </button>
+        <button
+          type="button"
+          onClick={() => setRole('admin')}
+          style={{
+            padding: '0.6rem 1rem',
+            borderRadius: '6px',
+            border: 'none',
+            background: role === 'admin' ? '#2196F3' : 'transparent',
+            color: role === 'admin' ? 'white' : '#666',
+            fontWeight: role === 'admin' ? '600' : '400',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            flex: 1,
+            textAlign: 'center',
+            fontSize: '0.9rem'
+          }}
+        >
+          I am a Teacher
+        </button>
+      </div>
 
-      <form className="signup-form" onSubmit={handleSignup} autoComplete="on">
+      {error && <p className="error-message" style={{ color: '#e74c3c', margin: '0 0 1rem', textAlign: 'center', fontSize: '0.9rem' }}>{error}</p>}
+
+      <form className="signup-form" onSubmit={handleSignup} autoComplete="on" style={{ margin: 0 }}>
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
@@ -107,7 +160,7 @@ const SignupForm = () => {
           />
         </div>
 
-        <button type="submit" className="signup-button">
+        <button type="submit" className="signup-button" style={{ marginTop: '1rem' }}>
           Sign Up
         </button>
       </form>
