@@ -147,7 +147,11 @@ app.post('/api/signin', async (req, res) => {
     // Success: return user info (excluding password)
     res.json({
       message: 'Login successful',
-      user: { id: user.id, email: user.email }
+      user: { 
+        id: user.id, 
+        email: user.email,
+        role: user.role || 'student' // Default to 'student' if role is not set
+      }
     });
   } catch (error) {
     console.error('Signin error:', error);

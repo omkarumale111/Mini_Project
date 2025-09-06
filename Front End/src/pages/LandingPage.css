@@ -363,7 +363,8 @@ body, .landing-root {
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
-  gap: 4rem;
+  align-items: flex-start;
+  gap: 2rem;
 }
 
 .footer-brand {
@@ -397,9 +398,11 @@ body, .landing-root {
 }
 
 .footer-links {
-  flex: 2;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  flex: 1;
+  justify-content: flex-end;
+  flex: 1;
   gap: 2rem;
 }
 
@@ -413,6 +416,12 @@ body, .landing-root {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+}
+
+.footer-column {
+  text-align: right;
+  max-width: 300px;
+  margin-left: auto;
 }
 
 .footer-column a {

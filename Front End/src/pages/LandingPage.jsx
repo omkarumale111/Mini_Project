@@ -43,8 +43,6 @@ const LandingPage = () => {
         <nav className="landing-nav">
           <a href="/" className="nav-link active">HOME</a>
           <a href="/about" className="nav-link">ABOUT</a>
-          <a className="nav-link" onClick={() => navigate('/login')}>COURSES</a>
-          <a className="nav-link" onClick={() => navigate('/login')}>MODULES</a>
           <button className="login-button" onClick={() => navigate('/login')}>LOG IN</button>
         </nav>
       </header>
@@ -120,26 +118,6 @@ const LandingPage = () => {
           </div>
           
           <div className="footer-links">
-            <div className="footer-column">
-              <h4>Quick Links</h4>
-              <nav>
-                <a href="/">Home</a>
-                <a href="/about">About</a>
-                <a href="/login">Courses</a>
-                <a href="/login">Login</a>
-              </nav>
-            </div>
-
-            <div className="footer-column">
-              <h4>Resources</h4>
-              <nav>
-                <a href="/blog">Blog</a>
-                <a href="/writing-tips">Writing Tips</a>
-                <a href="/faq">FAQ</a>
-                <a href="/support">Support</a>
-              </nav>
-            </div>
-
             <div className="footer-column">
               <h4>Contact</h4>
               <p>contact@writeedge.com</p>
