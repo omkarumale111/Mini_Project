@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-import { ImHome3 } from "react-icons/im";
-import { IoPersonCircleOutline } from "react-icons/io5";
-import { GrNotes } from "react-icons/gr";
-import { TiMessageTyping } from "react-icons/ti";
-import { IoMdSettings, IoIosHelpCircleOutline } from "react-icons/io";
-import { MdLogout, MdMenu } from "react-icons/md";
+import { 
+  RiDashboardLine, 
+  RiBook2Line, 
+  RiChat3Line, 
+  RiSettings4Line, 
+  RiQuestionLine, 
+  RiLogoutCircleRLine, 
+  RiMenuFoldLine,
+  RiMenuUnfoldLine
+} from "react-icons/ri";
 import logo from '../../assets/Logo.png';
 
 /**
@@ -15,77 +19,149 @@ import logo from '../../assets/Logo.png';
  * and quick access to writing modules.
  */
 const Dashboard = () => {
-  // State to track sidebar visibility
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const navigate = useNavigate();
 
-  // Toggles the sidebar open/closed
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarVisible(true);
+      } else {
+        setSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
+    if (isMobile) {
+      setSidebarVisible(!sidebarVisible);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
   };
 
-  // Navigate to a module
+  const closeSidebarOnMobile = () => {
+    if (isMobile) {
+      setSidebarVisible(false);
+    }
+  };
+
   const navigateToModule = (path) => {
     navigate(path);
+    closeSidebarOnMobile();
   };
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar navigation for main sections and user actions */}
-      <div className={`sidebar ${sidebarVisible ? "" : "hidden"}`}>
-        <div className="top-bar">
-          <button className="sidebar-toggle1" onClick={toggleSidebar}>
-            <MdMenu />
+      {/* Mobile backdrop */}
+      {isMobile && sidebarVisible && (
+        <div 
+          className="backdrop visible" 
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar navigation */}
+      <div 
+        className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
+      >
+        <div className="sidebar-header">
+          <button 
+            className="menu-toggle" 
+            onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
+          >
+            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
           </button>
+          {!sidebarCollapsed && <h2>Menu</h2>}
         </div>
+        
+        {/* User Profile */}
+        <div className="user-profile">
+          <div className="avatar">
+            <div className="avatar-placeholder">
+              <span>JS</span>
+            </div>
+          </div>
+          {!sidebarCollapsed && (
+            <div className="user-info">
+              <h3>John Smith</h3>
+              <p>Free Plan</p>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Menu */}
         <nav className="nav-menu">
           <ul>
-            <li className="active">
-              <ImHome3 className="menu-icon" />
-              {sidebarVisible && "DASHBOARD"}
+            <li 
+              className="nav-item active"
+              onClick={() => navigateToModule('/dashboard')}
+            >
+              <RiDashboardLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Dashboard</span>}
             </li>
-            <li>
-              <GrNotes className="menu-icon" />
-              {sidebarVisible && "MODULES"}
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/learning')}
+            >
+              <RiBook2Line className="nav-icon" />
+              {!sidebarCollapsed && <span>My Learning</span>}
             </li>
-            <li>
-              <TiMessageTyping className="menu-icon" />
-              {sidebarVisible && "FEEDBACK"}
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/messages')}
+            >
+              <RiChat3Line className="nav-icon" />
+              {!sidebarCollapsed && <span>Messages</span>}
             </li>
           </ul>
         </nav>
+
+        {/* Bottom Menu */}
         <div className="bottom-menu">
           <ul>
-            <li>
-              <IoMdSettings className="menu-icon" />
-              {sidebarVisible && "SETTINGS"}
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/settings')}
+            >
+              <RiSettings4Line className="nav-icon" />
+              {!sidebarCollapsed && <span>Settings</span>}
             </li>
-            <li>
-              <MdLogout className="menu-icon" />
-              {sidebarVisible && (
-                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/login')}>LOG OUT</span>
-              )}
-              {!sidebarVisible && (
-                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/login')}></span>
-              )}
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/help')}
+            >
+              <RiQuestionLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Help</span>}
             </li>
-            <li>
-              <IoIosHelpCircleOutline className="menu-icon" />
-              {sidebarVisible && "HELP"}
+            <li 
+              className="nav-item" 
+              onClick={() => {
+                // Handle logout logic here
+                navigate('/login');
+              }}
+            >
+              <RiLogoutCircleRLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Logout</span>}
             </li>
           </ul>
         </div>
       </div>
 
-      {/* Backdrop overlays content when sidebar is open; clicking closes sidebar */}
-      {sidebarVisible && <div className="backdrop" onClick={toggleSidebar}></div>}
-
-      {/* Main content area with progress, leaderboard, and modules */}
+      {/* Main content area */}
       <div className="main-content">
         <div className="top-bar">
-          <button className="sidebar-toggle" onClick={toggleSidebar}>
-            <MdMenu />
-          </button>
           <div className="logo-group">
             <img src={logo} alt="WriteEdge Logo" className="dashboard-logo" />
             <span className="logo">WriteEdge</span>
