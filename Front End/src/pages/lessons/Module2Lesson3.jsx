@@ -1,0 +1,298 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  RiDashboardLine, 
+  RiUserLine, 
+  RiPencilLine, 
+  RiFileTextLine,
+  RiQuestionLine, 
+  RiLogoutCircleRLine, 
+  RiMenuFoldLine,
+  RiMenuUnfoldLine,
+  RiArrowLeftLine,
+  RiSendPlaneLine
+} from "react-icons/ri";
+import logo from '../../assets/Logo.png';
+import './Lesson.css';
+
+/**
+ * Module 2 Lesson 3: Technical Specifications
+ */
+const Module2Lesson3 = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [user, setUser] = useState(null);
+  const [answers, setAnswers] = useState({
+    requirementsDocument: ''
+  });
+  const navigate = useNavigate();
+
+  // Get user data from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarVisible(true);
+      } else {
+        setSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setSidebarVisible(!sidebarVisible);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
+  };
+
+  const closeSidebarOnMobile = () => {
+    if (isMobile) {
+      setSidebarVisible(false);
+    }
+  };
+
+  const navigateToModule = (path) => {
+    navigate(path);
+    closeSidebarOnMobile();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  const handleInputChange = (field, value) => {
+    setAnswers(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = () => {
+    console.log('Submitted answers:', answers);
+    alert('Requirements document submitted successfully!');
+  };
+
+  return (
+    <div className="lesson-container">
+      {/* Mobile backdrop */}
+      {isMobile && sidebarVisible && (
+        <div 
+          className="backdrop visible" 
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Mobile menu button */}
+      <button 
+        className="mobile-menu-btn"
+        onClick={toggleSidebar}
+        style={{ display: isMobile ? 'block' : 'none' }}
+      >
+        <RiMenuFoldLine />
+      </button>
+
+      {/* Sidebar navigation */}
+      <div 
+        className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
+      >
+        <div className="sidebar-header">
+          <button 
+            className="sidebar-toggle" 
+            onClick={toggleSidebar}
+          >
+            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
+          </button>
+          <div className="logo-section">
+            <img src={logo} alt="WriteEdge Logo" className="sidebar-logo" />
+            {!sidebarCollapsed && <span className="logo-text">WriteEdge</span>}
+          </div>
+        </div>
+
+        {/* Navigation Menu */}
+        <nav className="nav-menu">
+          <ul>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/dashboard')}
+            >
+              <RiDashboardLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Dashboard</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/profile')}
+            >
+              <RiUserLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Profile</span>}
+            </li>
+            <li 
+              className="nav-item active"
+              onClick={() => navigateToModule('/modules')}
+            >
+              <RiPencilLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Practice</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/take-test')}
+            >
+              <RiFileTextLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Take Test</span>}
+            </li>
+          </ul>
+        </nav>
+
+        {/* Bottom Menu */}
+        <div className="bottom-menu">
+          <ul>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/dashboard/about')}
+            >
+              <RiQuestionLine className="nav-icon" />
+              {!sidebarCollapsed && <span>About</span>}
+            </li>
+            <li 
+              className="nav-item" 
+              onClick={handleLogout}
+            >
+              <RiLogoutCircleRLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Log Out</span>}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Main content area */}
+      <div className="main-content">
+        {/* Top Navigation Bar */}
+        <div className="top-bar">
+          <div className="top-bar-title">
+            <h1>Student Dashboard</h1>
+          </div>
+          
+          <div className="top-bar-nav">
+            <a href="/dashboard" className="nav-link">HOME</a>
+            <a href="/dashboard/about" className="nav-link">ABOUT</a>
+            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
+          </div>
+        </div>
+
+        {/* Lesson Content */}
+        <div className="lesson-content">
+          <div className="lesson-header">
+            <button 
+              className="back-button"
+              onClick={() => navigate('/modules')}
+            >
+              <RiArrowLeftLine />
+              <span>Back to Modules</span>
+            </button>
+            <div className="lesson-info">
+              <span className="module-badge">📗 Module 2</span>
+              <h2>Technical Specifications</h2>
+              <p>Lesson 3 of 4 • Technical Writing Foundations</p>
+            </div>
+          </div>
+
+          <div className="lesson-main">
+            <div className="lesson-card">
+              <div className="problem-statement">
+                <h3>Problem Statement</h3>
+                <p>
+                  Write a feature requirements document for a <strong>"To-Do List App"</strong> that includes: 
+                  <strong>task creation</strong>, <strong>deadlines</strong>, <strong>reminders</strong>, and <strong>category tagging</strong>.
+                </p>
+              </div>
+
+              <div className="exercise-section">
+                <div className="exercise-item">
+                  <label htmlFor="requirementsDocument">
+                    <h4>Feature Requirements Document - To-Do List App</h4>
+                    <p className="instruction">
+                      Create a comprehensive requirements document that includes:
+                      <br />• Project overview and objectives
+                      <br />• Feature specifications for each requirement
+                      <br />• User stories and acceptance criteria
+                      <br />• Technical considerations
+                      <br />• Priority levels for features
+                    </p>
+                  </label>
+                  <textarea
+                    id="requirementsDocument"
+                    value={answers.requirementsDocument}
+                    onChange={(e) => handleInputChange('requirementsDocument', e.target.value)}
+                    placeholder="TO-DO LIST APP - FEATURE REQUIREMENTS DOCUMENT&#10;&#10;1. PROJECT OVERVIEW&#10;[Brief description of the app and its purpose]&#10;&#10;2. FEATURE SPECIFICATIONS&#10;&#10;2.1 TASK CREATION&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.2 DEADLINES&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.3 REMINDERS&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.4 CATEGORY TAGGING&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;3. TECHNICAL CONSIDERATIONS&#10;[Platform requirements, data storage, etc.]&#10;&#10;4. PRIORITY MATRIX&#10;[High/Medium/Low priority for each feature]"
+                    rows="18"
+                  />
+                </div>
+
+                <div className="submit-section">
+                  <button 
+                    className="submit-button"
+                    onClick={handleSubmit}
+                    disabled={!answers.requirementsDocument}
+                  >
+                    <RiSendPlaneLine />
+                    Submit Requirements Document
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="lesson-sidebar">
+              <div className="learning-objectives">
+                <h3>Learning Objectives</h3>
+                <ul>
+                  <li>Write clear technical specifications</li>
+                  <li>Define user stories and acceptance criteria</li>
+                  <li>Structure requirements documents</li>
+                  <li>Prioritize features effectively</li>
+                </ul>
+              </div>
+
+              <div className="tips-section">
+                <h3>Requirements Writing Tips</h3>
+                <ul>
+                  <li>Be specific and measurable</li>
+                  <li>Use clear, unambiguous language</li>
+                  <li>Include user perspectives</li>
+                  <li>Define acceptance criteria</li>
+                  <li>Consider technical constraints</li>
+                </ul>
+              </div>
+
+              <div className="progress-section">
+                <h3>Module Progress</h3>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: '75%' }}></div>
+                </div>
+                <p>Lesson 3 of 4 completed</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Module2Lesson3;

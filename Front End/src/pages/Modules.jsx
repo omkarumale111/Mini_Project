@@ -207,7 +207,14 @@ const Modules = () => {
       lesson.status === 'in_progress' || lesson.status === 'available'
     );
     if (nextLesson) {
-      navigate(`/module/${selectedModule.id}/lesson/${nextLesson.id}`);
+      navigate(`/lessons/module${selectedModule.id}/lesson${nextLesson.id}`);
+    }
+  };
+
+  const handleLessonClick = (lesson) => {
+    // Only allow navigation to completed or in-progress lessons
+    if (lesson.status === 'completed' || lesson.status === 'in_progress') {
+      navigate(`/lessons/module${selectedModule.id}/lesson${lesson.id}`);
     }
   };
 
@@ -352,7 +359,11 @@ const Modules = () => {
 
           <div className="lessons-list">
             {selectedModule.lessons.map((lesson, index) => (
-              <div key={lesson.id} className={`lesson-item ${lesson.status}`}>
+              <div 
+                key={lesson.id} 
+                className={`lesson-item ${lesson.status} ${(lesson.status === 'completed' || lesson.status === 'in_progress') ? 'clickable' : ''}`}
+                onClick={() => handleLessonClick(lesson)}
+              >
                 <div className="lesson-number">
                   {lesson.status === 'completed' ? (
                     <div className="checkmark">✓</div>

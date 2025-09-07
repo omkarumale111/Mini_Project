@@ -292,16 +292,23 @@
 
 .lesson-item {
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 15px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
 }
 
-.lesson-item:hover {
-  background: #f8f9fa;
+.lesson-item.clickable {
+  cursor: pointer;
+}
+
+.lesson-item.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .lesson-item.completed {

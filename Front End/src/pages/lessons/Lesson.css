@@ -1,0 +1,569 @@
+/* Lesson Page Styles */
+.lesson-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+/* Mobile menu button */
+.mobile-menu-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: #0a2440;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  display: none;
+}
+
+.mobile-menu-btn:hover {
+  background: #1a3a5a;
+}
+
+/* Backdrop for mobile */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.backdrop.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Sidebar styles */
+.sidebar {
+  width: 280px;
+  background: linear-gradient(135deg, #0a2440 0%, #1a3a5a 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.sidebar-toggle {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.sidebar-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .logo-text {
+  opacity: 0;
+  width: 0;
+}
+
+/* Navigation menu */
+.nav-menu {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.nav-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 15px;
+  margin: 2px 10px;
+  border-radius: 8px;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+  background: rgba(255, 215, 0, 0.2);
+  border-left: 4px solid #FFD700;
+}
+
+.nav-icon {
+  font-size: 20px;
+  min-width: 20px;
+}
+
+.nav-item span {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .nav-item span {
+  opacity: 0;
+  width: 0;
+}
+
+/* Bottom menu */
+.bottom-menu {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 0;
+}
+
+.bottom-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.collapsed + .main-content {
+  margin-left: 80px;
+}
+
+/* Top bar */
+.top-bar {
+  background: white;
+  padding: 20px 30px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-bar-title h1 {
+  margin: 0;
+  color: #0a2440;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.top-bar-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #666;
+  font-weight: 500;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: #0a2440;
+}
+
+.logout-btn {
+  background: #0a2440;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background: #1a3a5a;
+}
+
+/* Lesson content */
+.lesson-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.lesson-header {
+  margin-bottom: 30px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid #ddd;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background: #f8f9fa;
+  border-color: #0a2440;
+  color: #0a2440;
+}
+
+.lesson-info {
+  margin-bottom: 20px;
+}
+
+.module-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.lesson-info h2 {
+  margin: 10px 0 5px 0;
+  color: #0a2440;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.lesson-info p {
+  color: #666;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Main lesson layout */
+.lesson-main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 30px;
+}
+
+.lesson-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.problem-statement {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.problem-statement h3 {
+  color: #0a2440;
+  margin: 0 0 15px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.problem-statement p {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Exercise sections */
+.exercise-section {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.exercise-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exercise-item label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exercise-item h4 {
+  color: #0a2440;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.instruction {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+  font-style: italic;
+}
+
+.exercise-item textarea {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.exercise-item textarea:focus {
+  outline: none;
+  border-color: #0a2440;
+}
+
+.exercise-item textarea::placeholder {
+  color: #999;
+}
+
+/* Submit section */
+.submit-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.submit-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0a2440;
+  color: white;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #1a3a5a;
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Lesson sidebar */
+.lesson-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.learning-objectives,
+.tips-section,
+.progress-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.learning-objectives h3,
+.tips-section h3,
+.progress-section h3 {
+  color: #0a2440;
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.learning-objectives ul,
+.tips-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.learning-objectives li,
+.tips-section li {
+  padding: 8px 0;
+  color: #555;
+  font-size: 14px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.learning-objectives li::before,
+.tips-section li::before {
+  content: "•";
+  color: #FFD700;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+/* Progress bar */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD700, #FFA000);
+  transition: width 0.3s ease;
+}
+
+.progress-section p {
+  margin: 0;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.visible {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .sidebar.collapsed + .main-content {
+    margin-left: 0;
+  }
+  
+  .lesson-main {
+    grid-template-columns: 1fr;
+  }
+  
+  .lesson-content {
+    padding: 20px;
+  }
+  
+  .top-bar {
+    padding: 15px 20px;
+  }
+  
+  .top-bar-nav {
+    gap: 15px;
+  }
+  
+  .nav-link {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .lesson-card {
+    padding: 20px;
+  }
+  
+  .lesson-info h2 {
+    font-size: 24px;
+  }
+  
+  .top-bar-title h1 {
+    font-size: 20px;
+  }
+  
+  .exercise-item textarea {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lesson-content {
+    padding: 15px;
+  }
+  
+  .lesson-card {
+    padding: 15px;
+  }
+  
+  .lesson-info h2 {
+    font-size: 20px;
+  }
+  
+  .submit-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
