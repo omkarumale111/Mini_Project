@@ -225,7 +225,7 @@ const Dashboard = () => {
             </div>
             <h3>Take Test</h3>
             <p>Enter a test code to start a new assessment</p>
-            <button onClick={() => navigateToModule('/modules')}>TAKE TEST</button>
+            <button onClick={() => navigateToModule('/take-test')}>TAKE TEST</button>
           </div>
           <div className="action-card practice">
             <div className="action-icon">

@@ -197,14 +197,6 @@ const StudentProfile = () => {
       <div className="main-content">
         {/* Top Navigation Bar */}
         <div className="top-bar">
-          <button 
-            className="menu-toggle" 
-            onClick={toggleSidebar}
-            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
-          >
-            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
-          </button>
-          
           <div className="top-bar-title">
             <h1>Student Dashboard</h1>
           </div>

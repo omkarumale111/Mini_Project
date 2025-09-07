@@ -10,6 +10,7 @@ import AboutPage from './pages/AboutPage';
 import DashboardAbout from './pages/DashboardAbout';
 import Modules from './pages/Modules';
 import StudentProfile from './pages/StudentProfile';
+import TakeTest from './pages/TakeTest';
 import SignupScreen from "./components/SignUpScreen/SignupScreen";
 
 /**
@@ -41,6 +42,8 @@ function App() {
       
       {/* Student Profile */}
       <Route path="/profile" element={<StudentProfile />} />
+      {/* Take Test page */}
+      <Route path="/take-test" element={<TakeTest />} />
     </Routes>
   );
 }
