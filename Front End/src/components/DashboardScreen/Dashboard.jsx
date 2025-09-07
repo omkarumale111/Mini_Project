@@ -126,24 +126,10 @@ const Dashboard = () => {
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/practice')}
+              onClick={() => navigateToModule('/modules')}
             >
               <RiPencilLine className="nav-icon" />
               {!sidebarCollapsed && <span>Practice</span>}
-            </li>
-            <li 
-              className="nav-item"
-              onClick={() => navigateToModule('/take-test')}
-            >
-              <RiFileTextLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Take Test</span>}
-            </li>
-            <li 
-              className="nav-item"
-              onClick={() => navigateToModule('/feedback')}
-            >
-              <RiMessageLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Feedback</span>}
             </li>
           </ul>
         </nav>
@@ -159,18 +145,18 @@ const Dashboard = () => {
               {!sidebarCollapsed && <span>Settings</span>}
             </li>
             <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/dashboard/about')}
+            >
+              <RiQuestionLine className="nav-icon" />
+              {!sidebarCollapsed && <span>About</span>}
+            </li>
+            <li 
               className="nav-item" 
               onClick={handleLogout}
             >
               <RiLogoutCircleRLine className="nav-icon" />
               {!sidebarCollapsed && <span>Log Out</span>}
-            </li>
-            <li 
-              className="nav-item"
-              onClick={() => navigateToModule('/help')}
-            >
-              <RiQuestionLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Help</span>}
             </li>
           </ul>
         </div>
@@ -185,10 +171,6 @@ const Dashboard = () => {
           </div>
           
           <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/about" className="nav-link">ABOUT</a>
-            <a href="/modules" className="nav-link">MODULES</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
           </div>
         </div>
 
@@ -244,22 +226,13 @@ const Dashboard = () => {
 
         {/* Action Cards */}
         <div className="action-cards">
-          <div className="action-card take-test">
-            <div className="action-icon">
-              <RiFileEditLine />
-            </div>
-            <h3>Take Test</h3>
-            <p>Enter a test code to start a new assessment</p>
-            <button onClick={() => navigateToModule('/take-test')}>START TEST</button>
-          </div>
-          
           <div className="action-card practice">
             <div className="action-icon">
               <RiPencilLine />
             </div>
             <h3>Practice Writing</h3>
             <p>Improve your skills with practice exercises</p>
-            <button onClick={() => navigateToModule('/practice')}>PRACTICE</button>
+            <button onClick={() => navigateToModule('/modules')}>PRACTICE</button>
           </div>
         </div>
 

@@ -4,6 +4,7 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  font-family: 'Inter', Arial, sans-serif;
 }
 
 /* Content container */

@@ -7,6 +7,8 @@ import TeacherProfile from "./components/TeacherProfile/TeacherProfile";
 import ForgotPassword from "./components/ForgotPasswordScreen/ForgotPassword";
 import LandingPage from './pages/LandingPage'
 import AboutPage from './pages/AboutPage';
+import DashboardAbout from './pages/DashboardAbout';
+import Modules from './pages/Modules';
 import WritingEssentials from "./pages/WritingEssentials";
 import WEQ1 from "./pages/WEQ1";
 import SignupScreen from "./components/SignUpScreen/SignupScreen";
@@ -31,6 +33,10 @@ function App() {
       <Route path="/login" element={<LoginScreen />} />
       {/* Dashboard for logged-in users */}
       <Route path="/dashboard" element={<Dashboard />} />
+      {/* Dashboard About page */}
+      <Route path="/dashboard/about" element={<DashboardAbout />} />
+      {/* Modules page */}
+      <Route path="/modules" element={<Modules />} />
       {/* Teacher/Admin Dashboard */}
       <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
       {/* Teacher Profile */}
