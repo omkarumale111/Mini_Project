@@ -1,28 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Dashboard.css";
+import "./TeacherDashboard.css";
 import { 
   RiDashboardLine, 
   RiUserLine, 
-  RiPencilLine, 
   RiFileTextLine, 
-  RiMessageLine, 
+  RiGroupLine, 
+  RiBarChartLine, 
   RiSettings4Line, 
   RiQuestionLine, 
   RiLogoutCircleRLine, 
   RiMenuFoldLine,
   RiMenuUnfoldLine,
+  RiAddLine,
   RiFileEditLine,
-  RiTimeLine
+  RiMegaphoneLine,
+  RiLightbulbLine
 } from "react-icons/ri";
 import logo from '../../assets/Logo.png';
 
 /**
- * Dashboard component provides the main layout for authenticated users.
- * It features a collapsible sidebar for navigation, a progress chart, leaderboard,
- * and quick access to writing modules.
+ * TeacherDashboard component provides the main layout for admin/teacher users.
+ * It features admin-specific functionality like test creation, student management,
+ * and analytics.
  */
-const Dashboard = () => {
+const TeacherDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -69,7 +71,7 @@ const Dashboard = () => {
     }
   };
 
-  const navigateToModule = (path) => {
+  const navigateToSection = (path) => {
     navigate(path);
     closeSidebarOnMobile();
   };
@@ -80,7 +82,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="teacher-dashboard-container">
       {/* Mobile backdrop */}
       {isMobile && sidebarVisible && (
         <div 
@@ -91,16 +93,9 @@ const Dashboard = () => {
 
       {/* Sidebar navigation */}
       <div 
-        className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
+        className={`teacher-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
       >
         <div className="sidebar-header">
-          <button 
-            className="sidebar-toggle" 
-            onClick={toggleSidebar}
-            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
-          >
-            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
-          </button>
           <div className="logo-section">
             <img src={logo} alt="WriteEdge Logo" className="sidebar-logo" />
             {!sidebarCollapsed && <span className="logo-text">WriteEdge</span>}
@@ -108,42 +103,42 @@ const Dashboard = () => {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="nav-menu">
+        <nav className="teacher-nav-menu">
           <ul>
             <li 
               className="nav-item active"
-              onClick={() => navigateToModule('/dashboard')}
+              onClick={() => navigateToSection('/teacher-dashboard')}
             >
               <RiDashboardLine className="nav-icon" />
               {!sidebarCollapsed && <span>Dashboard</span>}
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/profile')}
+              onClick={() => navigateToSection('/teacher-profile')}
             >
               <RiUserLine className="nav-icon" />
               {!sidebarCollapsed && <span>My Profile</span>}
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/practice')}
-            >
-              <RiPencilLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Practice</span>}
-            </li>
-            <li 
-              className="nav-item"
-              onClick={() => navigateToModule('/take-test')}
+              onClick={() => navigateToSection('/create-test')}
             >
               <RiFileTextLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Take Test</span>}
+              {!sidebarCollapsed && <span>Create Test</span>}
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/feedback')}
+              onClick={() => navigateToSection('/manage-tests')}
             >
-              <RiMessageLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Feedback</span>}
+              <RiFileEditLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Manage Tests</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/reports')}
+            >
+              <RiBarChartLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Reports</span>}
             </li>
           </ul>
         </nav>
@@ -153,7 +148,7 @@ const Dashboard = () => {
           <ul>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/settings')}
+              onClick={() => navigateToSection('/settings')}
             >
               <RiSettings4Line className="nav-icon" />
               {!sidebarCollapsed && <span>Settings</span>}
@@ -167,7 +162,7 @@ const Dashboard = () => {
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/help')}
+              onClick={() => navigateToSection('/help')}
             >
               <RiQuestionLine className="nav-icon" />
               {!sidebarCollapsed && <span>Help</span>}
@@ -177,24 +172,31 @@ const Dashboard = () => {
       </div>
 
       {/* Main content area */}
-      <div className="main-content">
+      <div className="teacher-main-content">
         {/* Top Navigation Bar */}
-        <div className="top-bar">
+        <div className="teacher-top-bar">
+          <button 
+            className="menu-toggle" 
+            onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
+          >
+            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
+          </button>
+          
           <div className="top-bar-title">
-            <h1>Student Dashboard</h1>
+            <h1>Admin Dashboard</h1>
           </div>
           
           <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
+            <a href="/teacher-dashboard" className="nav-link">HOME</a>
             <a href="/about" className="nav-link">ABOUT</a>
-            <a href="/modules" className="nav-link">MODULES</a>
             <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
           </div>
         </div>
 
         {/* Welcome Section */}
         <div className="welcome-section">
-          <h2>Welcome, {user?.email || 'omkarumale111'}</h2>
+          <h2>Welcome, {user?.email || 'Administrator'}</h2>
         </div>
 
         {/* Stats Cards */}
@@ -204,100 +206,99 @@ const Dashboard = () => {
               <RiFileTextLine />
             </div>
             <div className="stat-info">
-              <h3>Tests Completed</h3>
-              <span className="stat-number">3</span>
+              <h3>Active Tests</h3>
+              <span className="stat-number">0</span>
             </div>
           </div>
           
           <div className="stat-card">
             <div className="stat-icon green">
-              <RiTimeLine />
+              <RiGroupLine />
             </div>
             <div className="stat-info">
-              <h3>Average Score</h3>
-              <span className="stat-number">72%</span>
+              <h3>Student Submissions</h3>
+              <span className="stat-number">0</span>
             </div>
           </div>
           
           <div className="stat-card">
             <div className="stat-icon yellow">
-              <RiTimeLine />
+              <RiBarChartLine />
             </div>
             <div className="stat-info">
-              <h3>Hours Practiced</h3>
-              <span className="stat-number">8.5</span>
+              <h3>Average Score</h3>
+              <span className="stat-number">0%</span>
             </div>
           </div>
-        </div>
-
-        {/* Progress Section */}
-        <div className="progress-section">
-          <h3>My Progress</h3>
-          <div className="progress-chart">
-            <div className="donut-chart" style={{ '--percentage': 70 }}>
-              <div className="donut-chart-center">
-                <span>70%</span>
-              </div>
+          
+          <div className="stat-card">
+            <div className="stat-icon purple">
+              <RiFileTextLine />
+            </div>
+            <div className="stat-info">
+              <h3>Upcoming Tests</h3>
+              <span className="stat-number">2</span>
             </div>
           </div>
         </div>
 
         {/* Action Cards */}
-        <div className="action-cards">
-          <div className="action-card take-test">
+        <div className="action-cards-grid">
+          <div className="action-card create-manage">
+            <div className="action-icon">
+              <RiAddLine />
+            </div>
+            <h3>CREATE & MANAGE TESTS</h3>
+            <p>Easily design and schedule custom tests with full control over questions, duration, and difficulty.</p>
+            <button onClick={() => navigateToSection('/create-test')}>CREATE TEST</button>
+          </div>
+          
+          <div className="action-card ai-generator">
             <div className="action-icon">
               <RiFileEditLine />
             </div>
-            <h3>Take Test</h3>
-            <p>Enter a test code to start a new assessment</p>
-            <button onClick={() => navigateToModule('/take-test')}>START TEST</button>
+            <h3>AI TEXT GENERATOR</h3>
+            <p>Generate high-quality, contextually accurate content using AI-powered writing assistance.</p>
+            <button onClick={() => navigateToSection('/ai-generator')}>GENERATE</button>
           </div>
           
-          <div className="action-card practice">
+          <div className="action-card events">
             <div className="action-icon">
-              <RiPencilLine />
+              <RiMegaphoneLine />
             </div>
-            <h3>Practice Writing</h3>
-            <p>Improve your skills with practice exercises</p>
-            <button onClick={() => navigateToModule('/practice')}>PRACTICE</button>
+            <h3>EVENTS & ANNOUNCEMENT</h3>
+            <p>Publish important academic events and updates in real-time to keep students informed.</p>
+            <button onClick={() => navigateToSection('/announcements')}>MANAGE</button>
+          </div>
+          
+          <div className="action-card tips">
+            <div className="action-icon">
+              <RiLightbulbLine />
+            </div>
+            <h3>TIPS & SUGGESTIONS</h3>
+            <p>Share curated writing tips and strategies to help students enhance their skills.</p>
+            <button onClick={() => navigateToSection('/tips')}>SHARE</button>
           </div>
         </div>
 
-        {/* Upcoming Events */}
-        <div className="upcoming-events">
-          <h3>Upcoming Events</h3>
-          <div className="event-item">
-            <div className="event-date">
-              <span className="date-number">10</span>
-              <span className="date-month">MAY</span>
-            </div>
-            <div className="event-details">
-              <h4>Business Writing Assessment</h4>
-              <p>9:00 AM - Test will be available for 2 hours</p>
-            </div>
+        {/* Recent Submissions Section */}
+        <div className="recent-submissions">
+          <div className="submissions-header">
+            <h3>Recent Submissions</h3>
           </div>
-          <div className="event-item">
-            <div className="event-date">
-              <span className="date-number">15</span>
-              <span className="date-month">MAY</span>
-            </div>
-            <div className="event-details">
-              <h4>Technical Documentation Test</h4>
-              <p>2:00 PM - Test will be available for 90 minutes</p>
-            </div>
+          <div className="submissions-content">
+            <p>No submissions yet</p>
           </div>
         </div>
 
-        {/* Writing Tip of the Day */}
-        <div className="writing-tip">
-          <h3>Writing Tip of the Day</h3>
-          <div className="tip-content">
-            <p>"Use strong verbs — they carry more weight than adjectives. Instead of saying 'the meeting was good,' try 'the meeting energized the team.'"</p>
-          </div>
+        {/* Login Status */}
+        <div className="login-status">
+          <p>Login successful</p>
+          <p>Welcome back, {user?.email || 'Administrator'}!</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default TeacherDashboard;

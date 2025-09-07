@@ -31,10 +31,14 @@ const LoginForm = () => {
       console.log('Server response:', data);
 
       if (response.ok) {
-        // Store user data
+        // Store user data if needed
         localStorage.setItem('user', JSON.stringify(data.user));
-        // Redirect to dashboard
-        navigate("/dashboard");
+        // Redirect based on user role
+        if (data.user.role === 'admin') {
+          navigate("/teacher-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         setError(data.message || "Login failed. Please check your credentials.");
       }
