@@ -141,8 +141,7 @@
 }
 
 .nav-item.active {
-  background: rgba(255, 215, 0, 0.2);
-  border-left: 4px solid #FFD700;
+  background: rgb(255, 215, 0);
 }
 
 .nav-icon {
