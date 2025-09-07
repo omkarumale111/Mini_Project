@@ -2,7 +2,6 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginScreen from "./components/LoginScreen/LoginScreen";
 import Dashboard from "./components/DashboardScreen/Dashboard";
-import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
 import ForgotPassword from "./components/ForgotPasswordScreen/ForgotPassword";
 import LandingPage from './pages/LandingPage'
 import AboutPage from './pages/AboutPage';
@@ -17,27 +16,14 @@ import EMQ1 from "./pages/EMQ1";
 import LAQ1 from "./pages/LAQ1";
 
 // Protected Route Component
-const ProtectedRoute = ({ children, requiredRole = null }) => {
+const ProtectedRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem('user'));
   
   if (!user) {
     return <Navigate to="/login" replace />;
   }
   
-  if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to="/" replace />;
-  }
-  
   return children;
-};
-
-// Admin Layout Component
-const AdminLayout = () => {
-  return (
-    <ProtectedRoute requiredRole="admin">
-      <AdminDashboard />
-    </ProtectedRoute>
-  );
 };
 
 // User Layout Component
@@ -73,12 +59,6 @@ function App() {
       <Route path="/emq1" element={<UserLayout><EMQ1 /></UserLayout>} />
       <Route path="/letters-applications" element={<UserLayout><LettersApplications /></UserLayout>} />
       <Route path="/laq1" element={<UserLayout><LAQ1 /></UserLayout>} />
-      
-      {/* Admin Routes */}
-      <Route path="/admin/*" element={<AdminLayout />}>
-        <Route path="dashboard" element={<AdminDashboard />} />
-        {/* Add more admin routes here as needed */}
-      </Route>
       
       {/* Catch all other routes */}
       <Route path="*" element={<Navigate to="/" replace />} />

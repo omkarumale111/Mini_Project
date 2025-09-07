@@ -33,13 +33,8 @@ const LoginForm = () => {
       if (response.ok) {
         // Store user data
         localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Check user role and redirect accordingly
-        if (data.user.role === 'admin') {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/dashboard");
-        }
+        // Redirect to dashboard
+        navigate("/dashboard");
       } else {
         setError(data.message || "Login failed. Please check your credentials.");
       }

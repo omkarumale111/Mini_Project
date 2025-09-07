@@ -69,7 +69,6 @@ async function initializeDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role ENUM('admin', 'student') DEFAULT 'student' NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -95,25 +94,21 @@ initializeDatabase();
 app.post('/api/signup', async (req, res) => {
   console.log('Received signup request:', req.body);
   try {
-    const { email, password, role = 'student' } = req.body;
+    const { email, password } = req.body;
     
     if (!email || !password) {
       console.log('Missing email or password');
       return res.status(400).json({ message: 'Email and password are required' });
     }
     
-    if (!['admin', 'student'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role. Must be either admin or student' });
-    }
-    
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log('Password hashed successfully');
     
-    // Insert user with role
+    // Insert user
     const [result] = await pool.query(
-      'INSERT INTO users (email, password, role) VALUES (?, ?, ?)',
-      [email, hashedPassword, role]
+      'INSERT INTO users (email, password) VALUES (?, ?)',
+      [email, hashedPassword]
     );
     console.log('User inserted successfully:', result);
     
@@ -149,8 +144,7 @@ app.post('/api/signin', async (req, res) => {
       message: 'Login successful',
       user: { 
         id: user.id, 
-        email: user.email,
-        role: user.role || 'student' // Default to 'student' if role is not set
+        email: user.email
       }
     });
   } catch (error) {
