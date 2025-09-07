@@ -101,156 +101,174 @@ const Modules = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const getModulesData = () => [
-    {
-      id: 1,
-      title: "Business Communication Basics",
-      emoji: "📘",
-      progress: 60,
-      completionDate: "May 15, 2025",
-      lessons: [
-        {
-          id: 1,
-          title: "Principles of Effective Communication",
-          lessonId: "m1l1",
-          status: lessonProgress['m1l1']?.status || "available",
-          completedDate: lessonProgress['m1l1']?.completed ? "Completed" : null
-        },
-        {
-          id: 2,
-          title: "Writing Professional Emails",
-          lessonId: "m1l2",
-          status: lessonProgress['m1l2']?.status || "locked",
-          completedDate: lessonProgress['m1l2']?.completed ? "Completed" : null
-        },
-        {
-          id: 3,
-          title: "Creating Effective Business Reports",
-          lessonId: "m1l3",
-          status: lessonProgress['m1l3']?.status || "locked",
-          completedDate: lessonProgress['m1l3']?.completed ? "Completed" : null
-        },
-        {
-          id: 4,
-          title: "Writing for Internal Communications",
-          lessonId: "m1l4",
-          status: lessonProgress['m1l4']?.status || "locked",
-          completedDate: lessonProgress['m1l4']?.completed ? "Completed" : null
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: "Technical Writing Foundations",
-      emoji: "📗",
-      progress: 0,
-      completionDate: "June 1, 2025",
-      lessons: [
-        {
-          id: 1,
-          title: "Understanding Technical Documentation",
-          lessonId: "m2l1",
-          status: lessonProgress['m2l1']?.status || "locked",
-          completedDate: lessonProgress['m2l1']?.completed ? "Completed" : null
-        },
-        {
-          id: 2,
-          title: "Writing User Guides",
-          lessonId: "m2l2",
-          status: lessonProgress['m2l2']?.status || "locked",
-          completedDate: lessonProgress['m2l2']?.completed ? "Completed" : null
-        },
-        {
-          id: 3,
-          title: "Technical Specifications",
-          lessonId: "m2l3",
-          status: lessonProgress['m2l3']?.status || "locked",
-          completedDate: lessonProgress['m2l3']?.completed ? "Completed" : null
-        },
-        {
-          id: 4,
-          title: "Technical Presentations",
-          lessonId: "m2l4",
-          status: lessonProgress['m2l4']?.status || "locked",
-          completedDate: lessonProgress['m2l4']?.completed ? "Completed" : null
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: "Advanced Writing Techniques",
-      emoji: "📙",
-      progress: 0,
-      completionDate: "June 15, 2025",
-      lessons: [
-        {
-          id: 1,
-          title: "Persuasive Writing Strategies",
-          lessonId: "m3l1",
-          status: lessonProgress['m3l1']?.status || "locked",
-          completedDate: lessonProgress['m3l1']?.completed ? "Completed" : null
-        },
-        {
-          id: 2,
-          title: "Data-Driven Communication",
-          lessonId: "m3l2",
-          status: lessonProgress['m3l2']?.status || "locked",
-          completedDate: lessonProgress['m3l2']?.completed ? "Completed" : null
-        },
-        {
-          id: 3,
-          title: "Cross-Cultural Communication",
-          lessonId: "m3l3",
-          status: lessonProgress['m3l3']?.status || "locked",
-          completedDate: lessonProgress['m3l3']?.completed ? "Completed" : null
-        },
-        {
-          id: 4,
-          title: "Digital Communication Platforms",
-          lessonId: "m3l4",
-          status: lessonProgress['m3l4']?.status || "locked",
-          completedDate: lessonProgress['m3l4']?.completed ? "Completed" : null
-        }
-      ]
-    },
-    {
-      id: 4,
-      title: "Professional Writing Mastery",
-      emoji: "📕",
-      progress: 0,
-      completionDate: "July 1, 2025",
-      lessons: [
-        {
-          id: 1,
-          title: "Executive Summary Writing",
-          lessonId: "m4l1",
-          status: lessonProgress['m4l1']?.status || "locked",
-          completedDate: lessonProgress['m4l1']?.completed ? "Completed" : null
-        },
-        {
-          id: 2,
-          title: "Proposal Development",
-          lessonId: "m4l2",
-          status: lessonProgress['m4l2']?.status || "locked",
-          completedDate: lessonProgress['m4l2']?.completed ? "Completed" : null
-        },
-        {
-          id: 3,
-          title: "Grant Writing Fundamentals",
-          lessonId: "m4l3",
-          status: lessonProgress['m4l3']?.status || "locked",
-          completedDate: lessonProgress['m4l3']?.completed ? "Completed" : null
-        },
-        {
-          id: 4,
-          title: "Writing for Non-Profit Organizations",
-          lessonId: "m4l4",
-          status: lessonProgress['m4l4']?.status || "locked",
-          completedDate: lessonProgress['m4l4']?.completed ? "Completed" : null
-        }
-      ]
+  const calculateModuleProgress = (moduleId) => {
+    const lessonIds = [
+      `m${moduleId}l1`,
+      `m${moduleId}l2`, 
+      `m${moduleId}l3`,
+      `m${moduleId}l4`
+    ];
+    
+    const completedLessons = lessonIds.filter(lessonId => 
+      lessonProgress[lessonId]?.completed
+    ).length;
+    
+    return Math.round((completedLessons / lessonIds.length) * 100);
+  };
+
+  const getModuleCompletionDate = (moduleId) => {
+    const lesson4Id = `m${moduleId}l4`;
+    const lesson4Data = lessonProgress[lesson4Id];
+    
+    if (lesson4Data?.completed) {
+      // Return formatted date from completed_at timestamp
+      const completedAt = new Date(lesson4Data.completed_at || Date.now());
+      return completedAt.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
     }
-  ];
+    
+    return 'NA';
+  };
+
+  const getModulesData = () => {
+    return [
+      {
+        id: 1,
+        title: "Business Communication Basics",
+        emoji: "📘",
+        progress: calculateModuleProgress(1),
+        completionDate: getModuleCompletionDate(1),
+        lessons: [
+          {
+            id: 1,
+            title: "Introduction to Business Writing",
+            status: lessonProgress['m1l1']?.status || 'available',
+            completedDate: lessonProgress['m1l1']?.completed ? 'Completed' : null
+          },
+          {
+            id: 2,
+            title: "Email Communication",
+            status: lessonProgress['m1l2']?.status || 'locked',
+            completedDate: lessonProgress['m1l2']?.completed ? 'Completed' : null
+          },
+          {
+            id: 3,
+            title: "Formal Letters",
+            status: lessonProgress['m1l3']?.status || 'locked',
+            completedDate: lessonProgress['m1l3']?.completed ? 'Completed' : null
+          },
+          {
+            id: 4,
+            title: "Business Reports",
+            status: lessonProgress['m1l4']?.status || 'locked',
+            completedDate: lessonProgress['m1l4']?.completed ? 'Completed' : null
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Technical Writing Foundations",
+        emoji: "📗",
+        progress: calculateModuleProgress(2),
+        completionDate: getModuleCompletionDate(2),
+        lessons: [
+          {
+            id: 1,
+            title: "Technical Documentation",
+            status: lessonProgress['m2l1']?.status || 'locked',
+            completedDate: lessonProgress['m2l1']?.completed ? 'Completed' : null
+          },
+          {
+            id: 2,
+            title: "User Manuals",
+            status: lessonProgress['m2l2']?.status || 'locked',
+            completedDate: lessonProgress['m2l2']?.completed ? 'Completed' : null
+          },
+          {
+            id: 3,
+            title: "Process Documentation",
+            status: lessonProgress['m2l3']?.status || 'locked',
+            completedDate: lessonProgress['m2l3']?.completed ? 'Completed' : null
+          },
+          {
+            id: 4,
+            title: "API Documentation",
+            status: lessonProgress['m2l4']?.status || 'locked',
+            completedDate: lessonProgress['m2l4']?.completed ? 'Completed' : null
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Advanced Writing Techniques",
+        emoji: "📙",
+        progress: calculateModuleProgress(3),
+        completionDate: getModuleCompletionDate(3),
+        lessons: [
+          {
+            id: 1,
+            title: "Persuasive Writing",
+            status: lessonProgress['m3l1']?.status || 'locked',
+            completedDate: lessonProgress['m3l1']?.completed ? 'Completed' : null
+          },
+          {
+            id: 2,
+            title: "Research Writing",
+            status: lessonProgress['m3l2']?.status || 'locked',
+            completedDate: lessonProgress['m3l2']?.completed ? 'Completed' : null
+          },
+          {
+            id: 3,
+            title: "Creative Writing",
+            status: lessonProgress['m3l3']?.status || 'locked',
+            completedDate: lessonProgress['m3l3']?.completed ? 'Completed' : null
+          },
+          {
+            id: 4,
+            title: "Editing and Proofreading",
+            status: lessonProgress['m3l4']?.status || 'locked',
+            completedDate: lessonProgress['m3l4']?.completed ? 'Completed' : null
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Professional Writing Mastery",
+        emoji: "📕",
+        progress: calculateModuleProgress(4),
+        completionDate: getModuleCompletionDate(4),
+        lessons: [
+          {
+            id: 1,
+            title: "Executive Communication",
+            status: lessonProgress['m4l1']?.status || 'locked',
+            completedDate: lessonProgress['m4l1']?.completed ? 'Completed' : null
+          },
+          {
+            id: 2,
+            title: "Presentation Writing",
+            status: lessonProgress['m4l2']?.status || 'locked',
+            completedDate: lessonProgress['m4l2']?.completed ? 'Completed' : null
+          },
+          {
+            id: 3,
+            title: "Grant Writing",
+            status: lessonProgress['m4l3']?.status || 'locked',
+            completedDate: lessonProgress['m4l3']?.completed ? 'Completed' : null
+          },
+          {
+            id: 4,
+            title: "Portfolio Development",
+            status: lessonProgress['m4l4']?.status || 'locked',
+            completedDate: lessonProgress['m4l4']?.completed ? 'Completed' : null
+          }
+        ]
+      }
+    ];
+  };
 
   // Set selected module after modules data is available
   useEffect(() => {
