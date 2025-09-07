@@ -10,7 +10,8 @@ import {
   RiLogoutCircleRLine, 
   RiMenuFoldLine,
   RiMenuUnfoldLine,
-  RiBookLine
+  RiBookLine,
+  RiFileTextLine
 } from "react-icons/ri";
 import logo from '../assets/Logo.png';
 import './Modules.css';
@@ -266,6 +267,13 @@ const Modules = () => {
             >
               <RiPencilLine className="nav-icon" />
               {!sidebarCollapsed && <span>Practice</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/take-test')}
+            >
+              <RiFileTextLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Take Test</span>}
             </li>
           </ul>
         </nav>

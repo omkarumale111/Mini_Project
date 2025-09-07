@@ -11,7 +11,8 @@ import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiFileEditLine,
-  RiSaveLine
+  RiSaveLine,
+  RiFileTextLine   
 } from "react-icons/ri";
 import logo from '../assets/Logo.png';
 
@@ -168,6 +169,13 @@ const StudentProfile = () => {
             >
               <RiPencilLine className="nav-icon" />
               {!sidebarCollapsed && <span>Practice</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/take-test')}
+            >
+              <RiFileTextLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Take Test</span>}
             </li>
           </ul>
         </nav>

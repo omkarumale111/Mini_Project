@@ -4,6 +4,7 @@ import {
   RiDashboardLine, 
   RiUserLine, 
   RiPencilLine, 
+  RiFileTextLine,
   RiMessageLine, 
   RiSettings4Line, 
   RiQuestionLine, 
@@ -114,6 +115,13 @@ const DashboardAbout = () => {
             >
               <RiPencilLine className="nav-icon" />
               {!sidebarCollapsed && <span>Practice</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/take-test')}
+            >
+              <RiFileTextLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Take Test</span>}
             </li>
           </ul>
         </nav>
