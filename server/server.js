@@ -205,6 +205,113 @@ app.post('/api/weq1', async (req, res) => {
   }
 });
 
+// Lesson inputs endpoints
+app.post('/api/lesson-inputs', async (req, res) => {
+  try {
+    const { student_id, lesson_id, input_field, input_value } = req.body;
+    
+    if (!student_id || !lesson_id || !input_field) {
+      return res.status(400).json({ message: 'student_id, lesson_id, and input_field are required' });
+    }
+
+    const [result] = await pool.execute(
+      'INSERT INTO lesson_inputs (student_id, lesson_id, input_field, input_value) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE input_value = VALUES(input_value), updated_at = CURRENT_TIMESTAMP',
+      [student_id, lesson_id, input_field, input_value]
+    );
+
+    res.json({
+      message: 'Lesson input saved successfully',
+      id: result.insertId || result.affectedRows
+    });
+  } catch (error) {
+    console.error('Error saving lesson input:', error);
+    res.status(500).json({ message: 'Error saving lesson input' });
+  }
+});
+
+app.get('/api/lesson-inputs/:student_id/:lesson_id', async (req, res) => {
+  try {
+    const { student_id, lesson_id } = req.params;
+    
+    const [rows] = await pool.execute(
+      'SELECT input_field, input_value FROM lesson_inputs WHERE student_id = ? AND lesson_id = ?',
+      [student_id, lesson_id]
+    );
+
+    const inputs = {};
+    rows.forEach(row => {
+      inputs[row.input_field] = row.input_value;
+    });
+
+    res.json(inputs);
+  } catch (error) {
+    console.error('Error retrieving lesson inputs:', error);
+    res.status(500).json({ message: 'Error retrieving lesson inputs' });
+  }
+});
+
+// Lesson completion endpoints
+app.post('/api/lesson-complete', async (req, res) => {
+  try {
+    const { student_id, lesson_id } = req.body;
+    
+    if (!student_id || !lesson_id) {
+      return res.status(400).json({ message: 'student_id and lesson_id are required' });
+    }
+
+    const [result] = await pool.execute(
+      'INSERT INTO lesson_completions (student_id, lesson_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE completed_at = CURRENT_TIMESTAMP',
+      [student_id, lesson_id]
+    );
+
+    res.json({
+      message: 'Lesson marked as completed',
+      id: result.insertId || result.affectedRows
+    });
+  } catch (error) {
+    console.error('Error marking lesson as completed:', error);
+    res.status(500).json({ message: 'Error marking lesson as completed' });
+  }
+});
+
+app.get('/api/lesson-progress/:student_id', async (req, res) => {
+  try {
+    const { student_id } = req.params;
+    
+    const [rows] = await pool.execute(
+      'SELECT lesson_id FROM lesson_completions WHERE student_id = ?',
+      [student_id]
+    );
+
+    const completedLessons = rows.map(row => row.lesson_id);
+    
+    // Define lesson progression logic
+    const lessonOrder = [
+      'm1l1', 'm1l2', 'm1l3', 'm1l4',
+      'm2l1', 'm2l2', 'm2l3', 'm2l4', 
+      'm3l1', 'm3l2', 'm3l3', 'm3l4',
+      'm4l1', 'm4l2', 'm4l3', 'm4l4'
+    ];
+
+    const progress = {};
+    lessonOrder.forEach((lessonId, index) => {
+      const isCompleted = completedLessons.includes(lessonId);
+      const isUnlocked = index === 0 || completedLessons.includes(lessonOrder[index - 1]);
+      
+      progress[lessonId] = {
+        completed: isCompleted,
+        unlocked: isUnlocked,
+        status: isCompleted ? 'completed' : (isUnlocked ? 'available' : 'locked')
+      };
+    });
+
+    res.json(progress);
+  } catch (error) {
+    console.error('Error retrieving lesson progress:', error);
+    res.status(500).json({ message: 'Error retrieving lesson progress' });
+  }
+});
+
 const PORT = process.env.PORT || 5001; 
 // Text analysis endpoint
 app.post('/api/analyze-text', async (req, res) => {

@@ -86,9 +86,31 @@ const Module4Lesson3 = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    console.log('Submitted answers:', answers);
-    alert('Citations submitted successfully!');
+  const handleSubmit = async () => {
+    try {
+      // Mark lesson as completed
+      if (user && user.id) {
+        await fetch('http://localhost:5001/api/lesson-complete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            student_id: user.id,
+            lesson_id: 'm4l3'
+          })
+        });
+      }
+      
+      console.log('Submitted answers:', answers);
+      alert('Lesson completed successfully! Next lesson is now unlocked.');
+      
+      // Navigate back to modules to see progress
+      navigate('/modules');
+    } catch (error) {
+      console.error('Error completing lesson:', error);
+      alert('Answers submitted, but there was an error updating progress.');
+    }
   };
 
   return (

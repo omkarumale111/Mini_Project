@@ -1,164 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   RiDashboardLine, 
   RiUserLine, 
   RiPencilLine, 
-  RiMessageLine, 
-  RiSettings4Line, 
+  RiFileTextLine,
   RiQuestionLine, 
   RiLogoutCircleRLine, 
   RiMenuFoldLine,
-  RiMenuUnfoldLine,
-  RiBookLine,
-  RiFileTextLine
+  RiMenuUnfoldLine
 } from "react-icons/ri";
-import logo from '../assets/Logo.png';
+import { FaLock } from 'react-icons/fa';
+import logo from '../assets/logo.png';
 import './Modules.css';
 
 const Modules = () => {
+  const location = useLocation();
   const navigate = useNavigate();
-  
-  const modulesData = [
-    {
-      id: 1,
-      title: "Business Communication Basics",
-      emoji: "📘",
-      progress: 60,
-      completionDate: "May 15, 2025",
-      lessons: [
-        {
-          id: 1,
-          title: "Principles of Effective Communication",
-          status: "completed",
-          completedDate: "May 2, 2025"
-        },
-        {
-          id: 2,
-          title: "Writing Professional Emails",
-          status: "completed",
-          completedDate: "May 3, 2025"
-        },
-        {
-          id: 3,
-          title: "Creating Effective Business Reports",
-          status: "in_progress",
-          completedDate: null
-        },
-        {
-          id: 4,
-          title: "Writing for Internal Communications",
-          status: "locked",
-          completedDate: null,
-          unlockDate: "May 10, 2025"
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: "Technical Writing Foundations",
-      emoji: "📗",
-      progress: 0,
-      completionDate: "June 1, 2025",
-      lessons: [
-        {
-          id: 1,
-          title: "Understanding Technical Documentation",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 2,
-          title: "Writing User Guides",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 3,
-          title: "Technical Specifications",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 4,
-          title: "Technical Presentations",
-          status: "locked",
-          completedDate: null
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: "Advanced Persuasive Writing",
-      emoji: "📙",
-      progress: 0,
-      completionDate: "June 15, 2025",
-      lessons: [
-        {
-          id: 1,
-          title: "Psychology of Persuasion",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 2,
-          title: "Creating Compelling Arguments",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 3,
-          title: "Marketing Copy Techniques",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 4,
-          title: "Ethical Persuasion",
-          status: "locked",
-          completedDate: null
-        }
-      ]
-    },
-    {
-      id: 4,
-      title: "Research & Academic Writing",
-      emoji: "📕",
-      progress: 0,
-      completionDate: "July 1, 2025",
-      lessons: [
-        {
-          id: 1,
-          title: "Research Methods and Sources",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 2,
-          title: "Structuring Research Papers",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 3,
-          title: "Citation and Referencing Styles",
-          status: "locked",
-          completedDate: null
-        },
-        {
-          id: 4,
-          title: "Writing Abstracts and Summaries",
-          status: "locked",
-          completedDate: null
-        }
-      ]
-    }
-  ];
-
-  const [selectedModule, setSelectedModule] = useState(modulesData[0]);
+  const [user, setUser] = useState(null);
+  const [lessonProgress, setLessonProgress] = useState({});
+  const [selectedModule, setSelectedModule] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  // Get user data and load lesson progress
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   // Handle window resize
   useEffect(() => {
@@ -197,6 +69,203 @@ const Modules = () => {
     closeSidebarOnMobile();
   };
 
+  useEffect(() => {
+    const loadLessonProgress = async () => {
+      if (user && user.id) {
+        try {
+          const response = await fetch(`http://localhost:5001/api/lesson-progress/${user.id}`);
+          if (response.ok) {
+            const progress = await response.json();
+            setLessonProgress(progress);
+          }
+        } catch (error) {
+          console.error('Error loading lesson progress:', error);
+        }
+      }
+    };
+
+    loadLessonProgress();
+  }, [user]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const getModulesData = () => [
+    {
+      id: 1,
+      title: "Business Communication Basics",
+      emoji: "📘",
+      progress: 60,
+      completionDate: "May 15, 2025",
+      lessons: [
+        {
+          id: 1,
+          title: "Principles of Effective Communication",
+          lessonId: "m1l1",
+          status: lessonProgress['m1l1']?.status || "available",
+          completedDate: lessonProgress['m1l1']?.completed ? "Completed" : null
+        },
+        {
+          id: 2,
+          title: "Writing Professional Emails",
+          lessonId: "m1l2",
+          status: lessonProgress['m1l2']?.status || "locked",
+          completedDate: lessonProgress['m1l2']?.completed ? "Completed" : null
+        },
+        {
+          id: 3,
+          title: "Creating Effective Business Reports",
+          lessonId: "m1l3",
+          status: lessonProgress['m1l3']?.status || "locked",
+          completedDate: lessonProgress['m1l3']?.completed ? "Completed" : null
+        },
+        {
+          id: 4,
+          title: "Writing for Internal Communications",
+          lessonId: "m1l4",
+          status: lessonProgress['m1l4']?.status || "locked",
+          completedDate: lessonProgress['m1l4']?.completed ? "Completed" : null
+        }
+      ]
+    },
+    {
+      id: 2,
+      title: "Technical Writing Foundations",
+      emoji: "📗",
+      progress: 0,
+      completionDate: "June 1, 2025",
+      lessons: [
+        {
+          id: 1,
+          title: "Understanding Technical Documentation",
+          lessonId: "m2l1",
+          status: lessonProgress['m2l1']?.status || "locked",
+          completedDate: lessonProgress['m2l1']?.completed ? "Completed" : null
+        },
+        {
+          id: 2,
+          title: "Writing User Guides",
+          lessonId: "m2l2",
+          status: lessonProgress['m2l2']?.status || "locked",
+          completedDate: lessonProgress['m2l2']?.completed ? "Completed" : null
+        },
+        {
+          id: 3,
+          title: "Technical Specifications",
+          lessonId: "m2l3",
+          status: lessonProgress['m2l3']?.status || "locked",
+          completedDate: lessonProgress['m2l3']?.completed ? "Completed" : null
+        },
+        {
+          id: 4,
+          title: "Technical Presentations",
+          lessonId: "m2l4",
+          status: lessonProgress['m2l4']?.status || "locked",
+          completedDate: lessonProgress['m2l4']?.completed ? "Completed" : null
+        }
+      ]
+    },
+    {
+      id: 3,
+      title: "Advanced Writing Techniques",
+      emoji: "📙",
+      progress: 0,
+      completionDate: "June 15, 2025",
+      lessons: [
+        {
+          id: 1,
+          title: "Persuasive Writing Strategies",
+          lessonId: "m3l1",
+          status: lessonProgress['m3l1']?.status || "locked",
+          completedDate: lessonProgress['m3l1']?.completed ? "Completed" : null
+        },
+        {
+          id: 2,
+          title: "Data-Driven Communication",
+          lessonId: "m3l2",
+          status: lessonProgress['m3l2']?.status || "locked",
+          completedDate: lessonProgress['m3l2']?.completed ? "Completed" : null
+        },
+        {
+          id: 3,
+          title: "Cross-Cultural Communication",
+          lessonId: "m3l3",
+          status: lessonProgress['m3l3']?.status || "locked",
+          completedDate: lessonProgress['m3l3']?.completed ? "Completed" : null
+        },
+        {
+          id: 4,
+          title: "Digital Communication Platforms",
+          lessonId: "m3l4",
+          status: lessonProgress['m3l4']?.status || "locked",
+          completedDate: lessonProgress['m3l4']?.completed ? "Completed" : null
+        }
+      ]
+    },
+    {
+      id: 4,
+      title: "Professional Writing Mastery",
+      emoji: "📕",
+      progress: 0,
+      completionDate: "July 1, 2025",
+      lessons: [
+        {
+          id: 1,
+          title: "Executive Summary Writing",
+          lessonId: "m4l1",
+          status: lessonProgress['m4l1']?.status || "locked",
+          completedDate: lessonProgress['m4l1']?.completed ? "Completed" : null
+        },
+        {
+          id: 2,
+          title: "Proposal Development",
+          lessonId: "m4l2",
+          status: lessonProgress['m4l2']?.status || "locked",
+          completedDate: lessonProgress['m4l2']?.completed ? "Completed" : null
+        },
+        {
+          id: 3,
+          title: "Grant Writing Fundamentals",
+          lessonId: "m4l3",
+          status: lessonProgress['m4l3']?.status || "locked",
+          completedDate: lessonProgress['m4l3']?.completed ? "Completed" : null
+        },
+        {
+          id: 4,
+          title: "Writing for Non-Profit Organizations",
+          lessonId: "m4l4",
+          status: lessonProgress['m4l4']?.status || "locked",
+          completedDate: lessonProgress['m4l4']?.completed ? "Completed" : null
+        }
+      ]
+    }
+  ];
+
+  // Set selected module after modules data is available
+  useEffect(() => {
+    const modulesData = getModulesData();
+    if (modulesData.length > 0 && !selectedModule) {
+      setSelectedModule(modulesData[0]);
+    }
+  }, [lessonProgress, selectedModule]);
+
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    closeSidebarOnMobile();
+  };
+
   const handleModuleSelect = (module) => {
     setSelectedModule(module);
   };
@@ -212,8 +281,8 @@ const Modules = () => {
   };
 
   const handleLessonClick = (lesson) => {
-    // Only allow navigation to completed or in-progress lessons
-    if (lesson.status === 'completed' || lesson.status === 'in_progress') {
+    // Only allow navigation to completed or available lessons
+    if (lesson.status === 'completed' || lesson.status === 'available') {
       navigate(`/lessons/module${selectedModule.id}/lesson${lesson.id}`);
     }
   };
@@ -222,6 +291,11 @@ const Modules = () => {
     localStorage.removeItem('user');
     navigate('/login');
   };
+
+  // Don't render until we have module data
+  if (!selectedModule) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="modules-container">
@@ -235,7 +309,7 @@ const Modules = () => {
 
       {/* Sidebar navigation */}
       <div 
-        className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
+        className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${isMobile ? (sidebarVisible ? 'visible' : '') : 'visible'}`}
       >
         <div className="sidebar-header">
           <button 
@@ -255,29 +329,29 @@ const Modules = () => {
         <nav className="nav-menu">
           <ul>
             <li 
-              className="nav-item"
-              onClick={() => navigateToModule('/dashboard')}
+              className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`}
+              onClick={() => handleNavigation('/dashboard')}
             >
               <RiDashboardLine className="nav-icon" />
               {!sidebarCollapsed && <span>Dashboard</span>}
             </li>
             <li 
-              className="nav-item"
-              onClick={() => navigateToModule('/profile')}
+              className={`nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
+              onClick={() => handleNavigation('/profile')}
             >
               <RiUserLine className="nav-icon" />
               {!sidebarCollapsed && <span>My Profile</span>}
             </li>
             <li 
-              className="nav-item active"
-              onClick={() => navigateToModule('/modules')}
+              className={`nav-item ${location.pathname === '/modules' ? 'active' : ''}`}
+              onClick={() => handleNavigation('/modules')}
             >
               <RiPencilLine className="nav-icon" />
               {!sidebarCollapsed && <span>Practice</span>}
             </li>
             <li 
-              className="nav-item"
-              onClick={() => navigateToModule('/take-test')}
+              className={`nav-item ${location.pathname === '/take-test' ? 'active' : ''}`}
+              onClick={() => handleNavigation('/take-test')}
             >
               <RiFileTextLine className="nav-icon" />
               {!sidebarCollapsed && <span>Take Test</span>}
@@ -290,7 +364,7 @@ const Modules = () => {
           <ul>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/dashboard/about')}
+              onClick={() => handleNavigation('/dashboard/about')}
             >
               <RiQuestionLine className="nav-icon" />
               {!sidebarCollapsed && <span>About</span>}
@@ -308,108 +382,110 @@ const Modules = () => {
 
       {/* Main content area */}
       <div className="main-content">
-        {/* Mobile menu button */}
-        {isMobile && (
-          <button 
-            className="mobile-menu-btn" 
-            onClick={toggleSidebar}
-            aria-label="Open menu"
-          >
-            <RiMenuFoldLine />
-          </button>
-        )}
+        {/* Top Navigation Bar */}
+        <div className="top-bar">
+          <div className="top-bar-title">
+            <h1>Student Dashboard</h1>
+          </div>
+          
+          <div className="top-bar-nav">
+            <a href="/dashboard" className="nav-link">HOME</a>
+            <a href="/dashboard/about" className="nav-link">ABOUT</a>
+            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
+          </div>
+        </div>
 
         <div className="modules-content">
-          {/* Sidebar with module list */}
+          {/* Module List Sidebar */}
           <div className="modules-sidebar">
-            <h2>Learning Modules</h2>
+            <h2>Available Modules</h2>
             <div className="modules-list">
-              {modulesData.map((module) => (
-                <div
-                  key={module.id}
-                  className={`module-item ${selectedModule.id === module.id ? 'active' : ''}`}
+              {getModulesData().map((module) => (
+                <div 
+                  key={module.id} 
+                  className={`module-item ${selectedModule?.id === module.id ? 'active' : ''}`}
                   onClick={() => handleModuleSelect(module)}
                 >
-                <div className="module-header">
-                  <span className="module-emoji">{module.emoji}</span>
-                  <span className="module-title">Module {module.id}: {module.title}</span>
-                </div>
-                <div className="module-progress">
-                  <div className="progress-bar">
-                    <div 
-                      className="progress-fill" 
-                      style={{ width: `${module.progress}%` }}
-                    ></div>
+                  <div className="module-header">
+                    <span className="module-emoji">{module.emoji}</span>
+                    <div className="module-title">{module.title}</div>
                   </div>
-                  <span className="progress-text">{module.progress}%</span>
+                  <div className="module-progress">
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: `${module.progress}%` }}
+                      ></div>
+                    </div>
+                    <span className="progress-text">{module.progress}% Complete</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Main content area */}
-        <div className="module-details">
-          <div className="module-detail-header">
-            <h1>
-              <span className="module-emoji-large">{selectedModule.emoji}</span>
-              Module {selectedModule.id}: {selectedModule.title}
-            </h1>
+              ))}
+            </div>
           </div>
 
-          <div className="lessons-list">
-            {selectedModule.lessons.map((lesson, index) => (
-              <div 
-                key={lesson.id} 
-                className={`lesson-item ${lesson.status} ${(lesson.status === 'completed' || lesson.status === 'in_progress') ? 'clickable' : ''}`}
-                onClick={() => handleLessonClick(lesson)}
-              >
-                <div className="lesson-number">
-                  {lesson.status === 'completed' ? (
-                    <div className="checkmark">✓</div>
-                  ) : (
-                    <div className="lesson-num">{index + 1}</div>
-                  )}
-                </div>
-                <div className="lesson-content">
-                  <h3>Lesson {lesson.id}: {lesson.title}</h3>
-                  {lesson.status === 'completed' && lesson.completedDate && (
-                    <p className="completion-date">Completed on {lesson.completedDate}</p>
-                  )}
-                  {lesson.status === 'in_progress' && (
-                    <p className="status-text">In progress</p>
-                  )}
-                  {lesson.status === 'locked' && lesson.unlockDate && (
-                    <p className="unlock-date">Unlock on {lesson.unlockDate}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="module-footer">
-            <div className="progress-section">
-              <div className="progress-info">
-                <span className="progress-label">Progress: {selectedModule.progress}%</span>
-                <span className="completion-date">Completion date: {selectedModule.completionDate}</span>
-              </div>
-              <div className="progress-bar-large">
-                <div 
-                  className="progress-fill-large" 
-                  style={{ width: `${selectedModule.progress}%` }}
-                ></div>
-              </div>
+          {/* Module Details */}
+          <div className="module-details">
+            <div className="module-detail-header">
+              <h1>
+                <span className="module-emoji-large">{selectedModule?.emoji}</span>
+                {selectedModule?.title}
+              </h1>
             </div>
             
-            <button 
-              className="continue-button"
-              onClick={handleContinueModule}
-              disabled={selectedModule.progress === 0}
-            >
-              Continue Module
-            </button>
+            <div className="lessons-list">
+              {selectedModule?.lessons.map((lesson) => (
+                <div 
+                  key={lesson.id} 
+                  className={`lesson-item ${lesson.status} ${lesson.status !== 'locked' ? 'clickable' : ''}`}
+                  onClick={() => handleLessonClick(lesson)}
+                >
+                  <div className="lesson-number">
+                    {lesson.status === 'completed' ? (
+                      <FaCheck className="checkmark" />
+                    ) : lesson.status === 'locked' ? (
+                      <FaLock />
+                    ) : (
+                      <span className="lesson-num">{lesson.id}</span>
+                    )}
+                  </div>
+                  <div className="lesson-content">
+                    <h3>{lesson.title}</h3>
+                    {lesson.completedDate && (
+                      <p className="completion-date">{lesson.completedDate}</p>
+                    )}
+                    {lesson.status === 'in_progress' && (
+                      <p className="status-text">In Progress</p>
+                    )}
+                    {lesson.status === 'locked' && (
+                      <p className="unlock-date">Complete previous lesson to unlock</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="module-footer">
+              <div className="progress-section">
+                <div className="progress-info">
+                  <span className="progress-label">Progress: {selectedModule?.progress}%</span>
+                  <span className="completion-date">Completion date: {selectedModule?.completionDate}</span>
+                </div>
+                <div className="progress-bar-large">
+                  <div 
+                    className="progress-fill-large" 
+                    style={{ width: `${selectedModule?.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+              <button 
+                className="continue-button"
+                onClick={handleContinueModule}
+              >
+                Continue Module
+              </button>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>

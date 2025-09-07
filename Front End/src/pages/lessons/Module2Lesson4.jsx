@@ -36,6 +36,28 @@ const Module2Lesson4 = () => {
     }
   }, []);
 
+  // Load saved lesson inputs
+  useEffect(() => {
+    const loadLessonInputs = async () => {
+      if (user && user.id) {
+        try {
+          const response = await fetch(`http://localhost:5001/api/lesson-inputs/${user.id}/m2l4`);
+          if (response.ok) {
+            const savedInputs = await response.json();
+            setAnswers(prevAnswers => ({
+              ...prevAnswers,
+              ...savedInputs
+            }));
+          }
+        } catch (error) {
+          console.error('Error loading lesson inputs:', error);
+        }
+      }
+    };
+
+    loadLessonInputs();
+  }, [user]);
+
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
@@ -78,16 +100,58 @@ const Module2Lesson4 = () => {
     navigate('/login');
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = async (field, value) => {
     setAnswers(prev => ({
       ...prev,
       [field]: value
     }));
+
+    // Save to database
+    if (user && user.id) {
+      try {
+        await fetch('http://localhost:5001/api/lesson-inputs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            student_id: user.id,
+            lesson_id: 'm2l4',
+            input_field: field,
+            input_value: value
+          })
+        });
+      } catch (error) {
+        console.error('Error saving lesson input:', error);
+      }
+    }
   };
 
-  const handleSubmit = () => {
-    console.log('Submitted answers:', answers);
-    alert('Presentation slides submitted successfully!');
+  const handleSubmit = async () => {
+    try {
+      // Mark lesson as completed
+      if (user && user.id) {
+        await fetch('http://localhost:5001/api/lesson-complete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            student_id: user.id,
+            lesson_id: 'm2l4'
+          })
+        });
+      }
+      
+      console.log('Submitted answers:', answers);
+      alert('Lesson completed successfully! Next lesson is now unlocked.');
+      
+      // Navigate back to modules to see progress
+      navigate('/modules');
+    } catch (error) {
+      console.error('Error completing lesson:', error);
+      alert('Answers submitted, but there was an error updating progress.');
+    }
   };
 
   return (

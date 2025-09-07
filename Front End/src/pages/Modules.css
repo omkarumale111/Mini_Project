@@ -151,7 +151,7 @@
   transition: margin-left 0.3s ease;
 }
 
-.sidebar.collapsed + .main-content {
+.modules-container .sidebar.collapsed ~ .main-content {
   margin-left: 70px;
 }
 
@@ -449,7 +449,15 @@
     transform: translateX(-100%);
   }
   
+  .sidebar.visible {
+    transform: translateX(0);
+  }
+  
   .main-content {
+    margin-left: 0;
+  }
+  
+  .modules-container .sidebar.collapsed ~ .main-content {
     margin-left: 0;
   }
   
