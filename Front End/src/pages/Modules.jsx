@@ -275,13 +275,6 @@ const Modules = () => {
           <ul>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/settings')}
-            >
-              <RiSettings4Line className="nav-icon" />
-              {!sidebarCollapsed && <span>Settings</span>}
-            </li>
-            <li 
-              className="nav-item"
               onClick={() => navigateToModule('/dashboard/about')}
             >
               <RiQuestionLine className="nav-icon" />

@@ -122,13 +122,6 @@ const DashboardAbout = () => {
         <div className="bottom-menu">
           <ul>
             <li 
-              className="nav-item"
-              onClick={() => navigateToModule('/settings')}
-            >
-              <RiSettings4Line className="nav-icon" />
-              {!sidebarCollapsed && <span>Settings</span>}
-            </li>
-            <li 
               className="nav-item active"
               onClick={() => navigateToModule('/dashboard/about')}
             >

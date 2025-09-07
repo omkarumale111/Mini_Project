@@ -139,13 +139,6 @@ const Dashboard = () => {
           <ul>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/settings')}
-            >
-              <RiSettings4Line className="nav-icon" />
-              {!sidebarCollapsed && <span>Settings</span>}
-            </li>
-            <li 
-              className="nav-item"
               onClick={() => navigateToModule('/dashboard/about')}
             >
               <RiQuestionLine className="nav-icon" />
@@ -226,6 +219,14 @@ const Dashboard = () => {
 
         {/* Action Cards */}
         <div className="action-cards">
+          <div className="action-card test">
+            <div className="action-icon">
+              <RiFileTextLine />
+            </div>
+            <h3>Take Test</h3>
+            <p>Enter a test code to start a new assessment</p>
+            <button onClick={() => navigateToModule('/modules')}>TAKE TEST</button>
+          </div>
           <div className="action-card practice">
             <div className="action-icon">
               <RiPencilLine />
