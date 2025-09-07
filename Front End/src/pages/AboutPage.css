@@ -217,8 +217,7 @@ li::before {
 }
 
 .footer-links {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  justify-content: flex-end;
   gap: 2rem;
 }
 

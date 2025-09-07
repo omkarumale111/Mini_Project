@@ -17,8 +17,6 @@ const AboutPage = () => {
         <nav className="header-nav">
           <a href="/" className="nav-link">HOME</a>
           <a href="/about" className="nav-link active">ABOUT</a>
-          <a href="#" className="nav-link">COURSES</a>
-          <a href="#" className="nav-link">MODULES</a>
           <button className="login-button" onClick={() => navigate('/login')}>LOG IN</button>
         </nav>
       </header>
@@ -117,26 +115,6 @@ const AboutPage = () => {
           </div>
           
           <div className="footer-links">
-            <div className="footer-column">
-              <h4>Quick Links</h4>
-              <nav>
-                <a href="/">Home</a>
-                <a href="/about">About</a>
-                <a href="/courses">Courses</a>
-                <a href="/login">Login</a>
-              </nav>
-            </div>
-
-            <div className="footer-column">
-              <h4>Resources</h4>
-              <nav>
-                <a href="/blog">Blog</a>
-                <a href="/writing-tips">Writing Tips</a>
-                <a href="/faq">FAQ</a>
-                <a href="/support">Support</a>
-              </nav>
-            </div>
-
             <div className="footer-column">
               <h4>Contact</h4>
               <p>contact@writeedge.com</p>
