@@ -232,52 +232,67 @@ const TeacherDashboard = () => {
           </div>
         </div>
 
-        {/* Action Cards */}
-        <div className="action-cards-grid">
-          <div className="action-card create-manage">
-            <div className="action-icon">
-              <RiAddLine />
+        {/* Action Cards and Recent Submissions Layout */}
+        <div style={{ 
+          display: 'flex', 
+          gap: '20px', 
+          alignItems: 'flex-start',
+          margin: '20px',
+          marginBottom: '40px'
+        }}>
+          {/* Action Cards - 2x2 Grid */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 1fr', 
+            gridTemplateRows: '1fr 1fr', 
+            gap: '20px',
+            flex: '2'
+          }}>
+            <div className="action-card create-manage">
+              <div className="action-icon">
+                <RiAddLine />
+              </div>
+              <h3>CREATE TESTS</h3>
+              <p style={{ color: 'white' }}>Easily design and schedule custom tests with full control over questions, duration, and difficulty.</p>
+              <button onClick={() => navigateToSection('/create-test')}>CREATE TEST</button>
             </div>
-            <h3>CREATE & MANAGE TESTS</h3>
-            <p>Easily design and schedule custom tests with full control over questions, duration, and difficulty.</p>
-            <button onClick={() => navigateToSection('/create-test')}>CREATE TEST</button>
-          </div>
-          
-          <div className="action-card ai-generator">
-            <div className="action-icon">
-              <RiFileEditLine />
+            
+            <div className="action-card ai-generator">
+              <div className="action-icon">
+                <RiFileEditLine />
+              </div>
+              <h3>MANAGE TESTS</h3>
+              <p>View, edit, and organize your existing tests with comprehensive management tools.</p>
+              <button onClick={() => navigateToSection('/manage-tests')}>MANAGE</button>
             </div>
-            <h3>AI TEXT GENERATOR</h3>
-            <p>Generate high-quality, contextually accurate content using AI-powered writing assistance.</p>
-            <button onClick={() => navigateToSection('/ai-generator')}>GENERATE</button>
-          </div>
-          
-          <div className="action-card events">
-            <div className="action-icon">
-              <RiMegaphoneLine />
+            
+            <div className="action-card events">
+              <div className="action-icon">
+                <RiMegaphoneLine />
+              </div>
+              <h3>EVENTS & ANNOUNCEMENT</h3>
+              <p>Publish important academic events and updates in real-time to keep students informed.</p>
+              <button onClick={() => navigateToSection('/announcements')}>MANAGE</button>
             </div>
-            <h3>EVENTS & ANNOUNCEMENT</h3>
-            <p>Publish important academic events and updates in real-time to keep students informed.</p>
-            <button onClick={() => navigateToSection('/announcements')}>MANAGE</button>
-          </div>
-          
-          <div className="action-card tips">
-            <div className="action-icon">
-              <RiLightbulbLine />
+            
+            <div className="action-card tips">
+              <div className="action-icon">
+                <RiBarChartLine />
+              </div>
+              <h3>REPORTS</h3>
+              <p style={{ color: 'white' }}>View detailed analytics and performance reports for students and test results.</p>
+              <button onClick={() => navigateToSection('/reports')}>VIEW REPORTS</button>
             </div>
-            <h3>TIPS & SUGGESTIONS</h3>
-            <p>Share curated writing tips and strategies to help students enhance their skills.</p>
-            <button onClick={() => navigateToSection('/tips')}>SHARE</button>
           </div>
-        </div>
 
-        {/* Recent Submissions Section */}
-        <div className="recent-submissions">
-          <div className="submissions-header">
-            <h3>Recent Submissions</h3>
-          </div>
-          <div className="submissions-content">
-            <p>No submissions yet</p>
+          {/* Recent Submissions Section */}
+          <div className="recent-submissions" style={{ flex: '1', minWidth: '300px' }}>
+            <div className="submissions-header">
+              <h3>Recent Submissions</h3>
+            </div>
+            <div className="submissions-content">
+              <p>No submissions yet</p>
+            </div>
           </div>
         </div>
 
