@@ -255,11 +255,6 @@ const Module1Lesson4 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -358,36 +353,6 @@ const Module1Lesson4 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Write effective internal memos</li>
-                  <li>Create clear notices and announcements</li>
-                  <li>Adapt tone for different communication channels</li>
-                  <li>Ensure clarity in team communications</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Internal Communication Tips</h3>
-                <ul>
-                  <li>Use appropriate formality for each medium</li>
-                  <li>Be clear and direct with instructions</li>
-                  <li>Include all necessary details</li>
-                  <li>Consider your audience's needs</li>
-                  <li>Use consistent formatting</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '100%' }}></div>
-                </div>
-                <p>Module 1 Complete! 🎉</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

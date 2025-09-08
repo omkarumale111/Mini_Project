@@ -29,6 +29,68 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+// Initialize database and create tables
+async function initializeDatabase() {
+  try {
+    const connection = await pool.getConnection();
+    console.log('Database connected successfully');
+    
+    // Create database if it doesn't exist
+    await connection.query('CREATE DATABASE IF NOT EXISTS mini_project_db');
+    await connection.query('USE mini_project_db');
+    
+    // Create users table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Create lesson_completions table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS lesson_completions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id INT NOT NULL,
+        lesson_id VARCHAR(10) NOT NULL,
+        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (student_id) REFERENCES users(id),
+        UNIQUE KEY unique_student_lesson (student_id, lesson_id)
+      )
+    `);
+    
+    // Create lesson_inputs table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS lesson_inputs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id INT NOT NULL,
+        lesson_id VARCHAR(10) NOT NULL,
+        input_field VARCHAR(100) NOT NULL,
+        input_value TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (student_id) REFERENCES users(id),
+        UNIQUE KEY unique_student_lesson_field (student_id, lesson_id, input_field)
+      )
+    `);
+    
+    console.log('Database tables initialized successfully');
+    
+    // Check existing lesson completions
+    const [completions] = await connection.query('SELECT * FROM lesson_completions');
+    console.log('Existing lesson completions:', completions);
+    
+    connection.release();
+  } catch (error) {
+    console.error('Database initialization failed:', error);
+  }
+}
+
+// Initialize database on startup
+initializeDatabase();
+
 // Test database connection
 pool.getConnection()
   .then(async connection => {
@@ -42,9 +104,21 @@ pool.getConnection()
       await connection.query('USE mini_project_db');
       console.log('Successfully connected to mini_project_db');
       
-      // Test query to check table structure
-      const [rows] = await connection.query('DESCRIBE users');
-      console.log('Users table structure:', rows);
+      // Check if lesson_completions table exists
+      const [tables] = await connection.query('SHOW TABLES');
+      console.log('Available tables:', tables);
+      
+      // Check lesson_completions table structure
+      try {
+        const [completionsTable] = await connection.query('DESCRIBE lesson_completions');
+        console.log('lesson_completions table structure:', completionsTable);
+        
+        // Check existing lesson completions
+        const [completions] = await connection.query('SELECT * FROM lesson_completions');
+        console.log('Existing lesson completions:', completions);
+      } catch (error) {
+        console.log('lesson_completions table does not exist, will create it');
+      }
       
       // Test query to check existing users
       const [users] = await connection.query('SELECT * FROM users');
@@ -57,39 +131,6 @@ pool.getConnection()
   .catch(err => {
     console.error('Error connecting to the database:', err);
   });
-
-// Create users table if not exists
-async function initializeDatabase() {
-  try {
-    const connection = await pool.getConnection();
-    
-    // First create the users table if it doesn't exist
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        role ENUM('admin', 'student') DEFAULT 'student' NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS WEQ1 (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    connection.release();
-    console.log('Database initialized successfully');
-  } catch (error) {
-    console.error('Error initializing database:', error);
-  }
-}
-
-initializeDatabase();
 
 // Routes
 app.post('/api/signup', async (req, res) => {
@@ -180,30 +221,6 @@ app.post('/api/problem-statements', async (req, res) => {
   }
 });
 
-// Add WEQ1 submission endpoint
-app.post('/api/weq1', async (req, res) => {
-  try {
-    const { userId, content } = req.body;
-    
-    if (!userId || !content) {
-      return res.status(400).json({ message: 'User ID and content are required' });
-    }
-
-    // Insert into WEQ1 table
-    const [result] = await pool.query(
-      'INSERT INTO WEQ1 (user_id, content) VALUES (?, ?)',
-      [userId, content]
-    );
-
-    res.status(201).json({ 
-      message: 'WEQ1 submission saved successfully',
-      id: result.insertId
-    });
-  } catch (error) {
-    console.error('Error saving WEQ1 submission:', error);
-    res.status(500).json({ message: 'Error saving submission' });
-  }
-});
 
 // Lesson inputs endpoints
 app.post('/api/lesson-inputs', async (req, res) => {
@@ -255,6 +272,8 @@ app.post('/api/lesson-complete', async (req, res) => {
   try {
     const { student_id, lesson_id } = req.body;
     
+    console.log('Received lesson completion request:', { student_id, lesson_id });
+    
     if (!student_id || !lesson_id) {
       return res.status(400).json({ message: 'student_id and lesson_id are required' });
     }
@@ -263,6 +282,8 @@ app.post('/api/lesson-complete', async (req, res) => {
       'INSERT INTO lesson_completions (student_id, lesson_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE completed_at = CURRENT_TIMESTAMP',
       [student_id, lesson_id]
     );
+
+    console.log('Lesson completion result:', result);
 
     res.json({
       message: 'Lesson marked as completed',
@@ -278,12 +299,15 @@ app.get('/api/lesson-progress/:student_id', async (req, res) => {
   try {
     const { student_id } = req.params;
     
+    console.log('Fetching lesson progress for student:', student_id);
+    
     const [rows] = await pool.execute(
       'SELECT lesson_id FROM lesson_completions WHERE student_id = ?',
       [student_id]
     );
 
     const completedLessons = rows.map(row => row.lesson_id);
+    console.log('Completed lessons:', completedLessons);
     
     // Define lesson progression logic
     const lessonOrder = [
@@ -298,6 +322,9 @@ app.get('/api/lesson-progress/:student_id', async (req, res) => {
       const isCompleted = completedLessons.includes(lessonId);
       const isUnlocked = index === 0 || completedLessons.includes(lessonOrder[index - 1]);
       
+      // Debug logging for all lessons
+      console.log(`${lessonId} Debug - isCompleted:`, isCompleted, `(in completedLessons: ${completedLessons.includes(lessonId)})`);
+      
       progress[lessonId] = {
         completed: isCompleted,
         unlocked: isUnlocked,
@@ -305,6 +332,7 @@ app.get('/api/lesson-progress/:student_id', async (req, res) => {
       };
     });
 
+    console.log('Generated progress:', progress);
     res.json(progress);
   } catch (error) {
     console.error('Error retrieving lesson progress:', error);

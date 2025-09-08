@@ -253,11 +253,6 @@ const Module2Lesson2 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -323,36 +318,6 @@ const Module2Lesson2 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Create clear step-by-step instructions</li>
-                  <li>Structure user guides logically</li>
-                  <li>Use simple, actionable language</li>
-                  <li>Anticipate user needs and questions</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>User Guide Tips</h3>
-                <ul>
-                  <li>Use numbered steps for clarity</li>
-                  <li>Include screenshots or visual cues</li>
-                  <li>Test instructions with real users</li>
-                  <li>Provide troubleshooting tips</li>
-                  <li>Keep language simple and direct</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '50%' }}></div>
-                </div>
-                <p>Lesson 2 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

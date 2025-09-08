@@ -28,11 +28,3 @@ CREATE TABLE IF NOT EXISTS lesson_completions (
     FOREIGN KEY (student_id) REFERENCES users(id),
     UNIQUE KEY unique_student_lesson (student_id, lesson_id)
 );
-
-CREATE TABLE IF NOT EXISTS WEQ1 (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);

@@ -10,7 +10,7 @@ import {
   RiMenuFoldLine,
   RiMenuUnfoldLine
 } from "react-icons/ri";
-import { FaLock } from 'react-icons/fa';
+import { FaLock, FaCheck } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 import './Modules.css';
 
@@ -19,6 +19,7 @@ const Modules = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [lessonProgress, setLessonProgress] = useState({});
+  const [progressLoaded, setProgressLoaded] = useState(false);
   const [selectedModule, setSelectedModule] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -76,10 +77,15 @@ const Modules = () => {
           const response = await fetch(`http://localhost:5001/api/lesson-progress/${user.id}`);
           if (response.ok) {
             const progress = await response.json();
+            console.log('Frontend received lesson progress:', progress);
+            console.log('M1L1 status:', progress['m1l1']);
+            console.log('M1L2 status:', progress['m1l2']);
             setLessonProgress(progress);
+            setProgressLoaded(true);
           }
         } catch (error) {
           console.error('Error loading lesson progress:', error);
+          setProgressLoaded(true); // Set to true even on error to prevent infinite loading
         }
       }
     };
@@ -87,19 +93,27 @@ const Modules = () => {
     loadLessonProgress();
   }, [user]);
 
-  // Handle window resize
+  // Add effect to reload progress when returning from a lesson
   useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      if (!mobile) {
-        setSidebarVisible(false);
+    const reloadProgress = async () => {
+      if (user && user.id && location.pathname === '/modules') {
+        try {
+          const response = await fetch(`http://localhost:5001/api/lesson-progress/${user.id}`);
+          if (response.ok) {
+            const progress = await response.json();
+            console.log('Reloaded lesson progress on modules page:', progress);
+            setLessonProgress(progress);
+            setProgressLoaded(true);
+          }
+        } catch (error) {
+          console.error('Error reloading lesson progress:', error);
+        }
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    reloadProgress();
+  }, [location.pathname, user]);
+
 
   const calculateModuleProgress = (moduleId) => {
     const lessonIds = [
@@ -134,6 +148,8 @@ const Modules = () => {
   };
 
   const getModulesData = () => {
+    console.log('Current lessonProgress state:', lessonProgress);
+    console.log('M1L2 lesson data:', lessonProgress['m1l2']);
     return [
       {
         id: 1,
@@ -151,19 +167,22 @@ const Modules = () => {
           {
             id: 2,
             title: "Email Communication",
-            status: lessonProgress['m1l2']?.status || 'locked',
+            status: lessonProgress['m1l2']?.status || 
+              (lessonProgress['m1l1']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m1l2']?.completed ? 'Completed' : null
           },
           {
             id: 3,
             title: "Formal Letters",
-            status: lessonProgress['m1l3']?.status || 'locked',
+            status: lessonProgress['m1l3']?.status || 
+              (lessonProgress['m1l2']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m1l3']?.completed ? 'Completed' : null
           },
           {
             id: 4,
             title: "Business Reports",
-            status: lessonProgress['m1l4']?.status || 'locked',
+            status: lessonProgress['m1l4']?.status || 
+              (lessonProgress['m1l3']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m1l4']?.completed ? 'Completed' : null
           }
         ]
@@ -178,25 +197,29 @@ const Modules = () => {
           {
             id: 1,
             title: "Technical Documentation",
-            status: lessonProgress['m2l1']?.status || 'locked',
+            status: lessonProgress['m2l1']?.status || 
+              (lessonProgress['m1l4']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m2l1']?.completed ? 'Completed' : null
           },
           {
             id: 2,
             title: "User Manuals",
-            status: lessonProgress['m2l2']?.status || 'locked',
+            status: lessonProgress['m2l2']?.status || 
+              (lessonProgress['m2l1']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m2l2']?.completed ? 'Completed' : null
           },
           {
             id: 3,
             title: "Process Documentation",
-            status: lessonProgress['m2l3']?.status || 'locked',
+            status: lessonProgress['m2l3']?.status || 
+              (lessonProgress['m2l2']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m2l3']?.completed ? 'Completed' : null
           },
           {
             id: 4,
             title: "API Documentation",
-            status: lessonProgress['m2l4']?.status || 'locked',
+            status: lessonProgress['m2l4']?.status || 
+              (lessonProgress['m2l3']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m2l4']?.completed ? 'Completed' : null
           }
         ]
@@ -211,25 +234,29 @@ const Modules = () => {
           {
             id: 1,
             title: "Persuasive Writing",
-            status: lessonProgress['m3l1']?.status || 'locked',
+            status: lessonProgress['m3l1']?.status || 
+              (lessonProgress['m2l4']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m3l1']?.completed ? 'Completed' : null
           },
           {
             id: 2,
             title: "Research Writing",
-            status: lessonProgress['m3l2']?.status || 'locked',
+            status: lessonProgress['m3l2']?.status || 
+              (lessonProgress['m3l1']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m3l2']?.completed ? 'Completed' : null
           },
           {
             id: 3,
             title: "Creative Writing",
-            status: lessonProgress['m3l3']?.status || 'locked',
+            status: lessonProgress['m3l3']?.status || 
+              (lessonProgress['m3l2']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m3l3']?.completed ? 'Completed' : null
           },
           {
             id: 4,
             title: "Editing and Proofreading",
-            status: lessonProgress['m3l4']?.status || 'locked',
+            status: lessonProgress['m3l4']?.status || 
+              (lessonProgress['m3l3']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m3l4']?.completed ? 'Completed' : null
           }
         ]
@@ -244,25 +271,29 @@ const Modules = () => {
           {
             id: 1,
             title: "Executive Communication",
-            status: lessonProgress['m4l1']?.status || 'locked',
+            status: lessonProgress['m4l1']?.status || 
+              (lessonProgress['m3l4']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m4l1']?.completed ? 'Completed' : null
           },
           {
             id: 2,
             title: "Presentation Writing",
-            status: lessonProgress['m4l2']?.status || 'locked',
+            status: lessonProgress['m4l2']?.status || 
+              (lessonProgress['m4l1']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m4l2']?.completed ? 'Completed' : null
           },
           {
             id: 3,
             title: "Grant Writing",
-            status: lessonProgress['m4l3']?.status || 'locked',
+            status: lessonProgress['m4l3']?.status || 
+              (lessonProgress['m4l2']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m4l3']?.completed ? 'Completed' : null
           },
           {
             id: 4,
             title: "Portfolio Development",
-            status: lessonProgress['m4l4']?.status || 'locked',
+            status: lessonProgress['m4l4']?.status || 
+              (lessonProgress['m4l3']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m4l4']?.completed ? 'Completed' : null
           }
         ]
@@ -406,11 +437,6 @@ const Modules = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         <div className="modules-content">
@@ -452,12 +478,15 @@ const Modules = () => {
             </div>
             
             <div className="lessons-list">
-              {selectedModule?.lessons.map((lesson) => (
-                <div 
-                  key={lesson.id} 
-                  className={`lesson-item ${lesson.status} ${lesson.status !== 'locked' ? 'clickable' : ''}`}
-                  onClick={() => handleLessonClick(lesson)}
-                >
+              {!progressLoaded ? (
+                <div>Loading lessons...</div>
+              ) : (
+                selectedModule?.lessons.map((lesson) => (
+                  <div 
+                    key={lesson.id} 
+                    className={`lesson-item ${lesson.status} ${lesson.status !== 'locked' ? 'clickable' : ''}`}
+                    onClick={() => handleLessonClick(lesson)}
+                  >
                   <div className="lesson-number">
                     {lesson.status === 'completed' ? (
                       <FaCheck className="checkmark" />
@@ -480,22 +509,11 @@ const Modules = () => {
                     )}
                   </div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
 
             <div className="module-footer">
-              <div className="progress-section">
-                <div className="progress-info">
-                  <span className="progress-label">Progress: {selectedModule?.progress}%</span>
-                  <span className="completion-date">Completion date: {selectedModule?.completionDate}</span>
-                </div>
-                <div className="progress-bar-large">
-                  <div 
-                    className="progress-fill-large" 
-                    style={{ width: `${selectedModule?.progress}%` }}
-                  ></div>
-                </div>
-              </div>
               <button 
                 className="continue-button"
                 onClick={handleContinueModule}

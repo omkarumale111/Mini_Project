@@ -255,11 +255,6 @@ const Module3Lesson3 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -354,36 +349,6 @@ const Module3Lesson3 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Write compelling product descriptions</li>
-                  <li>Use persuasive language techniques</li>
-                  <li>Focus on benefits over features</li>
-                  <li>Create emotional connections</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Marketing Copy Tips</h3>
-                <ul>
-                  <li>Lead with benefits, not features</li>
-                  <li>Use power words and action verbs</li>
-                  <li>Create urgency or exclusivity</li>
-                  <li>Appeal to emotions</li>
-                  <li>Keep it concise and punchy</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '75%' }}></div>
-                </div>
-                <p>Lesson 3 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

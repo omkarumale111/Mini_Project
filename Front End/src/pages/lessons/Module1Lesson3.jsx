@@ -253,11 +253,6 @@ const Module1Lesson3 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -323,37 +318,6 @@ const Module1Lesson3 = () => {
                     Submit Business Report
                   </button>
                 </div>
-              </div>
-            </div>
-
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Structure professional business reports</li>
-                  <li>Analyze and interpret data effectively</li>
-                  <li>Identify causes behind performance trends</li>
-                  <li>Provide actionable recommendations</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Report Writing Tips</h3>
-                <ul>
-                  <li>Start with an executive summary</li>
-                  <li>Use clear headings and sections</li>
-                  <li>Support findings with data</li>
-                  <li>Be objective in your analysis</li>
-                  <li>Make recommendations specific and actionable</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '75%' }}></div>
-                </div>
-                <p>Lesson 3 of 4 completed</p>
               </div>
             </div>
           </div>

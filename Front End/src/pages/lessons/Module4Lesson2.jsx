@@ -211,11 +211,6 @@ const Module4Lesson2 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -281,36 +276,6 @@ const Module4Lesson2 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Structure academic research papers</li>
-                  <li>Develop logical flow of arguments</li>
-                  <li>Organize complex information effectively</li>
-                  <li>Plan comprehensive research studies</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Research Paper Structure</h3>
-                <ul>
-                  <li>Start with a clear research question</li>
-                  <li>Build on existing literature</li>
-                  <li>Use appropriate methodology</li>
-                  <li>Present findings objectively</li>
-                  <li>Draw meaningful conclusions</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '50%' }}></div>
-                </div>
-                <p>Lesson 2 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

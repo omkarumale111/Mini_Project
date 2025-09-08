@@ -253,11 +253,6 @@ const Module2Lesson3 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -322,36 +317,6 @@ const Module2Lesson3 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Write clear technical specifications</li>
-                  <li>Define user stories and acceptance criteria</li>
-                  <li>Structure requirements documents</li>
-                  <li>Prioritize features effectively</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Requirements Writing Tips</h3>
-                <ul>
-                  <li>Be specific and measurable</li>
-                  <li>Use clear, unambiguous language</li>
-                  <li>Include user perspectives</li>
-                  <li>Define acceptance criteria</li>
-                  <li>Consider technical constraints</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '75%' }}></div>
-                </div>
-                <p>Lesson 3 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

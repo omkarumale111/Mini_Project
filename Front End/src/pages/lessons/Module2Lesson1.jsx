@@ -253,11 +253,6 @@ const Module2Lesson1 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -320,36 +315,6 @@ const Module2Lesson1 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Simplify complex technical concepts</li>
-                  <li>Write for non-technical audiences</li>
-                  <li>Use analogies and simple language</li>
-                  <li>Make technical information accessible</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Simplification Tips</h3>
-                <ul>
-                  <li>Avoid jargon and technical terms</li>
-                  <li>Use everyday analogies</li>
-                  <li>Break down complex processes</li>
-                  <li>Define any necessary technical terms</li>
-                  <li>Test understanding with examples</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '25%' }}></div>
-                </div>
-                <p>Lesson 1 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

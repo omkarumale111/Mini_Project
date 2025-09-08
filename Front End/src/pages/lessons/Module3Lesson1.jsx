@@ -253,11 +253,6 @@ const Module3Lesson1 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -331,37 +326,6 @@ const Module3Lesson1 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Identify common persuasion techniques</li>
-                  <li>Analyze advertising strategies</li>
-                  <li>Understand psychological triggers</li>
-                  <li>Recognize persuasive language patterns</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Persuasion Techniques</h3>
-                <ul>
-                  <li><strong>Authority:</strong> Expert endorsements</li>
-                  <li><strong>Scarcity:</strong> Limited availability</li>
-                  <li><strong>Social Proof:</strong> Others are doing it</li>
-                  <li><strong>Reciprocity:</strong> Give to receive</li>
-                  <li><strong>Consistency:</strong> Align with beliefs</li>
-                  <li><strong>Liking:</strong> Similarity and attractiveness</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '25%' }}></div>
-                </div>
-                <p>Lesson 1 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

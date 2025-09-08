@@ -212,11 +212,6 @@ const Module4Lesson3 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -303,36 +298,6 @@ const Module4Lesson3 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Master APA citation format</li>
-                  <li>Master MLA citation format</li>
-                  <li>Understand style differences</li>
-                  <li>Apply proper formatting rules</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Citation Style Differences</h3>
-                <ul>
-                  <li><strong>APA:</strong> Psychology, sciences</li>
-                  <li><strong>MLA:</strong> Literature, humanities</li>
-                  <li><strong>Chicago:</strong> History, arts</li>
-                  <li>Always check style guides</li>
-                  <li>Use citation management tools</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '75%' }}></div>
-                </div>
-                <p>Lesson 3 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

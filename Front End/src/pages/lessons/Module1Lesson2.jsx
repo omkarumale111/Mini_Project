@@ -256,11 +256,6 @@ const Module1Lesson2 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -377,36 +372,6 @@ const Module1Lesson2 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Master different email types and purposes</li>
-                  <li>Use appropriate tone for each situation</li>
-                  <li>Structure emails professionally</li>
-                  <li>Write effective subject lines</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Email Writing Tips</h3>
-                <ul>
-                  <li>Start with a clear, specific subject line</li>
-                  <li>Use proper salutations and closings</li>
-                  <li>Keep paragraphs short and focused</li>
-                  <li>Be concise but complete</li>
-                  <li>Proofread before sending</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '50%' }}></div>
-                </div>
-                <p>Lesson 2 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

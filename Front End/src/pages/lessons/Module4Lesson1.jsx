@@ -211,11 +211,6 @@ const Module4Lesson1 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -290,36 +285,6 @@ const Module4Lesson1 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Evaluate source credibility effectively</li>
-                  <li>Identify reliable vs unreliable sources</li>
-                  <li>Apply credibility criteria systematically</li>
-                  <li>Develop critical thinking skills</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Credibility Criteria</h3>
-                <ul>
-                  <li><strong>Authority:</strong> Author expertise</li>
-                  <li><strong>Accuracy:</strong> Factual correctness</li>
-                  <li><strong>Objectivity:</strong> Minimal bias</li>
-                  <li><strong>Currency:</strong> Up-to-date information</li>
-                  <li><strong>Coverage:</strong> Comprehensive scope</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '25%' }}></div>
-                </div>
-                <p>Lesson 1 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -34,7 +34,9 @@ const Module1Lesson1 = () => {
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
-      setUser(JSON.parse(userData));
+      const parsedUser = JSON.parse(userData);
+      console.log('User data in M1L1:', parsedUser);
+      setUser(parsedUser);
     }
   }, []);
 
@@ -133,7 +135,8 @@ const Module1Lesson1 = () => {
     try {
       // Mark lesson as completed
       if (user && user.id) {
-        await fetch('http://localhost:5001/api/lesson-complete', {
+        console.log('Attempting to mark lesson complete for user:', user.id);
+        const response = await fetch('http://localhost:5001/api/lesson-complete', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -143,6 +146,13 @@ const Module1Lesson1 = () => {
             lesson_id: 'm1l1'
           })
         });
+        
+        const result = await response.json();
+        console.log('Lesson completion response:', result);
+        
+        if (!response.ok) {
+          throw new Error(`Server error: ${result.message}`);
+        }
       }
       
       console.log('Submitted answers:', answers);
@@ -152,7 +162,7 @@ const Module1Lesson1 = () => {
       navigate('/modules');
     } catch (error) {
       console.error('Error completing lesson:', error);
-      alert('Answers submitted, but there was an error updating progress.');
+      alert('Answers submitted, but there was an error updating progress: ' + error.message);
     }
   };
 
@@ -255,11 +265,6 @@ const Module1Lesson1 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -347,35 +352,6 @@ const Module1Lesson1 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Understand formal vs informal communication</li>
-                  <li>Practice tone adaptation for different audiences</li>
-                  <li>Identify elements of clear communication</li>
-                  <li>Analyze communication effectiveness</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Tips for Success</h3>
-                <ul>
-                  <li>Consider your audience when choosing tone</li>
-                  <li>Be clear and concise in your messaging</li>
-                  <li>Use appropriate salutations and closings</li>
-                  <li>Proofread for clarity and professionalism</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '25%' }}></div>
-                </div>
-                <p>Lesson 1 of 4 completed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

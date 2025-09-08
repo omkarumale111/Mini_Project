@@ -253,11 +253,6 @@ const Module3Lesson4 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -337,36 +332,6 @@ const Module3Lesson4 = () => {
               </div>
             </div>
 
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Distinguish ethical from manipulative persuasion</li>
-                  <li>Respect audience autonomy and choice</li>
-                  <li>Build trust through honest communication</li>
-                  <li>Create value-focused messaging</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Ethical Persuasion Principles</h3>
-                <ul>
-                  <li>Be honest and transparent</li>
-                  <li>Respect customer autonomy</li>
-                  <li>Focus on genuine benefits</li>
-                  <li>Avoid fear-based tactics</li>
-                  <li>Build long-term relationships</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '100%' }}></div>
-                </div>
-                <p>Module 3 Complete! 🎉</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

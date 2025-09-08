@@ -211,11 +211,6 @@ const Module4Lesson4 = () => {
             <h1>Student Dashboard</h1>
           </div>
           
-          <div className="top-bar-nav">
-            <a href="/dashboard" className="nav-link">HOME</a>
-            <a href="/dashboard/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-          </div>
         </div>
 
         {/* Lesson Content */}
@@ -292,37 +287,6 @@ const Module4Lesson4 = () => {
                     Submit Abstract
                   </button>
                 </div>
-              </div>
-            </div>
-
-            <div className="lesson-sidebar">
-              <div className="learning-objectives">
-                <h3>Learning Objectives</h3>
-                <ul>
-                  <li>Write concise, informative abstracts</li>
-                  <li>Summarize complex research effectively</li>
-                  <li>Include all essential components</li>
-                  <li>Meet specific word count requirements</li>
-                </ul>
-              </div>
-
-              <div className="tips-section">
-                <h3>Abstract Writing Tips</h3>
-                <ul>
-                  <li>Start with the research problem</li>
-                  <li>Describe methods briefly</li>
-                  <li>Highlight key findings</li>
-                  <li>End with implications</li>
-                  <li>Use clear, concise language</li>
-                </ul>
-              </div>
-
-              <div className="progress-section">
-                <h3>Module Progress</h3>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '100%' }}></div>
-                </div>
-                <p>Module 4 Complete! 🎉</p>
               </div>
             </div>
           </div>
