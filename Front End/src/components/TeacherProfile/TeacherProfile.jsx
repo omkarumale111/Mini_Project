@@ -13,7 +13,8 @@ import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiFileEditLine,
-  RiSaveLine
+  RiSaveLine,
+  RiCalendarEventLine
 } from "react-icons/ri";
 import logo from '../../assets/Logo.png';
 
@@ -126,6 +127,13 @@ const TeacherProfile = () => {
         className={`teacher-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
       >
         <div className="sidebar-header">
+          <button 
+            className="sidebar-menu-toggle" 
+            onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
+          >
+            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
+          </button>
           <div className="logo-section">
             <img src={logo} alt="WriteEdge Logo" className="sidebar-logo" />
             {!sidebarCollapsed && <span className="logo-text">WriteEdge</span>}
@@ -165,6 +173,13 @@ const TeacherProfile = () => {
             </li>
             <li 
               className="nav-item"
+              onClick={() => navigateToSection('/manage-events')}
+            >
+              <RiCalendarEventLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Manage Events</span>}
+            </li>
+            <li 
+              className="nav-item"
               onClick={() => navigateToSection('/reports')}
             >
               <RiBarChartLine className="nav-icon" />
@@ -177,18 +192,18 @@ const TeacherProfile = () => {
         <div className="bottom-menu">
           <ul>
             <li 
-              className="nav-item" 
-              onClick={handleLogout}
-            >
-              <RiLogoutCircleRLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Log Out</span>}
-            </li>
-            <li 
               className="nav-item"
               onClick={() => navigateToSection('/teacher-about')}
             >
               <RiQuestionLine className="nav-icon" />
               {!sidebarCollapsed && <span>About</span>}
+            </li>
+            <li 
+              className="nav-item" 
+              onClick={handleLogout}
+            >
+              <RiLogoutCircleRLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Log Out</span>}
             </li>
           </ul>
         </div>
@@ -198,14 +213,6 @@ const TeacherProfile = () => {
       <div className="teacher-main-content">
         {/* Top Navigation Bar */}
         <div className="teacher-top-bar">
-          <button 
-            className="menu-toggle" 
-            onClick={toggleSidebar}
-            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
-          >
-            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
-          </button>
-          
           <div className="top-bar-title">
             <h1>Admin Dashboard</h1>
           </div>

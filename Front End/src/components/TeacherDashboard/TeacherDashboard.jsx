@@ -15,7 +15,8 @@ import {
   RiAddLine,
   RiFileEditLine,
   RiMegaphoneLine,
-  RiLightbulbLine
+  RiLightbulbLine,
+  RiCalendarEventLine
 } from "react-icons/ri";
 import logo from '../../assets/Logo.png';
 
@@ -96,6 +97,13 @@ const TeacherDashboard = () => {
         className={`teacher-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
       >
         <div className="sidebar-header">
+          <button 
+            className="sidebar-menu-toggle" 
+            onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
+          >
+            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
+          </button>
           <div className="logo-section">
             <img src={logo} alt="WriteEdge Logo" className="sidebar-logo" />
             {!sidebarCollapsed && <span className="logo-text">WriteEdge</span>}
@@ -135,6 +143,13 @@ const TeacherDashboard = () => {
             </li>
             <li 
               className="nav-item"
+              onClick={() => navigateToSection('/manage-events')}
+            >
+              <RiCalendarEventLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Manage Events</span>}
+            </li>
+            <li 
+              className="nav-item"
               onClick={() => navigateToSection('/reports')}
             >
               <RiBarChartLine className="nav-icon" />
@@ -168,14 +183,6 @@ const TeacherDashboard = () => {
       <div className="teacher-main-content">
         {/* Top Navigation Bar */}
         <div className="teacher-top-bar">
-          <button 
-            className="menu-toggle" 
-            onClick={toggleSidebar}
-            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
-          >
-            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
-          </button>
-          
           <div className="top-bar-title">
             <h1>Admin Dashboard</h1>
           </div>
