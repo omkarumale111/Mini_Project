@@ -8,6 +8,7 @@ import ForgotPassword from "./components/ForgotPasswordScreen/ForgotPassword";
 import LandingPage from './pages/LandingPage'
 import AboutPage from './pages/AboutPage';
 import DashboardAbout from './pages/DashboardAbout';
+import TeacherAbout from './pages/TeacherAbout';
 import Modules from './pages/Modules';
 import StudentProfile from './pages/StudentProfile';
 import TakeTest from './pages/TakeTest';
@@ -59,6 +60,8 @@ function App() {
       <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
       {/* Teacher Profile */}
       <Route path="/teacher-profile" element={<TeacherProfile />} />
+      {/* Teacher About page */}
+      <Route path="/teacher-about" element={<TeacherAbout />} />
       {/* Sign up page for new users */}
       <Route path="/signup" element={<SignupScreen/>} />
       {/* Password recovery page */}

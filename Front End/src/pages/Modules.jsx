@@ -434,7 +434,6 @@ const Modules = () => {
         {/* Top Navigation Bar */}
         <div className="top-bar">
           <div className="top-bar-title">
-            <h1>Student Dashboard</h1>
           </div>
           
         </div>

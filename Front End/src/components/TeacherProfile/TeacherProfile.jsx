@@ -177,13 +177,6 @@ const TeacherProfile = () => {
         <div className="bottom-menu">
           <ul>
             <li 
-              className="nav-item"
-              onClick={() => navigateToSection('/settings')}
-            >
-              <RiSettings4Line className="nav-icon" />
-              {!sidebarCollapsed && <span>Settings</span>}
-            </li>
-            <li 
               className="nav-item" 
               onClick={handleLogout}
             >
@@ -192,10 +185,10 @@ const TeacherProfile = () => {
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToSection('/help')}
+              onClick={() => navigateToSection('/teacher-about')}
             >
               <RiQuestionLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Help</span>}
+              {!sidebarCollapsed && <span>About</span>}
             </li>
           </ul>
         </div>
@@ -218,9 +211,6 @@ const TeacherProfile = () => {
           </div>
           
           <div className="top-bar-nav">
-            <a href="/teacher-dashboard" className="nav-link">HOME</a>
-            <a href="/about" className="nav-link">ABOUT</a>
-            <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
           </div>
         </div>
 
