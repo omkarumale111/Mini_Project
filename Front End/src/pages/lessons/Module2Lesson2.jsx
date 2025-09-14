@@ -26,6 +26,9 @@ const Module2Lesson2 = () => {
   const [answers, setAnswers] = useState({
     userGuide: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -127,6 +130,39 @@ const Module2Lesson2 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    if (!answers.userGuide) {
+      alert('Please write your user guide before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: answers.userGuide }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your user guide. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -152,6 +188,14 @@ const Module2Lesson2 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      userGuide: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -273,51 +317,118 @@ const Module2Lesson2 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  Create a simple step-by-step user guide for <strong>installing and using a mobile payment app</strong> 
-                  (e.g., download, register, add bank account, make first payment).
-                </p>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Problem Statement</h3>
+                    <p>
+                      Create a simple step-by-step user guide for <strong>installing and using a mobile payment app</strong> 
+                      (e.g., download, register, add bank account, make first payment).
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="userGuide">
+                        <h4>Mobile Payment App User Guide</h4>
+                        <p className="instruction">
+                          Write a comprehensive user guide that covers:
+                          <br />• Downloading the app
+                          <br />• Registration process
+                          <br />• Adding a bank account
+                          <br />• Making your first payment
+                          <br />
+                          Use clear, numbered steps and simple language.
+                        </p>
+                      </label>
+                      <textarea
+                        id="userGuide"
+                        value={answers.userGuide}
+                        onChange={(e) => handleInputChange('userGuide', e.target.value)}
+                        placeholder="MOBILE PAYMENT APP USER GUIDE&#10;&#10;Getting Started with [App Name]&#10;&#10;STEP 1: DOWNLOADING THE APP&#10;1. Open your phone's app store...&#10;&#10;STEP 2: REGISTRATION&#10;1. Open the app...&#10;&#10;STEP 3: ADDING YOUR BANK ACCOUNT&#10;1. Tap on 'Add Payment Method'...&#10;&#10;STEP 4: MAKING YOUR FIRST PAYMENT&#10;1. Select 'Send Money'..."
+                        rows="12"
+                      />
+                      <div className="character-count">
+                        {answers.userGuide?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.userGuide}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.userGuide}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset Guide
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="userGuide">
-                    <h4>Mobile Payment App User Guide</h4>
-                    <p className="instruction">
-                      Write a comprehensive user guide that covers:
-                      <br />• Downloading the app
-                      <br />• Registration process
-                      <br />• Adding a bank account
-                      <br />• Making your first payment
-                      <br />
-                      Use clear, numbered steps and simple language.
-                    </p>
-                  </label>
-                  <textarea
-                    id="userGuide"
-                    value={answers.userGuide}
-                    onChange={(e) => handleInputChange('userGuide', e.target.value)}
-                    placeholder="MOBILE PAYMENT APP USER GUIDE&#10;&#10;Getting Started with [App Name]&#10;&#10;STEP 1: DOWNLOADING THE APP&#10;1. Open your phone's app store...&#10;&#10;STEP 2: REGISTRATION&#10;1. Open the app...&#10;&#10;STEP 3: ADDING YOUR BANK ACCOUNT&#10;1. Tap on 'Add Payment Method'...&#10;&#10;STEP 4: MAKING YOUR FIRST PAYMENT&#10;1. Select 'Send Money'..."
-                    rows="15"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <div className="placeholder-icon">📱</div>
+                    <h3>AI Feedback</h3>
+                    <p>Write your user guide and click "Get AI Feedback" to receive detailed analysis including clarity assessment, step organization feedback, and user-friendliness suggestions.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.userGuide}
-                  >
-                    <RiSendPlaneLine />
-                    Submit User Guide
-                  </button>
-                </div>
+                {isLoading && (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <h3>Analyzing your user guide...</h3>
+                    <p>Our AI is reviewing your guide for clarity, organization, and user accessibility.</p>
+                  </div>
+                )}
+
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h2>Analysis Results</h2>
+                    
+                    <div className="feedback-section-item">
+                      <h3>📚 Grammar & Spelling</h3>
+                      <div className="feedback-text">
+                        {feedback.spellAndGrammar}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>💡 Content Feedback</h3>
+                      <div className="feedback-text">
+                        {feedback.contentFeedback}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>🎯 Suggestions</h3>
+                      <div className="feedback-text">
+                        {feedback.suggestions}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>

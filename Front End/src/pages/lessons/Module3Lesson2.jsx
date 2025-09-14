@@ -26,6 +26,9 @@ const Module3Lesson2 = () => {
   const [answers, setAnswers] = useState({
     argumentativeEssay: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -127,6 +130,39 @@ const Module3Lesson2 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    if (!answers.argumentativeEssay) {
+      alert('Please write your argumentative essay before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: answers.argumentativeEssay }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your argumentative essay. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -152,6 +188,14 @@ const Module3Lesson2 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      argumentativeEssay: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -273,51 +317,115 @@ const Module3Lesson2 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  Write a short <strong>argumentative essay (250–300 words)</strong> on whether companies should adopt a <strong>4-day workweek</strong>.
-                </p>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Problem Statement</h3>
+                    <p>
+                      Write a short <strong>argumentative essay (250–300 words)</strong> on whether companies should adopt a <strong>4-day workweek</strong>.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="argumentativeEssay">
+                        <h4>4-Day Workweek Argumentative Essay</h4>
+                        <p className="instruction">
+                          Structure your essay with:
+                          <br />• <strong>Introduction:</strong> Hook, background, and clear thesis statement
+                          <br />• <strong>Body Paragraphs:</strong> 2-3 main arguments with evidence and examples
+                          <br />• <strong>Counterargument:</strong> Address opposing viewpoint and refute it
+                          <br />• <strong>Conclusion:</strong> Restate thesis and call to action
+                          <br />
+                          Word count: 250-300 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="argumentativeEssay"
+                        value={answers.argumentativeEssay}
+                        onChange={(e) => handleInputChange('argumentativeEssay', e.target.value)}
+                        placeholder="Should Companies Adopt a 4-Day Workweek?&#10;&#10;[Introduction with hook and thesis statement]&#10;&#10;[Body paragraph 1 - First main argument with evidence]&#10;&#10;[Body paragraph 2 - Second main argument with evidence]&#10;&#10;[Counterargument and refutation]&#10;&#10;[Conclusion with restatement and call to action]"
+                        rows="14"
+                      />
+                      <div className="word-count">
+                        <p>Word count: {answers.argumentativeEssay.split(' ').filter(word => word.length > 0).length} / 250-300 words</p>
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.argumentativeEssay}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.argumentativeEssay}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset Essay
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="argumentativeEssay">
-                    <h4>4-Day Workweek Argumentative Essay</h4>
-                    <p className="instruction">
-                      Structure your essay with:
-                      <br />• <strong>Introduction:</strong> Hook, background, and clear thesis statement
-                      <br />• <strong>Body Paragraphs:</strong> 2-3 main arguments with evidence and examples
-                      <br />• <strong>Counterargument:</strong> Address opposing viewpoint and refute it
-                      <br />• <strong>Conclusion:</strong> Restate thesis and call to action
-                      <br />
-                      Word count: 250-300 words
-                    </p>
-                  </label>
-                  <textarea
-                    id="argumentativeEssay"
-                    value={answers.argumentativeEssay}
-                    onChange={(e) => handleInputChange('argumentativeEssay', e.target.value)}
-                    placeholder="Should Companies Adopt a 4-Day Workweek?&#10;&#10;[Introduction with hook and thesis statement]&#10;&#10;[Body paragraph 1 - First main argument with evidence]&#10;&#10;[Body paragraph 2 - Second main argument with evidence]&#10;&#10;[Counterargument and refutation]&#10;&#10;[Conclusion with restatement and call to action]"
-                    rows="18"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <div className="placeholder-icon">📝</div>
+                    <h3>AI Feedback</h3>
+                    <p>Write your argumentative essay and click "Get AI Feedback" to receive detailed analysis on argument structure, evidence quality, counterargument handling, and persuasive effectiveness.</p>
+                  </div>
+                )}
 
-                <div className="word-count">
-                  <p>Word count: {answers.argumentativeEssay.split(' ').filter(word => word.length > 0).length} / 250-300 words</p>
-                </div>
+                {isLoading && (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <h3>Analyzing your argumentative essay...</h3>
+                    <p>Our AI is reviewing your argument structure, evidence quality, and persuasive techniques.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.argumentativeEssay}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Essay
-                  </button>
-                </div>
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h2>Analysis Results</h2>
+                    
+                    <div className="feedback-section-item">
+                      <h3>📚 Grammar & Spelling</h3>
+                      <div className="feedback-text">
+                        {feedback.spellAndGrammar}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>💡 Content Feedback</h3>
+                      <div className="feedback-text">
+                        {feedback.contentFeedback}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>🎯 Suggestions</h3>
+                      <div className="feedback-text">
+                        {feedback.suggestions}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

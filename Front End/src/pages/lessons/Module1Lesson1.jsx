@@ -28,6 +28,9 @@ const Module1Lesson1 = () => {
     informalMessage: '',
     analysis: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -131,6 +134,43 @@ const Module1Lesson1 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    // Check if all questions are answered
+    if (!answers.formalMessage || !answers.informalMessage || !answers.analysis) {
+      alert('Please answer all questions before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      // Combine all answers into one text for analysis
+      const combinedText = `Formal Message: ${answers.formalMessage}\n\nInformal Message: ${answers.informalMessage}\n\nAnalysis: ${answers.analysis}`;
+
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: combinedText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your responses. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -164,6 +204,16 @@ const Module1Lesson1 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress: ' + error.message);
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      formalMessage: '',
+      informalMessage: '',
+      analysis: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -285,73 +335,146 @@ const Module1Lesson1 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  You are a project manager. Draft one <strong>formal message</strong> to your client about a project delay 
-                  and one <strong>informal message</strong> to your colleague about being late for lunch. Then, identify 
-                  which of the following two messages is clear and which is unclear, and explain why.
-                </p>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Problem Statement</h3>
+                    <p>
+                      You are a project manager. Draft one <strong>formal message</strong> to your client about a project delay 
+                      and one <strong>informal message</strong> to your colleague about being late for lunch. Then, identify 
+                      which of the following two messages is clear and which is unclear, and explain why.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="formalMessage">
+                        <h4>1. Formal Message to Client (Project Delay)</h4>
+                      </label>
+                      <textarea
+                        id="formalMessage"
+                        value={answers.formalMessage}
+                        onChange={(e) => handleInputChange('formalMessage', e.target.value)}
+                        placeholder="Write your formal message here..."
+                        rows="6"
+                      />
+                      <div className="character-count">
+                        {answers.formalMessage?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="informalMessage">
+                        <h4>2. Informal Message to Colleague (Late for Lunch)</h4>
+                      </label>
+                      <textarea
+                        id="informalMessage"
+                        value={answers.informalMessage}
+                        onChange={(e) => handleInputChange('informalMessage', e.target.value)}
+                        placeholder="Write your informal message here..."
+                        rows="4"
+                      />
+                      <div className="character-count">
+                        {answers.informalMessage?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="analysis">
+                        <h4>3. Analysis: Clear vs Unclear Communication</h4>
+                        <p className="instruction">
+                          Compare your two messages above. Identify which elements make communication clear or unclear, 
+                          and explain the differences in tone, structure, and formality.
+                        </p>
+                      </label>
+                      <textarea
+                        id="analysis"
+                        value={answers.analysis}
+                        onChange={(e) => handleInputChange('analysis', e.target.value)}
+                        placeholder="Analyze the differences between your formal and informal messages..."
+                        rows="6"
+                      />
+                      <div className="character-count">
+                        {answers.analysis?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.formalMessage || !answers.informalMessage || !answers.analysis}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.formalMessage || !answers.informalMessage || !answers.analysis}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset All
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="formalMessage">
-                    <h4>1. Formal Message to Client (Project Delay)</h4>
-                  </label>
-                  <textarea
-                    id="formalMessage"
-                    value={answers.formalMessage}
-                    onChange={(e) => handleInputChange('formalMessage', e.target.value)}
-                    placeholder="Write your formal message here..."
-                    rows="6"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <div className="placeholder-icon">📝</div>
+                    <h3>AI Feedback</h3>
+                    <p>Complete all questions and click "Get AI Feedback" to receive detailed analysis of your writing including grammar suggestions, content feedback, and improvement tips.</p>
+                  </div>
+                )}
 
-                <div className="exercise-item">
-                  <label htmlFor="informalMessage">
-                    <h4>2. Informal Message to Colleague (Late for Lunch)</h4>
-                  </label>
-                  <textarea
-                    id="informalMessage"
-                    value={answers.informalMessage}
-                    onChange={(e) => handleInputChange('informalMessage', e.target.value)}
-                    placeholder="Write your informal message here..."
-                    rows="4"
-                  />
-                </div>
+                {isLoading && (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <h3>Analyzing your responses...</h3>
+                    <p>Our AI is reviewing your writing for grammar, clarity, and overall quality.</p>
+                  </div>
+                )}
 
-                <div className="exercise-item">
-                  <label htmlFor="analysis">
-                    <h4>3. Analysis: Clear vs Unclear Communication</h4>
-                    <p className="instruction">
-                      Compare your two messages above. Identify which elements make communication clear or unclear, 
-                      and explain the differences in tone, structure, and formality.
-                    </p>
-                  </label>
-                  <textarea
-                    id="analysis"
-                    value={answers.analysis}
-                    onChange={(e) => handleInputChange('analysis', e.target.value)}
-                    placeholder="Analyze the differences between your formal and informal messages..."
-                    rows="6"
-                  />
-                </div>
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h2>Analysis Results</h2>
+                    
+                    <div className="feedback-section-item">
+                      <h3>📚 Grammar & Spelling</h3>
+                      <div className="feedback-text">
+                        {feedback.spellAndGrammar}
+                      </div>
+                    </div>
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.formalMessage || !answers.informalMessage || !answers.analysis}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Answers
-                  </button>
-                </div>
+                    <div className="feedback-section-item">
+                      <h3>💡 Content Feedback</h3>
+                      <div className="feedback-text">
+                        {feedback.contentFeedback}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>🎯 Suggestions</h3>
+                      <div className="feedback-text">
+                        {feedback.suggestions}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>

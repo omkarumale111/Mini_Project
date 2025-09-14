@@ -26,6 +26,9 @@ const Module2Lesson1 = () => {
   const [answers, setAnswers] = useState({
     rewrittenText: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -127,6 +130,40 @@ const Module2Lesson1 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    // Check if text is rewritten
+    if (!answers.rewrittenText) {
+      alert('Please rewrite the technical text before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: answers.rewrittenText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your rewritten text. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -152,6 +189,14 @@ const Module2Lesson1 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      rewrittenText: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -273,48 +318,115 @@ const Module2Lesson1 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  The following technical text is given: <strong>"The CPU executes instructions using a fetch-decode-execute cycle."</strong>
-                </p>
-                <p>
-                  Rewrite this for a <strong>beginner who has no technical background</strong>.
-                </p>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Problem Statement</h3>
+                    <p>
+                      The following technical text is given: <strong>"The CPU executes instructions using a fetch-decode-execute cycle."</strong>
+                    </p>
+                    <p>
+                      Rewrite this for a <strong>beginner who has no technical background</strong>.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="rewrittenText">
+                        <h4>Rewrite for Beginners</h4>
+                        <p className="instruction">
+                          Transform the technical statement into simple, everyday language that someone with no computer 
+                          knowledge can understand. Use analogies, simple words, and clear explanations.
+                        </p>
+                      </label>
+                      <textarea
+                        id="rewrittenText"
+                        value={answers.rewrittenText}
+                        onChange={(e) => handleInputChange('rewrittenText', e.target.value)}
+                        placeholder="Rewrite the technical statement in simple, beginner-friendly language..."
+                        rows="10"
+                      />
+                      <div className="character-count">
+                        {answers.rewrittenText?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.rewrittenText}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.rewrittenText}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset Text
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="rewrittenText">
-                    <h4>Rewrite for Beginners</h4>
-                    <p className="instruction">
-                      Transform the technical statement into simple, everyday language that someone with no computer 
-                      knowledge can understand. Use analogies, simple words, and clear explanations.
-                    </p>
-                  </label>
-                  <textarea
-                    id="rewrittenText"
-                    value={answers.rewrittenText}
-                    onChange={(e) => handleInputChange('rewrittenText', e.target.value)}
-                    placeholder="Rewrite the technical statement in simple, beginner-friendly language..."
-                    rows="8"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <div className="placeholder-icon">🔧</div>
+                    <h3>AI Feedback</h3>
+                    <p>Rewrite the technical text and click "Get AI Feedback" to receive detailed analysis including clarity assessment, simplification suggestions, and beginner-friendliness tips.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.rewrittenText}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Answer
-                  </button>
-                </div>
+                {isLoading && (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <h3>Analyzing your rewrite...</h3>
+                    <p>Our AI is reviewing your technical writing for clarity, simplicity, and accessibility for beginners.</p>
+                  </div>
+                )}
+
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h2>Analysis Results</h2>
+                    
+                    <div className="feedback-section-item">
+                      <h3>📚 Grammar & Spelling</h3>
+                      <div className="feedback-text">
+                        {feedback.spellAndGrammar}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>💡 Content Feedback</h3>
+                      <div className="feedback-text">
+                        {feedback.contentFeedback}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>🎯 Suggestions</h3>
+                      <div className="feedback-text">
+                        {feedback.suggestions}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>

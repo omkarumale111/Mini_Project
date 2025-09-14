@@ -26,6 +26,9 @@ const Module1Lesson3 = () => {
   const [answers, setAnswers] = useState({
     businessReport: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -127,6 +130,40 @@ const Module1Lesson3 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    // Check if business report is written
+    if (!answers.businessReport) {
+      alert('Please write your business report before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: answers.businessReport }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your report. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -152,6 +189,14 @@ const Module1Lesson3 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      businessReport: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -273,51 +318,119 @@ const Module1Lesson3 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  You have sales data showing: <strong>Quarter 1 – 25% growth</strong>, <strong>Quarter 2 – 18% decline</strong>, 
-                  <strong>Quarter 3 – 12% growth</strong>, <strong>Quarter 4 – 20% growth</strong>. 
-                </p>
-                <p>
-                  Summarize this data into a short business report (2–3 pages) highlighting <strong>key findings</strong>, 
-                  <strong>causes</strong>, and <strong>recommendations</strong>.
-                </p>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Problem Statement</h3>
+                    <p>
+                      You have sales data showing: <strong>Quarter 1 – 25% growth</strong>, <strong>Quarter 2 – 18% decline</strong>, 
+                      <strong>Quarter 3 – 12% growth</strong>, <strong>Quarter 4 – 20% growth</strong>. 
+                    </p>
+                    <p>
+                      Summarize this data into a short business report (2–3 pages) highlighting <strong>key findings</strong>, 
+                      <strong>causes</strong>, and <strong>recommendations</strong>.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="businessReport">
+                        <h4>Business Report: Quarterly Sales Analysis</h4>
+                        <p className="instruction">
+                          Structure your report with the following sections:
+                          <br />• Executive Summary
+                          <br />• Key Findings (data analysis)
+                          <br />• Possible Causes (for decline and growth patterns)
+                          <br />• Recommendations (actionable next steps)
+                          <br />• Conclusion
+                        </p>
+                      </label>
+                      <textarea
+                        id="businessReport"
+                        value={answers.businessReport}
+                        onChange={(e) => handleInputChange('businessReport', e.target.value)}
+                        placeholder="QUARTERLY SALES ANALYSIS REPORT&#10;&#10;EXECUTIVE SUMMARY&#10;[Brief overview of the report's purpose and main findings]&#10;&#10;KEY FINDINGS&#10;[Analysis of the quarterly data]&#10;&#10;POSSIBLE CAUSES&#10;[Reasons for the performance variations]&#10;&#10;RECOMMENDATIONS&#10;[Actionable strategies for improvement]&#10;&#10;CONCLUSION&#10;[Summary and next steps]"
+                        rows="18"
+                      />
+                      <div className="character-count">
+                        {answers.businessReport?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.businessReport}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.businessReport}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset Report
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="businessReport">
-                    <h4>Business Report: Quarterly Sales Analysis</h4>
-                    <p className="instruction">
-                      Structure your report with the following sections:
-                      <br />• Executive Summary
-                      <br />• Key Findings (data analysis)
-                      <br />• Possible Causes (for decline and growth patterns)
-                      <br />• Recommendations (actionable next steps)
-                      <br />• Conclusion
-                    </p>
-                  </label>
-                  <textarea
-                    id="businessReport"
-                    value={answers.businessReport}
-                    onChange={(e) => handleInputChange('businessReport', e.target.value)}
-                    placeholder="QUARTERLY SALES ANALYSIS REPORT&#10;&#10;EXECUTIVE SUMMARY&#10;[Brief overview of the report's purpose and main findings]&#10;&#10;KEY FINDINGS&#10;[Analysis of the quarterly data]&#10;&#10;POSSIBLE CAUSES&#10;[Reasons for the performance variations]&#10;&#10;RECOMMENDATIONS&#10;[Actionable strategies for improvement]&#10;&#10;CONCLUSION&#10;[Summary and next steps]"
-                    rows="20"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <div className="placeholder-icon">📊</div>
+                    <h3>AI Feedback</h3>
+                    <p>Write your business report and click "Get AI Feedback" to receive detailed analysis including grammar suggestions, content structure feedback, and professional writing tips.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.businessReport}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Business Report
-                  </button>
-                </div>
+                {isLoading && (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <h3>Analyzing your report...</h3>
+                    <p>Our AI is reviewing your business report for clarity, structure, and professional tone.</p>
+                  </div>
+                )}
+
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h2>Analysis Results</h2>
+                    
+                    <div className="feedback-section-item">
+                      <h3>📚 Grammar & Spelling</h3>
+                      <div className="feedback-text">
+                        {feedback.spellAndGrammar}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>💡 Content Feedback</h3>
+                      <div className="feedback-text">
+                        {feedback.contentFeedback}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>🎯 Suggestions</h3>
+                      <div className="feedback-text">
+                        {feedback.suggestions}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

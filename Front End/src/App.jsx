@@ -73,28 +73,28 @@ function App() {
       <Route path="/take-test" element={<TakeTest />} />
       
       {/* Module 1 Lesson Routes */}
-      <Route path="/lessons/module1/lesson1" element={<Module1Lesson1 />} />
-      <Route path="/lessons/module1/lesson2" element={<Module1Lesson2 />} />
-      <Route path="/lessons/module1/lesson3" element={<Module1Lesson3 />} />
-      <Route path="/lessons/module1/lesson4" element={<Module1Lesson4 />} />
+      <Route path="/module1/lesson1" element={<Module1Lesson1 />} />
+      <Route path="/module1/lesson2" element={<Module1Lesson2 />} />
+      <Route path="/module1/lesson3" element={<Module1Lesson3 />} />
+      <Route path="/module1/lesson4" element={<Module1Lesson4 />} />
       
       {/* Module 2 Lesson Routes */}
-      <Route path="/lessons/module2/lesson1" element={<Module2Lesson1 />} />
-      <Route path="/lessons/module2/lesson2" element={<Module2Lesson2 />} />
-      <Route path="/lessons/module2/lesson3" element={<Module2Lesson3 />} />
-      <Route path="/lessons/module2/lesson4" element={<Module2Lesson4 />} />
+      <Route path="/module2/lesson1" element={<Module2Lesson1 />} />
+      <Route path="/module2/lesson2" element={<Module2Lesson2 />} />
+      <Route path="/module2/lesson3" element={<Module2Lesson3 />} />
+      <Route path="/module2/lesson4" element={<Module2Lesson4 />} />
       
       {/* Module 3 Lesson Routes */}
-      <Route path="/lessons/module3/lesson1" element={<Module3Lesson1 />} />
-      <Route path="/lessons/module3/lesson2" element={<Module3Lesson2 />} />
-      <Route path="/lessons/module3/lesson3" element={<Module3Lesson3 />} />
-      <Route path="/lessons/module3/lesson4" element={<Module3Lesson4 />} />
+      <Route path="/module3/lesson1" element={<Module3Lesson1 />} />
+      <Route path="/module3/lesson2" element={<Module3Lesson2 />} />
+      <Route path="/module3/lesson3" element={<Module3Lesson3 />} />
+      <Route path="/module3/lesson4" element={<Module3Lesson4 />} />
       
       {/* Module 4 Lesson Routes */}
-      <Route path="/lessons/module4/lesson1" element={<Module4Lesson1 />} />
-      <Route path="/lessons/module4/lesson2" element={<Module4Lesson2 />} />
-      <Route path="/lessons/module4/lesson3" element={<Module4Lesson3 />} />
-      <Route path="/lessons/module4/lesson4" element={<Module4Lesson4 />} />
+      <Route path="/module4/lesson1" element={<Module4Lesson1 />} />
+      <Route path="/module4/lesson2" element={<Module4Lesson2 />} />
+      <Route path="/module4/lesson3" element={<Module4Lesson3 />} />
+      <Route path="/module4/lesson4" element={<Module4Lesson4 />} />
     </Routes>
   );
 }

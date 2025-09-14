@@ -355,31 +355,33 @@ app.post('/api/analyze-text', async (req, res) => {
     console.log('Starting grammar check...');
     // Grammar and Spell Check
     const grammarResponse = await cohere.generate({
-      prompt: `Identify the grammatical errors and spelling errors in a short and concise manner:\n\nText: ${text}`,
-      maxTokens: 150,
-      temperature: 0.3,
-    });
+      prompt: `Correct grammar and spelling. Output only the Incorrected words or phrases and thier correct form:\n\n${text}`,
+      maxTokens: 60,
+      temperature: 0
+    });    
 
     console.log('Starting content feedback...');
     // Content Feedback
     const feedbackResponse = await cohere.generate({
-      prompt: `Analyze the following text and provide detailed feedback on content strength, clarity, organization, and overall impact:\n\nText: ${text}`,
-      maxTokens: 150,
-      temperature: 0.3,
+      prompt: `Evaluate clarity, tone, and structure. Give 1–2 concise improvement notes per aspect:\n\n${text}`,
+      maxTokens: 60,
+      temperature: 0
     });
+    
 
     console.log('Starting suggestions...');
     // Suggestions
     const suggestionsResponse = await cohere.generate({
-      prompt: `Provide specific, actionable suggestions for improving the following text, focusing on style, structure, and engagement:\n\nText: ${text}`,
-      maxTokens: 150,
-      temperature: 0.3,
+      prompt: `List exactly 3 actionable ways to improve this text (no intro):\n\n${text}`,
+      maxTokens: 60,
+      temperature: 0
     });
+    
 
     res.json({
-      spellAndGrammar: grammarResponse.generations[0].text,
-      contentFeedback: feedbackResponse.generations[0].text,
-      suggestions: suggestionsResponse.generations[0].text
+      spellAndGrammar: grammarResponse.generations[0].text.replace(/^Here is an analysis of the text provided:\s*/i, '').trim(),
+      contentFeedback: feedbackResponse.generations[0].text.replace(/^Here is an analysis of the text provided:\s*/i, '').trim(),
+      suggestions: suggestionsResponse.generations[0].text.replace(/^Here is an analysis of the text provided:\s*/i, '').trim()
     });
 
   } catch (error) {

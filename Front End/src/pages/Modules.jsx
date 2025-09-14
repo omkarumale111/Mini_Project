@@ -325,14 +325,14 @@ const Modules = () => {
       lesson.status === 'in_progress' || lesson.status === 'available'
     );
     if (nextLesson) {
-      navigate(`/lessons/module${selectedModule.id}/lesson${nextLesson.id}`);
+      navigate(`/module${selectedModule.id}/lesson${nextLesson.id}`);
     }
   };
 
   const handleLessonClick = (lesson) => {
     // Only allow navigation to completed or available lessons
     if (lesson.status === 'completed' || lesson.status === 'available') {
-      navigate(`/lessons/module${selectedModule.id}/lesson${lesson.id}`);
+      navigate(`/module${selectedModule.id}/lesson${lesson.id}`);
     }
   };
 

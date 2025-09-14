@@ -26,6 +26,9 @@ const Module2Lesson3 = () => {
   const [answers, setAnswers] = useState({
     requirementsDocument: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -127,6 +130,39 @@ const Module2Lesson3 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    if (!answers.requirementsDocument) {
+      alert('Please write your requirements document before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: answers.requirementsDocument }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your requirements document. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -152,6 +188,14 @@ const Module2Lesson3 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      requirementsDocument: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -273,50 +317,117 @@ const Module2Lesson3 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  Write a feature requirements document for a <strong>"To-Do List App"</strong> that includes: 
-                  <strong>task creation</strong>, <strong>deadlines</strong>, <strong>reminders</strong>, and <strong>category tagging</strong>.
-                </p>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Problem Statement</h3>
+                    <p>
+                      Write a feature requirements document for a <strong>"To-Do List App"</strong> that includes: 
+                      <strong>task creation</strong>, <strong>deadlines</strong>, <strong>reminders</strong>, and <strong>category tagging</strong>.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="requirementsDocument">
+                        <h4>Feature Requirements Document - To-Do List App</h4>
+                        <p className="instruction">
+                          Create a comprehensive requirements document that includes:
+                          <br />• Project overview and objectives
+                          <br />• Feature specifications for each requirement
+                          <br />• User stories and acceptance criteria
+                          <br />• Technical considerations
+                          <br />• Priority levels for features
+                        </p>
+                      </label>
+                      <textarea
+                        id="requirementsDocument"
+                        value={answers.requirementsDocument}
+                        onChange={(e) => handleInputChange('requirementsDocument', e.target.value)}
+                        placeholder="TO-DO LIST APP - FEATURE REQUIREMENTS DOCUMENT&#10;&#10;1. PROJECT OVERVIEW&#10;[Brief description of the app and its purpose]&#10;&#10;2. FEATURE SPECIFICATIONS&#10;&#10;2.1 TASK CREATION&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.2 DEADLINES&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.3 REMINDERS&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.4 CATEGORY TAGGING&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;3. TECHNICAL CONSIDERATIONS&#10;[Platform requirements, data storage, etc.]&#10;&#10;4. PRIORITY MATRIX&#10;[High/Medium/Low priority for each feature]"
+                        rows="15"
+                      />
+                      <div className="character-count">
+                        {answers.requirementsDocument?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.requirementsDocument}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.requirementsDocument}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset Document
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="requirementsDocument">
-                    <h4>Feature Requirements Document - To-Do List App</h4>
-                    <p className="instruction">
-                      Create a comprehensive requirements document that includes:
-                      <br />• Project overview and objectives
-                      <br />• Feature specifications for each requirement
-                      <br />• User stories and acceptance criteria
-                      <br />• Technical considerations
-                      <br />• Priority levels for features
-                    </p>
-                  </label>
-                  <textarea
-                    id="requirementsDocument"
-                    value={answers.requirementsDocument}
-                    onChange={(e) => handleInputChange('requirementsDocument', e.target.value)}
-                    placeholder="TO-DO LIST APP - FEATURE REQUIREMENTS DOCUMENT&#10;&#10;1. PROJECT OVERVIEW&#10;[Brief description of the app and its purpose]&#10;&#10;2. FEATURE SPECIFICATIONS&#10;&#10;2.1 TASK CREATION&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.2 DEADLINES&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.3 REMINDERS&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.4 CATEGORY TAGGING&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;3. TECHNICAL CONSIDERATIONS&#10;[Platform requirements, data storage, etc.]&#10;&#10;4. PRIORITY MATRIX&#10;[High/Medium/Low priority for each feature]"
-                    rows="18"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <div className="placeholder-icon">📋</div>
+                    <h3>AI Feedback</h3>
+                    <p>Write your requirements document and click "Get AI Feedback" to receive detailed analysis including structure assessment, clarity feedback, and technical writing suggestions.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.requirementsDocument}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Requirements Document
-                  </button>
-                </div>
+                {isLoading && (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <h3>Analyzing your document...</h3>
+                    <p>Our AI is reviewing your requirements document for structure, clarity, and technical completeness.</p>
+                  </div>
+                )}
+
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h2>Analysis Results</h2>
+                    
+                    <div className="feedback-section-item">
+                      <h3>📚 Grammar & Spelling</h3>
+                      <div className="feedback-text">
+                        {feedback.spellAndGrammar}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>💡 Content Feedback</h3>
+                      <div className="feedback-text">
+                        {feedback.contentFeedback}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>🎯 Suggestions</h3>
+                      <div className="feedback-text">
+                        {feedback.suggestions}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>

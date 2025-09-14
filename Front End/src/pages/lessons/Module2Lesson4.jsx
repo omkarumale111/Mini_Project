@@ -26,6 +26,9 @@ const Module2Lesson4 = () => {
   const [answers, setAnswers] = useState({
     slideOutlines: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -127,6 +130,39 @@ const Module2Lesson4 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    if (!answers.slideOutlines) {
+      alert('Please create your presentation outlines before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: answers.slideOutlines }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your presentation outlines. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -152,6 +188,14 @@ const Module2Lesson4 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      slideOutlines: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -273,50 +317,117 @@ const Module2Lesson4 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  You are preparing a <strong>5-slide presentation</strong> on <strong>"Cloud Storage Security."</strong> 
-                  Create slide outlines with concise text for: <strong>Introduction</strong>, <strong>Risks</strong>, 
-                  <strong>Solutions</strong>, <strong>Case Example</strong>, and <strong>Conclusion</strong>.
-                </p>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Problem Statement</h3>
+                    <p>
+                      You are preparing a <strong>5-slide presentation</strong> on <strong>"Cloud Storage Security."</strong> 
+                      Create slide outlines with concise text for: <strong>Introduction</strong>, <strong>Risks</strong>, 
+                      <strong>Solutions</strong>, <strong>Case Example</strong>, and <strong>Conclusion</strong>.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="slideOutlines">
+                        <h4>Cloud Storage Security Presentation Outlines</h4>
+                        <p className="instruction">
+                          Create detailed outlines for each of the 5 slides. Include:
+                          <br />• Slide title
+                          <br />• Key bullet points (3-5 per slide)
+                          <br />• Supporting details or examples
+                          <br />• Visual suggestions (charts, images, etc.)
+                        </p>
+                      </label>
+                      <textarea
+                        id="slideOutlines"
+                        value={answers.slideOutlines}
+                        onChange={(e) => handleInputChange('slideOutlines', e.target.value)}
+                        placeholder="CLOUD STORAGE SECURITY PRESENTATION&#10;&#10;SLIDE 1: INTRODUCTION&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 2: RISKS&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 3: SOLUTIONS&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 4: CASE EXAMPLE&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 5: CONCLUSION&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]"
+                        rows="16"
+                      />
+                      <div className="character-count">
+                        {answers.slideOutlines?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.slideOutlines}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.slideOutlines}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset Outlines
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="slideOutlines">
-                    <h4>Cloud Storage Security Presentation Outlines</h4>
-                    <p className="instruction">
-                      Create detailed outlines for each of the 5 slides. Include:
-                      <br />• Slide title
-                      <br />• Key bullet points (3-5 per slide)
-                      <br />• Supporting details or examples
-                      <br />• Visual suggestions (charts, images, etc.)
-                    </p>
-                  </label>
-                  <textarea
-                    id="slideOutlines"
-                    value={answers.slideOutlines}
-                    onChange={(e) => handleInputChange('slideOutlines', e.target.value)}
-                    placeholder="CLOUD STORAGE SECURITY PRESENTATION&#10;&#10;SLIDE 1: INTRODUCTION&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 2: RISKS&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 3: SOLUTIONS&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 4: CASE EXAMPLE&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 5: CONCLUSION&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]"
-                    rows="20"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <div className="placeholder-icon">📊</div>
+                    <h3>AI Feedback</h3>
+                    <p>Create your presentation outlines and click "Get AI Feedback" to receive detailed analysis including structure assessment, content clarity feedback, and presentation effectiveness suggestions.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.slideOutlines}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Presentation Outlines
-                  </button>
-                </div>
+                {isLoading && (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <h3>Analyzing your presentation...</h3>
+                    <p>Our AI is reviewing your slide outlines for structure, clarity, and presentation effectiveness.</p>
+                  </div>
+                )}
+
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h2>Analysis Results</h2>
+                    
+                    <div className="feedback-section-item">
+                      <h3>📚 Grammar & Spelling</h3>
+                      <div className="feedback-text">
+                        {feedback.spellAndGrammar}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>💡 Content Feedback</h3>
+                      <div className="feedback-text">
+                        {feedback.contentFeedback}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>🎯 Suggestions</h3>
+                      <div className="feedback-text">
+                        {feedback.suggestions}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>

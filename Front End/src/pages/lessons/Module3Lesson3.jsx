@@ -28,6 +28,9 @@ const Module3Lesson3 = () => {
     waterBottleDescription: '',
     elearningAppDescription: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -129,6 +132,41 @@ const Module3Lesson3 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    if (!answers.smartwatchDescription || !answers.waterBottleDescription || !answers.elearningAppDescription) {
+      alert('Please complete all three product descriptions before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const combinedText = `Smartwatch Description: ${answers.smartwatchDescription}\n\nEco-Friendly Water Bottle Description: ${answers.waterBottleDescription}\n\nE-Learning App Description: ${answers.elearningAppDescription}`;
+      
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: combinedText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your product descriptions. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -154,6 +192,16 @@ const Module3Lesson3 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      smartwatchDescription: '',
+      waterBottleDescription: '',
+      elearningAppDescription: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -275,80 +323,144 @@ const Module3Lesson3 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  Write <strong>three catchy product descriptions (2–3 sentences each)</strong> for: 
-                  a <strong>smartwatch</strong>, an <strong>eco-friendly water bottle</strong>, and a <strong>new e-learning app</strong>.
-                </p>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Problem Statement</h3>
+                    <p>
+                      Write <strong>three catchy product descriptions (2–3 sentences each)</strong> for: 
+                      a <strong>smartwatch</strong>, an <strong>eco-friendly water bottle</strong>, and a <strong>new e-learning app</strong>.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="smartwatchDescription">
+                        <h4>1. Smartwatch Product Description</h4>
+                        <p className="instruction">
+                          Write a compelling 2-3 sentence description for a smartwatch. Focus on benefits, 
+                          unique features, and emotional appeal.
+                        </p>
+                      </label>
+                      <textarea
+                        id="smartwatchDescription"
+                        value={answers.smartwatchDescription}
+                        onChange={(e) => handleInputChange('smartwatchDescription', e.target.value)}
+                        placeholder="Write your smartwatch description here..."
+                        rows="3"
+                      />
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="waterBottleDescription">
+                        <h4>2. Eco-Friendly Water Bottle Product Description</h4>
+                        <p className="instruction">
+                          Create an engaging 2-3 sentence description for an eco-friendly water bottle. 
+                          Highlight environmental benefits and practical features.
+                        </p>
+                      </label>
+                      <textarea
+                        id="waterBottleDescription"
+                        value={answers.waterBottleDescription}
+                        onChange={(e) => handleInputChange('waterBottleDescription', e.target.value)}
+                        placeholder="Write your eco-friendly water bottle description here..."
+                        rows="3"
+                      />
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="elearningAppDescription">
+                        <h4>3. E-Learning App Product Description</h4>
+                        <p className="instruction">
+                          Craft an attractive 2-3 sentence description for a new e-learning app. 
+                          Emphasize learning outcomes and user experience.
+                        </p>
+                      </label>
+                      <textarea
+                        id="elearningAppDescription"
+                        value={answers.elearningAppDescription}
+                        onChange={(e) => handleInputChange('elearningAppDescription', e.target.value)}
+                        placeholder="Write your e-learning app description here..."
+                        rows="3"
+                      />
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.smartwatchDescription || !answers.waterBottleDescription || !answers.elearningAppDescription}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.smartwatchDescription || !answers.waterBottleDescription || !answers.elearningAppDescription}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset All
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="smartwatchDescription">
-                    <h4>1. Smartwatch Product Description</h4>
-                    <p className="instruction">
-                      Write a compelling 2-3 sentence description for a smartwatch. Focus on benefits, 
-                      unique features, and emotional appeal.
-                    </p>
-                  </label>
-                  <textarea
-                    id="smartwatchDescription"
-                    value={answers.smartwatchDescription}
-                    onChange={(e) => handleInputChange('smartwatchDescription', e.target.value)}
-                    placeholder="Write your smartwatch description here..."
-                    rows="4"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <div className="placeholder-icon">📱</div>
+                    <h3>AI Feedback</h3>
+                    <p>Complete all three product descriptions and click "Get AI Feedback" to receive detailed analysis on marketing copy effectiveness, persuasive language usage, and audience appeal.</p>
+                  </div>
+                )}
 
-                <div className="exercise-item">
-                  <label htmlFor="waterBottleDescription">
-                    <h4>2. Eco-Friendly Water Bottle Product Description</h4>
-                    <p className="instruction">
-                      Create an engaging 2-3 sentence description for an eco-friendly water bottle. 
-                      Highlight environmental benefits and practical features.
-                    </p>
-                  </label>
-                  <textarea
-                    id="waterBottleDescription"
-                    value={answers.waterBottleDescription}
-                    onChange={(e) => handleInputChange('waterBottleDescription', e.target.value)}
-                    placeholder="Write your eco-friendly water bottle description here..."
-                    rows="4"
-                  />
-                </div>
+                {isLoading && (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <h3>Analyzing your marketing copy...</h3>
+                    <p>Our AI is reviewing your product descriptions for persuasive techniques and marketing effectiveness.</p>
+                  </div>
+                )}
 
-                <div className="exercise-item">
-                  <label htmlFor="elearningAppDescription">
-                    <h4>3. E-Learning App Product Description</h4>
-                    <p className="instruction">
-                      Craft an attractive 2-3 sentence description for a new e-learning app. 
-                      Emphasize learning outcomes and user experience.
-                    </p>
-                  </label>
-                  <textarea
-                    id="elearningAppDescription"
-                    value={answers.elearningAppDescription}
-                    onChange={(e) => handleInputChange('elearningAppDescription', e.target.value)}
-                    placeholder="Write your e-learning app description here..."
-                    rows="4"
-                  />
-                </div>
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h2>Analysis Results</h2>
+                    
+                    <div className="feedback-section-item">
+                      <h3>📚 Grammar & Spelling</h3>
+                      <div className="feedback-text">
+                        {feedback.spellAndGrammar}
+                      </div>
+                    </div>
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.smartwatchDescription || !answers.waterBottleDescription || !answers.elearningAppDescription}
-                  >
-                    <RiSendPlaneLine />
-                    Submit All Descriptions
-                  </button>
-                </div>
+                    <div className="feedback-section-item">
+                      <h3>💡 Content Feedback</h3>
+                      <div className="feedback-text">
+                        {feedback.contentFeedback}
+                      </div>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h3>🎯 Suggestions</h3>
+                      <div className="feedback-text">
+                        {feedback.suggestions}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>
