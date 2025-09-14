@@ -87,12 +87,12 @@ const TakeTest = () => {
     e.preventDefault();
     
     if (!testId.trim()) {
-      setError('Please enter a test ID');
+      setError('Please enter a test code');
       return;
     }
 
     if (testId.length < 6) {
-      setError('Test ID must be at least 6 characters long');
+      setError('Test code must be at least 6 characters long');
       return;
     }
 
@@ -100,21 +100,19 @@ const TakeTest = () => {
     setError('');
 
     try {
-      // TODO: Replace with actual API call to validate test ID
-      // For now, simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Validate test code with API
+      const response = await fetch(`http://localhost:5001/api/validate-test-code/${testId}`);
+      const data = await response.json();
       
-      // Mock validation - in real app, this would be an API call
-      const validTestIds = ['TEST001', 'EXAM123', 'QUIZ456', 'ASSESS789'];
-      
-      if (validTestIds.includes(testId)) {
-        // Navigate to actual test interface with test ID
+      if (response.ok && data.valid) {
+        // Navigate to test interface with test code
         navigate(`/test/${testId}`);
       } else {
-        setError('Invalid test ID. Please check and try again.');
+        setError(data.error || 'Invalid test code. Please check and try again.');
       }
     } catch (err) {
-      setError('Failed to validate test ID. Please try again.');
+      console.error('Error validating test code:', err);
+      setError('Failed to validate test code. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -238,7 +236,7 @@ const TakeTest = () => {
 
               <form onSubmit={handleSubmit} className="test-form">
                 <div className="form-group">
-                  <label htmlFor="testId">Test ID</label>
+                  <label htmlFor="testId">Test Code</label>
                   <div className="input-wrapper">
                     <RiLockLine className="input-icon" />
                     <input
@@ -246,10 +244,10 @@ const TakeTest = () => {
                       id="testId"
                       value={testId}
                       onChange={handleTestIdChange}
-                      placeholder="Enter test ID (e.g., TEST001)"
+                      placeholder="Enter test code (e.g., ABC123)"
                       className={error ? 'error' : ''}
                       disabled={isLoading}
-                      maxLength={20}
+                      maxLength={10}
                     />
                   </div>
                   {error && <span className="error-message">{error}</span>}

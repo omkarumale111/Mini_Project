@@ -75,6 +75,56 @@ async function initializeDatabase() {
         UNIQUE KEY unique_student_lesson_field (student_id, lesson_id, input_field)
       )
     `);
+
+    // Create test management tables
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS tests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        teacher_id INT NOT NULL,
+        test_name VARCHAR(255) NOT NULL,
+        test_code VARCHAR(10) UNIQUE NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_active BOOLEAN DEFAULT TRUE,
+        FOREIGN KEY (teacher_id) REFERENCES users(id)
+      )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS test_questions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        test_id INT NOT NULL,
+        question_text TEXT NOT NULL,
+        question_order INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
+      )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS student_test_submissions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        test_id INT NOT NULL,
+        student_id INT NOT NULL,
+        submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE,
+        FOREIGN KEY (student_id) REFERENCES users(id),
+        UNIQUE KEY unique_student_test (student_id, test_id)
+      )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS student_answers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        submission_id INT NOT NULL,
+        question_id INT NOT NULL,
+        answer_text TEXT,
+        answered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (submission_id) REFERENCES student_test_submissions(id) ON DELETE CASCADE,
+        FOREIGN KEY (question_id) REFERENCES test_questions(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_submission_question (submission_id, question_id)
+      )
+    `);
     
     console.log('Database tables initialized successfully');
     
@@ -388,6 +438,288 @@ app.post('/api/analyze-text', async (req, res) => {
     console.error('Text analysis error:', error.message);
     console.error('Full error:', error);
     res.status(500).json({ message: 'Error analyzing text' });
+  }
+});
+
+// Test Management API Endpoints
+
+// Generate unique test code
+function generateTestCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+// Create a new test
+app.post('/api/create-test', async (req, res) => {
+  const { testName, description, questions, teacherId } = req.body;
+  
+  try {
+    const connection = await pool.getConnection();
+    
+    // Generate unique test code
+    let testCode;
+    let isUnique = false;
+    
+    while (!isUnique) {
+      testCode = generateTestCode();
+      const [existing] = await connection.execute(
+        'SELECT id FROM tests WHERE test_code = ?',
+        [testCode]
+      );
+      if (existing.length === 0) {
+        isUnique = true;
+      }
+    }
+    
+    // Insert test
+    const [testResult] = await connection.execute(
+      'INSERT INTO tests (teacher_id, test_name, test_code, description) VALUES (?, ?, ?, ?)',
+      [teacherId, testName, testCode, description || null]
+    );
+    
+    const testId = testResult.insertId;
+    
+    // Insert questions
+    for (const question of questions) {
+      await connection.execute(
+        'INSERT INTO test_questions (test_id, question_text, question_order) VALUES (?, ?, ?)',
+        [testId, question.text, question.order]
+      );
+    }
+    
+    connection.release();
+    
+    res.json({ 
+      success: true, 
+      testId, 
+      testCode,
+      message: 'Test created successfully' 
+    });
+    
+  } catch (error) {
+    console.error('Error creating test:', error);
+    res.status(500).json({ error: 'Failed to create test' });
+  }
+});
+
+// Get teacher's tests
+app.get('/api/teacher-tests/:teacherId', async (req, res) => {
+  const { teacherId } = req.params;
+  
+  try {
+    const connection = await pool.getConnection();
+    
+    const [tests] = await connection.execute(`
+      SELECT 
+        t.*,
+        COUNT(DISTINCT tq.id) as question_count,
+        COUNT(DISTINCT sts.id) as submission_count
+      FROM tests t
+      LEFT JOIN test_questions tq ON t.id = tq.test_id
+      LEFT JOIN student_test_submissions sts ON t.id = sts.test_id
+      WHERE t.teacher_id = ? AND t.is_active = 1
+      GROUP BY t.id
+      ORDER BY t.created_at DESC
+    `, [teacherId]);
+    
+    connection.release();
+    
+    res.json({ tests });
+    
+  } catch (error) {
+    console.error('Error fetching teacher tests:', error);
+    res.status(500).json({ error: 'Failed to fetch tests' });
+  }
+});
+
+// Validate test code
+app.get('/api/validate-test-code/:testCode', async (req, res) => {
+  const { testCode } = req.params;
+  
+  try {
+    const connection = await pool.getConnection();
+    
+    const [tests] = await connection.execute(
+      'SELECT id, test_name FROM tests WHERE test_code = ? AND is_active = 1',
+      [testCode]
+    );
+    
+    connection.release();
+    
+    if (tests.length > 0) {
+      res.json({ 
+        valid: true, 
+        test: tests[0] 
+      });
+    } else {
+      res.json({ 
+        valid: false, 
+        error: 'Invalid or inactive test code' 
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error validating test code:', error);
+    res.status(500).json({ error: 'Failed to validate test code' });
+  }
+});
+
+// Get test data for students
+app.get('/api/test/:testCode', async (req, res) => {
+  const { testCode } = req.params;
+  
+  try {
+    const connection = await pool.getConnection();
+    
+    // Get test info
+    const [tests] = await connection.execute(
+      'SELECT * FROM tests WHERE test_code = ? AND is_active = 1',
+      [testCode]
+    );
+    
+    if (tests.length === 0) {
+      connection.release();
+      return res.status(404).json({ error: 'Test not found or inactive' });
+    }
+    
+    const test = tests[0];
+    
+    // Get questions
+    const [questions] = await connection.execute(
+      'SELECT * FROM test_questions WHERE test_id = ? ORDER BY question_order',
+      [test.id]
+    );
+    
+    connection.release();
+    
+    res.json({ 
+      test: {
+        ...test,
+        questions
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching test:', error);
+    res.status(500).json({ error: 'Failed to fetch test' });
+  }
+});
+
+// Submit test answers
+app.post('/api/submit-test', async (req, res) => {
+  const { testId, studentId, answers } = req.body;
+  
+  try {
+    const connection = await pool.getConnection();
+    
+    // Check if student already submitted this test
+    const [existing] = await connection.execute(
+      'SELECT id FROM student_test_submissions WHERE test_id = ? AND student_id = ?',
+      [testId, studentId]
+    );
+    
+    if (existing.length > 0) {
+      connection.release();
+      return res.status(400).json({ error: 'Test already submitted' });
+    }
+    
+    // Create submission record
+    const [submissionResult] = await connection.execute(
+      'INSERT INTO student_test_submissions (test_id, student_id) VALUES (?, ?)',
+      [testId, studentId]
+    );
+    
+    const submissionId = submissionResult.insertId;
+    
+    // Insert answers
+    for (const answer of answers) {
+      await connection.execute(
+        'INSERT INTO student_answers (submission_id, question_id, answer_text) VALUES (?, ?, ?)',
+        [submissionId, answer.questionId, answer.answerText]
+      );
+    }
+    
+    connection.release();
+    
+    res.json({ 
+      success: true, 
+      submissionId,
+      message: 'Test submitted successfully' 
+    });
+    
+  } catch (error) {
+    console.error('Error submitting test:', error);
+    res.status(500).json({ error: 'Failed to submit test' });
+  }
+});
+
+// Get test submissions for teachers
+app.get('/api/test-submissions/:testId', async (req, res) => {
+  const { testId } = req.params;
+  
+  try {
+    const connection = await pool.getConnection();
+    
+    const [submissions] = await connection.execute(`
+      SELECT 
+        sts.id,
+        sts.submitted_at,
+        u.email as student_email,
+        u.id as student_id
+      FROM student_test_submissions sts
+      JOIN users u ON sts.student_id = u.id
+      WHERE sts.test_id = ?
+      ORDER BY sts.submitted_at DESC
+    `, [testId]);
+    
+    // Get answers for each submission
+    for (let submission of submissions) {
+      const [answers] = await connection.execute(`
+        SELECT 
+          sa.answer_text,
+          tq.question_text,
+          tq.id as question_id
+        FROM student_answers sa
+        JOIN test_questions tq ON sa.question_id = tq.id
+        WHERE sa.submission_id = ?
+        ORDER BY tq.question_order
+      `, [submission.id]);
+      
+      submission.answers = answers;
+    }
+    
+    connection.release();
+    
+    res.json({ submissions });
+    
+  } catch (error) {
+    console.error('Error fetching test submissions:', error);
+    res.status(500).json({ error: 'Failed to fetch submissions' });
+  }
+});
+
+// Delete test
+app.delete('/api/delete-test/:testId', async (req, res) => {
+  const { testId } = req.params;
+  
+  try {
+    const connection = await pool.getConnection();
+    
+    // Set test as inactive instead of deleting (to preserve data integrity)
+    await connection.execute(
+      'UPDATE tests SET is_active = 0 WHERE id = ?',
+      [testId]
+    );
+    
+    connection.release();
+    
+    res.json({ 
+      success: true, 
+      message: 'Test deleted successfully' 
+    });
+    
+  } catch (error) {
+    console.error('Error deleting test:', error);
+    res.status(500).json({ error: 'Failed to delete test' });
   }
 });
 
