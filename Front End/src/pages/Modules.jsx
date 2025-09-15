@@ -301,13 +301,15 @@ const Modules = () => {
     ];
   };
 
-  // Set selected module after modules data is available
+  // Set selected module after modules data is available and progress is loaded
   useEffect(() => {
-    const modulesData = getModulesData();
-    if (modulesData.length > 0 && !selectedModule) {
-      setSelectedModule(modulesData[0]);
+    if (progressLoaded) {
+      const modulesData = getModulesData();
+      if (modulesData.length > 0 && !selectedModule) {
+        setSelectedModule(modulesData[0]);
+      }
     }
-  }, [lessonProgress, selectedModule]);
+  }, [lessonProgress, selectedModule, progressLoaded]);
 
 
   const handleNavigation = (path) => {
@@ -341,8 +343,8 @@ const Modules = () => {
     navigate('/login');
   };
 
-  // Don't render until we have module data
-  if (!selectedModule) {
+  // Don't render until we have module data and progress is loaded
+  if (!selectedModule || !progressLoaded) {
     return <div>Loading...</div>;
   }
 
@@ -443,7 +445,7 @@ const Modules = () => {
           <div className="modules-sidebar">
             <h2>Available Modules</h2>
             <div className="modules-list">
-              {getModulesData().map((module) => (
+              {progressLoaded ? getModulesData().map((module) => (
                 <div 
                   key={module.id} 
                   className={`module-item ${selectedModule?.id === module.id ? 'active' : ''}`}
@@ -463,7 +465,7 @@ const Modules = () => {
                     <span className="progress-text">{module.progress}% Complete</span>
                   </div>
                 </div>
-              ))}
+              )) : <div>Loading modules...</div>}
             </div>
           </div>
 
