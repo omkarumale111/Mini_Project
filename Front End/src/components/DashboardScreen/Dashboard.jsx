@@ -199,29 +199,8 @@ const Dashboard = () => {
               <span className="stat-number">72%</span>
             </div>
           </div>
-          
-          <div className="stat-card">
-            <div className="stat-icon yellow">
-              <RiTimeLine />
-            </div>
-            <div className="stat-info">
-              <h3>Hours Practiced</h3>
-              <span className="stat-number">8.5</span>
-            </div>
-          </div>
         </div>
 
-        {/* Progress Section */}
-        <div className="progress-section">
-          <h3>My Progress</h3>
-          <div className="progress-chart">
-            <div className="donut-chart" style={{ '--percentage': 70 }}>
-              <div className="donut-chart-center">
-                <span>70%</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Action Cards */}
         <div className="action-cards">

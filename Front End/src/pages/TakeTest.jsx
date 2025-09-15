@@ -238,7 +238,6 @@ const TakeTest = () => {
                 <div className="form-group">
                   <label htmlFor="testId">Test Code</label>
                   <div className="input-wrapper">
-                    <RiLockLine className="input-icon" />
                     <input
                       type="text"
                       id="testId"
