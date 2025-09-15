@@ -200,7 +200,33 @@ async function initializeDatabase() {
       )
     `);
 
-    console.log('Database tables initialized successfully');
+    // Create stored procedure for getting student test count
+    await connection.query('DROP PROCEDURE IF EXISTS GetStudentTestCount');
+    await connection.query(`
+      CREATE PROCEDURE GetStudentTestCount(IN input_student_id INT)
+      BEGIN
+          SELECT COUNT(*) as completed_tests 
+          FROM student_test_submissions 
+          WHERE student_id = input_student_id;
+      END
+    `);
+
+    // Create view for student test statistics
+    await connection.query('DROP VIEW IF EXISTS student_test_stats');
+    await connection.query(`
+      CREATE VIEW student_test_stats AS
+      SELECT 
+          u.id as student_id,
+          u.email as student_email,
+          COUNT(sts.id) as completed_tests,
+          COALESCE(AVG(CASE WHEN sts.id IS NOT NULL THEN 100 ELSE NULL END), 0) as completion_rate
+      FROM users u
+      LEFT JOIN student_test_submissions sts ON u.id = sts.student_id
+      WHERE u.role = 'student'
+      GROUP BY u.id, u.email
+    `);
+
+    console.log('Database tables and procedures initialized successfully');
     
     // Check existing lesson completions
     const [completions] = await connection.query('SELECT * FROM lesson_completions');
@@ -967,6 +993,29 @@ app.get('/api/teacher-profile/:userId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching teacher profile:', error);
     res.status(500).json({ error: 'Failed to fetch teacher profile' });
+  }
+});
+
+// Get student test completion count
+app.get('/api/student-test-count/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const connection = await pool.getConnection();
+    
+    // Use stored procedure to get test count
+    const [result] = await connection.query(
+      'CALL GetStudentTestCount(?)',
+      [studentId]
+    );
+    
+    connection.release();
+    
+    res.json({ 
+      completedTests: result[0][0].completed_tests 
+    });
+  } catch (error) {
+    console.error('Error fetching student test count:', error);
+    res.status(500).json({ error: 'Failed to fetch test count' });
   }
 });
 

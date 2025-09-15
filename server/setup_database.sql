@@ -108,3 +108,25 @@ CREATE TABLE IF NOT EXISTS teacher_profiles (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Stored procedure to get test completion count for a student
+DELIMITER //
+CREATE PROCEDURE IF NOT EXISTS GetStudentTestCount(IN student_id INT)
+BEGIN
+    SELECT COUNT(*) as completed_tests 
+    FROM student_test_submissions 
+    WHERE student_id = student_id;
+END //
+DELIMITER ;
+
+-- View to get test completion statistics for all students
+CREATE VIEW IF NOT EXISTS student_test_stats AS
+SELECT 
+    u.id as student_id,
+    u.email as student_email,
+    COUNT(sts.id) as completed_tests,
+    COALESCE(AVG(CASE WHEN sts.id IS NOT NULL THEN 100 ELSE NULL END), 0) as completion_rate
+FROM users u
+LEFT JOIN student_test_submissions sts ON u.id = sts.student_id
+WHERE u.role = 'student'
+GROUP BY u.id, u.email;

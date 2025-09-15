@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
+  const [testCount, setTestCount] = useState(0);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -36,6 +37,27 @@ const Dashboard = () => {
       setUser(JSON.parse(userData));
     }
   }, []);
+
+  // Fetch test completion count
+  useEffect(() => {
+    const fetchTestCount = async () => {
+      if (user && user.id) {
+        try {
+          const response = await fetch(`http://localhost:5001/api/student-test-count/${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setTestCount(data.completedTests);
+          } else {
+            console.error('Failed to fetch test count');
+          }
+        } catch (error) {
+          console.error('Error fetching test count:', error);
+        }
+      }
+    };
+
+    fetchTestCount();
+  }, [user]);
 
   // Handle window resize
   useEffect(() => {
@@ -186,7 +208,7 @@ const Dashboard = () => {
             </div>
             <div className="stat-info">
               <h3>Tests Completed</h3>
-              <span className="stat-number">3</span>
+              <span className="stat-number">{testCount}</span>
             </div>
           </div>
           
