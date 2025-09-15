@@ -181,6 +181,22 @@ const StudentProfile = () => {
     return `${profileData.firstName} ${profileData.lastName}`.trim() || 'User';
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not provided';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  };
+
   return (
     <div className="student-profile-container">
       {/* Mobile backdrop */}
@@ -377,11 +393,11 @@ const StudentProfile = () => {
                     {isEditing ? (
                       <input
                         type="date"
-                        value={profileData.dateOfBirth}
+                        value={formatDateForInput(profileData.dateOfBirth)}
                         onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.dateOfBirth || 'Not provided'}</span>
+                      <span>{formatDate(profileData.dateOfBirth)}</span>
                     )}
                   </div>
                 </div>

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
+    role ENUM('student', 'admin') DEFAULT 'student',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -69,4 +70,41 @@ CREATE TABLE IF NOT EXISTS student_answers (
     FOREIGN KEY (submission_id) REFERENCES student_test_submissions(id) ON DELETE CASCADE,
     FOREIGN KEY (question_id) REFERENCES test_questions(id) ON DELETE CASCADE,
     UNIQUE KEY unique_submission_question (submission_id, question_id)
+);
+
+-- Profile Management Tables
+CREATE TABLE IF NOT EXISTS student_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE,
+    phone VARCHAR(20),
+    address TEXT,
+    school_college VARCHAR(255),
+    grade_year VARCHAR(50),
+    interests TEXT,
+    goals TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS teacher_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE,
+    phone VARCHAR(20),
+    address TEXT,
+    institution VARCHAR(255),
+    department VARCHAR(100),
+    qualification VARCHAR(255),
+    experience_years INT,
+    specialization TEXT,
+    bio TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
