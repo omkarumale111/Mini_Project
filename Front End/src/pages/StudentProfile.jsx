@@ -27,28 +27,65 @@ const StudentProfile = () => {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    fullName: 'John Smith',
-    email: 'john.smith@student.edu',
-    studentId: 'STU2024001',
-    program: 'Bachelor of Arts in English',
-    year: 'Third Year',
-    phoneNumber: '(555) 987-6543',
-    bio: 'Passionate about creative writing and literature. Currently focusing on improving business communication skills and academic writing techniques.'
+    firstName: '',
+    lastName: '',
+    email: '',
+    dateOfBirth: '',
+    phone: '',
+    address: '',
+    schoolCollege: '',
+    gradeYear: '',
+    interests: '',
+    goals: ''
   });
+  const [loading, setLoading] = useState(true);
   
   const navigate = useNavigate();
 
-  // Get user data from localStorage
+  // Get user data and profile from localStorage and API
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      setProfileData(prev => ({
-        ...prev,
-        email: parsedUser.email
-      }));
-    }
+    const fetchProfile = async () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        
+        try {
+          const response = await fetch(`http://localhost:5001/api/student-profile/${parsedUser.id}`);
+          const data = await response.json();
+          
+          if (response.ok && data.profile) {
+            setProfileData({
+              firstName: data.profile.first_name || '',
+              lastName: data.profile.last_name || '',
+              email: parsedUser.email,
+              dateOfBirth: data.profile.date_of_birth || '',
+              phone: data.profile.phone || '',
+              address: data.profile.address || '',
+              schoolCollege: data.profile.school_college || '',
+              gradeYear: data.profile.grade_year || '',
+              interests: data.profile.interests || '',
+              goals: data.profile.goals || ''
+            });
+          } else {
+            // No profile found, set default with user email
+            setProfileData(prev => ({
+              ...prev,
+              email: parsedUser.email
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+          setProfileData(prev => ({
+            ...prev,
+            email: parsedUser.email
+          }));
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchProfile();
   }, []);
 
   // Handle window resize
@@ -100,14 +137,48 @@ const StudentProfile = () => {
     }));
   };
 
-  const handleSaveChanges = () => {
-    // Here you would typically save to backend
-    setIsEditing(false);
-    // Show success message or handle save logic
+  const handleSaveChanges = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/save-student-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          dateOfBirth: profileData.dateOfBirth,
+          phone: profileData.phone,
+          address: profileData.address,
+          schoolCollege: profileData.schoolCollege,
+          gradeYear: profileData.gradeYear,
+          interests: profileData.interests,
+          goals: profileData.goals
+        }),
+      });
+
+      if (response.ok) {
+        setIsEditing(false);
+        // Show success message
+        alert('Profile updated successfully!');
+      } else {
+        alert('Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to connect to server. Please try again.');
+    }
   };
 
-  const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const getInitials = (firstName, lastName) => {
+    const first = firstName ? firstName[0] : '';
+    const last = lastName ? lastName[0] : '';
+    return (first + last).toUpperCase() || 'U';
+  };
+
+  const getFullName = () => {
+    return `${profileData.firstName} ${profileData.lastName}`.trim() || 'User';
   };
 
   return (
@@ -216,21 +287,24 @@ const StudentProfile = () => {
             <h2>Student Profile</h2>
           </div>
 
-          <div className="profile-main">
-            {/* Profile Card */}
-            <div className="profile-card">
-              <div className="profile-avatar">
-                <div className="avatar-circle">
-                  <span>{getInitials(profileData.fullName)}</span>
+          {loading ? (
+            <div className="loading-message">Loading profile...</div>
+          ) : (
+            <div className="profile-main">
+              {/* Profile Card */}
+              <div className="profile-card">
+                <div className="profile-avatar">
+                  <div className="avatar-circle">
+                    <span>{getInitials(profileData.firstName, profileData.lastName)}</span>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="profile-info">
-                <h3>{profileData.fullName}</h3>
-                <p className="profile-title">{profileData.studentId}</p>
-                <p className="profile-department">{profileData.program}</p>
-                <p className="profile-institution">{profileData.year}</p>
-              </div>
+                
+                <div className="profile-info">
+                  <h3>{getFullName()}</h3>
+                  <p className="profile-title">{profileData.email}</p>
+                  <p className="profile-department">{profileData.schoolCollege}</p>
+                  <p className="profile-institution">{profileData.gradeYear}</p>
+                </div>
 
               {/* Student Stats */}
               <div className="student-stats">
@@ -268,96 +342,130 @@ const StudentProfile = () => {
               <div className="info-grid">
                 <div className="info-row">
                   <div className="info-field">
-                    <label>Full Name</label>
+                    <label>First Name</label>
                     {isEditing ? (
                       <input
                         type="text"
-                        value={profileData.fullName}
-                        onChange={(e) => handleInputChange('fullName', e.target.value)}
+                        value={profileData.firstName}
+                        onChange={(e) => handleInputChange('firstName', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.fullName}</span>
+                      <span>{profileData.firstName || 'Not provided'}</span>
                     )}
                   </div>
+                  <div className="info-field">
+                    <label>Last Name</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={profileData.lastName}
+                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      />
+                    ) : (
+                      <span>{profileData.lastName || 'Not provided'}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="info-row">
                   <div className="info-field">
                     <label>Email Address</label>
+                    <span>{profileData.email}</span>
+                  </div>
+                  <div className="info-field">
+                    <label>Date of Birth</label>
                     {isEditing ? (
                       <input
-                        type="email"
-                        value={profileData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        type="date"
+                        value={profileData.dateOfBirth}
+                        onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.email}</span>
+                      <span>{profileData.dateOfBirth || 'Not provided'}</span>
                     )}
                   </div>
                 </div>
 
                 <div className="info-row">
-                  <div className="info-field">
-                    <label>Student ID</label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={profileData.studentId}
-                        onChange={(e) => handleInputChange('studentId', e.target.value)}
-                      />
-                    ) : (
-                      <span>{profileData.studentId}</span>
-                    )}
-                  </div>
-                  <div className="info-field">
-                    <label>Program</label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={profileData.program}
-                        onChange={(e) => handleInputChange('program', e.target.value)}
-                      />
-                    ) : (
-                      <span>{profileData.program}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="info-row">
-                  <div className="info-field">
-                    <label>Academic Year</label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={profileData.year}
-                        onChange={(e) => handleInputChange('year', e.target.value)}
-                      />
-                    ) : (
-                      <span>{profileData.year}</span>
-                    )}
-                  </div>
                   <div className="info-field">
                     <label>Phone Number</label>
                     {isEditing ? (
                       <input
                         type="tel"
-                        value={profileData.phoneNumber}
-                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                        value={profileData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.phoneNumber}</span>
+                      <span>{profileData.phone || 'Not provided'}</span>
+                    )}
+                  </div>
+                  <div className="info-field">
+                    <label>School/College</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={profileData.schoolCollege}
+                        onChange={(e) => handleInputChange('schoolCollege', e.target.value)}
+                      />
+                    ) : (
+                      <span>{profileData.schoolCollege || 'Not provided'}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="info-row">
+                  <div className="info-field">
+                    <label>Grade/Year</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={profileData.gradeYear}
+                        onChange={(e) => handleInputChange('gradeYear', e.target.value)}
+                      />
+                    ) : (
+                      <span>{profileData.gradeYear || 'Not provided'}</span>
+                    )}
+                  </div>
+                  <div className="info-field">
+                    <label>Address</label>
+                    {isEditing ? (
+                      <textarea
+                        value={profileData.address}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        rows="2"
+                      />
+                    ) : (
+                      <span>{profileData.address || 'Not provided'}</span>
                     )}
                   </div>
                 </div>
 
                 <div className="info-row full-width">
                   <div className="info-field">
-                    <label>Personal Bio</label>
+                    <label>Interests & Hobbies</label>
                     {isEditing ? (
                       <textarea
-                        value={profileData.bio}
-                        onChange={(e) => handleInputChange('bio', e.target.value)}
-                        rows="4"
+                        value={profileData.interests}
+                        onChange={(e) => handleInputChange('interests', e.target.value)}
+                        rows="3"
                       />
                     ) : (
-                      <p>{profileData.bio}</p>
+                      <p>{profileData.interests || 'Not provided'}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="info-row full-width">
+                  <div className="info-field">
+                    <label>Learning Goals</label>
+                    {isEditing ? (
+                      <textarea
+                        value={profileData.goals}
+                        onChange={(e) => handleInputChange('goals', e.target.value)}
+                        rows="3"
+                      />
+                    ) : (
+                      <p>{profileData.goals || 'Not provided'}</p>
                     )}
                   </div>
                 </div>
@@ -373,6 +481,7 @@ const StudentProfile = () => {
               )}
             </div>
           </div>
+        )}
         </div>
       </div>
     </div>

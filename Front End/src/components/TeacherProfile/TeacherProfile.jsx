@@ -29,28 +29,69 @@ const TeacherProfile = () => {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    fullName: 'omkarumale111',
-    email: 'omkarumale111@gmail.com',
-    position: 'Senior Administrator',
-    department: 'English Department',
-    institution: 'University of Technology',
-    phoneNumber: '(555) 123-4567',
-    professionalBio: 'Experienced administrator with over 8 years in educational assessment and curriculum development. Specializing in writing program administration and student performance evaluation.'
+    firstName: '',
+    lastName: '',
+    email: '',
+    dateOfBirth: '',
+    phone: '',
+    address: '',
+    institution: '',
+    department: '',
+    qualification: '',
+    experienceYears: '',
+    specialization: '',
+    bio: ''
   });
+  const [loading, setLoading] = useState(true);
   
   const navigate = useNavigate();
 
-  // Get user data from localStorage
+  // Get user data and profile from localStorage and API
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      setProfileData(prev => ({
-        ...prev,
-        email: parsedUser.email
-      }));
-    }
+    const fetchProfile = async () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        
+        try {
+          const response = await fetch(`http://localhost:5001/api/teacher-profile/${parsedUser.id}`);
+          const data = await response.json();
+          
+          if (response.ok && data.profile) {
+            setProfileData({
+              firstName: data.profile.first_name || '',
+              lastName: data.profile.last_name || '',
+              email: parsedUser.email,
+              dateOfBirth: data.profile.date_of_birth || '',
+              phone: data.profile.phone || '',
+              address: data.profile.address || '',
+              institution: data.profile.institution || '',
+              department: data.profile.department || '',
+              qualification: data.profile.qualification || '',
+              experienceYears: data.profile.experience_years || '',
+              specialization: data.profile.specialization || '',
+              bio: data.profile.bio || ''
+            });
+          } else {
+            // No profile found, set default with user email
+            setProfileData(prev => ({
+              ...prev,
+              email: parsedUser.email
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+          setProfileData(prev => ({
+            ...prev,
+            email: parsedUser.email
+          }));
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchProfile();
   }, []);
 
   // Handle window resize
@@ -102,14 +143,49 @@ const TeacherProfile = () => {
     }));
   };
 
-  const handleSaveChanges = () => {
-    // Here you would typically save to backend
-    setIsEditing(false);
-    // Show success message or handle save logic
+  const handleSaveChanges = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/save-teacher-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          dateOfBirth: profileData.dateOfBirth,
+          phone: profileData.phone,
+          address: profileData.address,
+          institution: profileData.institution,
+          department: profileData.department,
+          qualification: profileData.qualification,
+          experienceYears: profileData.experienceYears ? parseInt(profileData.experienceYears) : null,
+          specialization: profileData.specialization,
+          bio: profileData.bio
+        }),
+      });
+
+      if (response.ok) {
+        setIsEditing(false);
+        alert('Profile updated successfully!');
+      } else {
+        alert('Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to connect to server. Please try again.');
+    }
   };
 
-  const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const getInitials = (firstName, lastName) => {
+    const first = firstName ? firstName[0] : '';
+    const last = lastName ? lastName[0] : '';
+    return (first + last).toUpperCase() || 'T';
+  };
+
+  const getFullName = () => {
+    return `${profileData.firstName} ${profileData.lastName}`.trim() || 'Teacher';
   };
 
   return (
@@ -224,24 +300,27 @@ const TeacherProfile = () => {
         {/* Profile Content */}
         <div className="profile-content">
           <div className="profile-header">
-            <h2>Administrator Profile</h2>
+            <h2>Teacher Profile</h2>
           </div>
 
-          <div className="profile-main">
-            {/* Profile Card */}
-            <div className="profile-card">
-              <div className="profile-avatar">
-                <div className="avatar-circle">
-                  <span>{getInitials(profileData.fullName)}</span>
+          {loading ? (
+            <div className="loading-message">Loading profile...</div>
+          ) : (
+            <div className="profile-main">
+              {/* Profile Card */}
+              <div className="profile-card">
+                <div className="profile-avatar">
+                  <div className="avatar-circle">
+                    <span>{getInitials(profileData.firstName, profileData.lastName)}</span>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="profile-info">
-                <h3>{profileData.fullName}</h3>
-                <p className="profile-title">{profileData.position}</p>
-                <p className="profile-department">{profileData.department}</p>
-                <p className="profile-institution">{profileData.institution}</p>
-              </div>
+                
+                <div className="profile-info">
+                  <h3>{getFullName()}</h3>
+                  <p className="profile-title">{profileData.email}</p>
+                  <p className="profile-department">{profileData.department}</p>
+                  <p className="profile-institution">{profileData.institution}</p>
+                </div>
 
               {/* Admin Stats */}
               <div className="admin-stats">
@@ -279,59 +358,63 @@ const TeacherProfile = () => {
               <div className="info-grid">
                 <div className="info-row">
                   <div className="info-field">
-                    <label>Full Name</label>
+                    <label>First Name</label>
                     {isEditing ? (
                       <input
                         type="text"
-                        value={profileData.fullName}
-                        onChange={(e) => handleInputChange('fullName', e.target.value)}
+                        value={profileData.firstName}
+                        onChange={(e) => handleInputChange('firstName', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.fullName}</span>
+                      <span>{profileData.firstName || 'Not provided'}</span>
                     )}
                   </div>
+                  <div className="info-field">
+                    <label>Last Name</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={profileData.lastName}
+                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      />
+                    ) : (
+                      <span>{profileData.lastName || 'Not provided'}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="info-row">
                   <div className="info-field">
                     <label>Email Address</label>
+                    <span>{profileData.email}</span>
+                  </div>
+                  <div className="info-field">
+                    <label>Date of Birth</label>
                     {isEditing ? (
                       <input
-                        type="email"
-                        value={profileData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        type="date"
+                        value={profileData.dateOfBirth}
+                        onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.email}</span>
+                      <span>{profileData.dateOfBirth || 'Not provided'}</span>
                     )}
                   </div>
                 </div>
 
                 <div className="info-row">
                   <div className="info-field">
-                    <label>Position/Title</label>
+                    <label>Phone Number</label>
                     {isEditing ? (
                       <input
-                        type="text"
-                        value={profileData.position}
-                        onChange={(e) => handleInputChange('position', e.target.value)}
+                        type="tel"
+                        value={profileData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.position}</span>
+                      <span>{profileData.phone || 'Not provided'}</span>
                     )}
                   </div>
-                  <div className="info-field">
-                    <label>Department</label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={profileData.department}
-                        onChange={(e) => handleInputChange('department', e.target.value)}
-                      />
-                    ) : (
-                      <span>{profileData.department}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="info-row">
                   <div className="info-field">
                     <label>Institution</label>
                     {isEditing ? (
@@ -341,19 +424,78 @@ const TeacherProfile = () => {
                         onChange={(e) => handleInputChange('institution', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.institution}</span>
+                      <span>{profileData.institution || 'Not provided'}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="info-row">
+                  <div className="info-field">
+                    <label>Department</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={profileData.department}
+                        onChange={(e) => handleInputChange('department', e.target.value)}
+                      />
+                    ) : (
+                      <span>{profileData.department || 'Not provided'}</span>
                     )}
                   </div>
                   <div className="info-field">
-                    <label>Phone Number</label>
+                    <label>Qualification</label>
                     {isEditing ? (
                       <input
-                        type="tel"
-                        value={profileData.phoneNumber}
-                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                        type="text"
+                        value={profileData.qualification}
+                        onChange={(e) => handleInputChange('qualification', e.target.value)}
                       />
                     ) : (
-                      <span>{profileData.phoneNumber}</span>
+                      <span>{profileData.qualification || 'Not provided'}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="info-row">
+                  <div className="info-field">
+                    <label>Years of Experience</label>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={profileData.experienceYears}
+                        onChange={(e) => handleInputChange('experienceYears', e.target.value)}
+                        min="0"
+                        max="50"
+                      />
+                    ) : (
+                      <span>{profileData.experienceYears || 'Not provided'}</span>
+                    )}
+                  </div>
+                  <div className="info-field">
+                    <label>Address</label>
+                    {isEditing ? (
+                      <textarea
+                        value={profileData.address}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        rows="2"
+                      />
+                    ) : (
+                      <span>{profileData.address || 'Not provided'}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="info-row full-width">
+                  <div className="info-field">
+                    <label>Specialization</label>
+                    {isEditing ? (
+                      <textarea
+                        value={profileData.specialization}
+                        onChange={(e) => handleInputChange('specialization', e.target.value)}
+                        rows="3"
+                      />
+                    ) : (
+                      <p>{profileData.specialization || 'Not provided'}</p>
                     )}
                   </div>
                 </div>
@@ -363,12 +505,12 @@ const TeacherProfile = () => {
                     <label>Professional Bio</label>
                     {isEditing ? (
                       <textarea
-                        value={profileData.professionalBio}
-                        onChange={(e) => handleInputChange('professionalBio', e.target.value)}
+                        value={profileData.bio}
+                        onChange={(e) => handleInputChange('bio', e.target.value)}
                         rows="4"
                       />
                     ) : (
-                      <p>{profileData.professionalBio}</p>
+                      <p>{profileData.bio || 'Not provided'}</p>
                     )}
                   </div>
                 </div>
@@ -384,6 +526,7 @@ const TeacherProfile = () => {
               )}
             </div>
           </div>
+        )}
         </div>
       </div>
     </div>

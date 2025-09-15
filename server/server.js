@@ -45,6 +45,7 @@ async function initializeDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        role ENUM('student', 'admin') DEFAULT 'student',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -85,6 +86,7 @@ async function initializeDatabase() {
         test_code VARCHAR(10) UNIQUE NOT NULL,
         description TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP NULL,
         is_active BOOLEAN DEFAULT TRUE,
         FOREIGN KEY (teacher_id) REFERENCES users(id)
       )
@@ -118,14 +120,86 @@ async function initializeDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         submission_id INT NOT NULL,
         question_id INT NOT NULL,
-        answer_text TEXT,
-        answered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        answer TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (submission_id) REFERENCES student_test_submissions(id) ON DELETE CASCADE,
-        FOREIGN KEY (question_id) REFERENCES test_questions(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_submission_question (submission_id, question_id)
+        FOREIGN KEY (question_id) REFERENCES test_questions(id) ON DELETE CASCADE
       )
     `);
-    
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS student_profiles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL UNIQUE,
+        first_name VARCHAR(100) NOT NULL,
+        last_name VARCHAR(100) NOT NULL,
+        date_of_birth DATE,
+        phone VARCHAR(20),
+        address TEXT,
+        school_college VARCHAR(255),
+        grade_year VARCHAR(50),
+        interests TEXT,
+        goals TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Add missing columns if they don't exist (migration)
+    try {
+      // Check if address column exists in student_profiles
+      const [studentColumns] = await connection.query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'mini_project_db' 
+        AND TABLE_NAME = 'student_profiles' 
+        AND COLUMN_NAME = 'address'
+      `);
+      
+      if (studentColumns.length === 0) {
+        await connection.query(`ALTER TABLE student_profiles ADD COLUMN address TEXT`);
+        console.log('Added address column to student_profiles');
+      }
+
+      // Check if address column exists in teacher_profiles
+      const [teacherColumns] = await connection.query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'mini_project_db' 
+        AND TABLE_NAME = 'teacher_profiles' 
+        AND COLUMN_NAME = 'address'
+      `);
+      
+      if (teacherColumns.length === 0) {
+        await connection.query(`ALTER TABLE teacher_profiles ADD COLUMN address TEXT`);
+        console.log('Added address column to teacher_profiles');
+      }
+    } catch (error) {
+      console.log('Column migration error:', error.message);
+    }
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS teacher_profiles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL UNIQUE,
+        first_name VARCHAR(100) NOT NULL,
+        last_name VARCHAR(100) NOT NULL,
+        date_of_birth DATE,
+        phone VARCHAR(20),
+        address TEXT,
+        institution VARCHAR(255),
+        department VARCHAR(100),
+        qualification VARCHAR(255),
+        experience_years INT,
+        specialization TEXT,
+        bio TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
     console.log('Database tables initialized successfully');
     
     // Check existing lesson completions
@@ -208,7 +282,17 @@ app.post('/api/signup', async (req, res) => {
     );
     console.log('User inserted successfully:', result);
     
-    res.status(201).json({ message: 'User created successfully' });
+    // Return user data for immediate login
+    const user = {
+      id: result.insertId,
+      email: email,
+      role: role
+    };
+    
+    res.status(201).json({ 
+      message: 'User created successfully',
+      user: user
+    });
   } catch (error) {
     console.error('Signup error:', error);
     if (error.code === 'ER_DUP_ENTRY') {
@@ -697,29 +781,192 @@ app.get('/api/test-submissions/:testId', async (req, res) => {
   }
 });
 
-// Delete test
+// Delete test endpoint
 app.delete('/api/delete-test/:testId', async (req, res) => {
-  const { testId } = req.params;
-  
   try {
+    const { testId } = req.params;
+    
     const connection = await pool.getConnection();
     
-    // Set test as inactive instead of deleting (to preserve data integrity)
-    await connection.execute(
-      'UPDATE tests SET is_active = 0 WHERE id = ?',
+    // Soft delete by updating deleted_at timestamp
+    await connection.query(
+      'UPDATE tests SET deleted_at = NOW() WHERE id = ?',
       [testId]
     );
     
     connection.release();
-    
-    res.json({ 
-      success: true, 
-      message: 'Test deleted successfully' 
-    });
-    
+    res.json({ success: true, message: 'Test deleted successfully' });
   } catch (error) {
     console.error('Error deleting test:', error);
     res.status(500).json({ error: 'Failed to delete test' });
+  }
+});
+
+// Save student profile endpoint
+app.post('/api/save-student-profile', async (req, res) => {
+  try {
+    console.log('Received student profile save request:', req.body);
+    
+    const {
+      userId,
+      firstName,
+      lastName,
+      dateOfBirth,
+      phone,
+      address,
+      schoolCollege,
+      gradeYear,
+      interests,
+      goals
+    } = req.body;
+
+    // Validate required fields
+    if (!userId || !firstName || !lastName) {
+      console.log('Missing required fields:', { userId, firstName, lastName });
+      return res.status(400).json({ error: 'Missing required fields: userId, firstName, lastName' });
+    }
+
+    const connection = await pool.getConnection();
+    
+    console.log('Executing database query with values:', [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, interests, goals]);
+    
+    // Insert or update student profile
+    const result = await connection.query(`
+      INSERT INTO student_profiles 
+      (user_id, first_name, last_name, date_of_birth, phone, address, school_college, grade_year, interests, goals)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+      first_name = VALUES(first_name),
+      last_name = VALUES(last_name),
+      date_of_birth = VALUES(date_of_birth),
+      phone = VALUES(phone),
+      address = VALUES(address),
+      school_college = VALUES(school_college),
+      grade_year = VALUES(grade_year),
+      interests = VALUES(interests),
+      goals = VALUES(goals),
+      updated_at = CURRENT_TIMESTAMP
+    `, [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, interests, goals]);
+    
+    console.log('Database query result:', result);
+    
+    connection.release();
+    res.json({ success: true, message: 'Student profile saved successfully' });
+  } catch (error) {
+    console.error('Error saving student profile:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Failed to save student profile', details: error.message });
+  }
+});
+
+// Save teacher profile endpoint
+app.post('/api/save-teacher-profile', async (req, res) => {
+  try {
+    console.log('Received teacher profile save request:', req.body);
+    
+    const {
+      userId,
+      firstName,
+      lastName,
+      dateOfBirth,
+      phone,
+      address,
+      institution,
+      department,
+      qualification,
+      experienceYears,
+      specialization,
+      bio
+    } = req.body;
+
+    // Validate required fields
+    if (!userId || !firstName || !lastName) {
+      console.log('Missing required fields:', { userId, firstName, lastName });
+      return res.status(400).json({ error: 'Missing required fields: userId, firstName, lastName' });
+    }
+
+    const connection = await pool.getConnection();
+    
+    console.log('Executing database query with values:', [userId, firstName, lastName, dateOfBirth, phone, address, institution, department, qualification, experienceYears, specialization, bio]);
+    
+    // Insert or update teacher profile
+    const result = await connection.query(`
+      INSERT INTO teacher_profiles 
+      (user_id, first_name, last_name, date_of_birth, phone, address, institution, department, qualification, experience_years, specialization, bio)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+      first_name = VALUES(first_name),
+      last_name = VALUES(last_name),
+      date_of_birth = VALUES(date_of_birth),
+      phone = VALUES(phone),
+      address = VALUES(address),
+      institution = VALUES(institution),
+      department = VALUES(department),
+      qualification = VALUES(qualification),
+      experience_years = VALUES(experience_years),
+      specialization = VALUES(specialization),
+      bio = VALUES(bio),
+      updated_at = CURRENT_TIMESTAMP
+    `, [userId, firstName, lastName, dateOfBirth, phone, address, institution, department, qualification, experienceYears, specialization, bio]);
+    
+    console.log('Database query result:', result);
+    
+    connection.release();
+    res.json({ success: true, message: 'Teacher profile saved successfully' });
+  } catch (error) {
+    console.error('Error saving teacher profile:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Failed to save teacher profile', details: error.message });
+  }
+});
+
+// Get student profile endpoint
+app.get('/api/student-profile/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const connection = await pool.getConnection();
+    
+    const [profiles] = await connection.query(
+      'SELECT * FROM student_profiles WHERE user_id = ?',
+      [userId]
+    );
+    
+    connection.release();
+    
+    if (profiles.length === 0) {
+      return res.json({ profile: null });
+    }
+    
+    res.json({ profile: profiles[0] });
+  } catch (error) {
+    console.error('Error fetching student profile:', error);
+    res.status(500).json({ error: 'Failed to fetch student profile' });
+  }
+});
+
+// Get teacher profile endpoint
+app.get('/api/teacher-profile/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const connection = await pool.getConnection();
+    
+    const [profiles] = await connection.query(
+      'SELECT * FROM teacher_profiles WHERE user_id = ?',
+      [userId]
+    );
+    
+    connection.release();
+    
+    if (profiles.length === 0) {
+      return res.json({ profile: null });
+    }
+    
+    res.json({ profile: profiles[0] });
+  } catch (error) {
+    console.error('Error fetching teacher profile:', error);
+    res.status(500).json({ error: 'Failed to fetch teacher profile' });
   }
 });
 

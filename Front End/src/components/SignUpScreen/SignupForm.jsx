@@ -38,8 +38,15 @@ const SignupForm = () => {
       console.log('Signup response data:', data);
 
       if (response.ok) {
-        // Redirect to login page after successful signup
-        navigate("/login");
+        // Store user data temporarily and redirect to profile setup
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Redirect to respective detail page based on role
+        if (role === 'student') {
+          navigate('/student-details');
+        } else if (role === 'admin') {
+          navigate('/teacher-details');
+        }
       } else {
         setError(data.message);
       }
