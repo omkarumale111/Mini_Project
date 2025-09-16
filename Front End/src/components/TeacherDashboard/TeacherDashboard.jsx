@@ -28,6 +28,7 @@ import logo from '../../assets/Logo.png';
 const TeacherDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [upcomingTestsCount, setUpcomingTestsCount] = useState(0);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
@@ -36,9 +37,27 @@ const TeacherDashboard = () => {
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
-      setUser(JSON.parse(userData));
+      const user = JSON.parse(userData);
+      setUser(user);
+      fetchUpcomingTests(user.id);
     }
   }, []);
+
+  // Fetch upcoming tests count
+  const fetchUpcomingTests = async (teacherId) => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/upcoming-tests/${teacherId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setUpcomingTestsCount(data.count || 0);
+      } else {
+        console.error('Failed to fetch upcoming tests:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching upcoming tests:', error);
+    }
+  };
 
   // Handle window resize
   useEffect(() => {
@@ -143,13 +162,6 @@ const TeacherDashboard = () => {
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToSection('/manage-events')}
-            >
-              <RiCalendarEventLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Manage Events</span>}
-            </li>
-            <li 
-              className="nav-item"
               onClick={() => navigateToSection('/reports')}
             >
               <RiBarChartLine className="nav-icon" />
@@ -198,35 +210,17 @@ const TeacherDashboard = () => {
 
         {/* Stats Cards */}
         <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon blue">
-              <RiFileTextLine />
-            </div>
-            <div className="stat-info">
-              <h3>Active Tests</h3>
-              <span className="stat-number">0</span>
-            </div>
-          </div>
           
           <div className="stat-card">
             <div className="stat-icon green">
-              <RiGroupLine />
+              <RiCalendarEventLine />
             </div>
             <div className="stat-info">
-              <h3>Student Submissions</h3>
+              <h3>Upcoming Events</h3>
               <span className="stat-number">0</span>
             </div>
           </div>
           
-          <div className="stat-card">
-            <div className="stat-icon yellow">
-              <RiBarChartLine />
-            </div>
-            <div className="stat-info">
-              <h3>Average Score</h3>
-              <span className="stat-number">0%</span>
-            </div>
-          </div>
           
           <div className="stat-card">
             <div className="stat-icon purple">
@@ -234,7 +228,7 @@ const TeacherDashboard = () => {
             </div>
             <div className="stat-info">
               <h3>Upcoming Tests</h3>
-              <span className="stat-number">2</span>
+              <span className="stat-number">{upcomingTestsCount}</span>
             </div>
           </div>
         </div>
@@ -271,15 +265,6 @@ const TeacherDashboard = () => {
               <h3>MANAGE TESTS</h3>
               <p>View, edit, and organize your existing tests with comprehensive management tools.</p>
               <button onClick={() => navigateToSection('/manage-tests')}>MANAGE</button>
-            </div>
-            
-            <div className="action-card events">
-              <div className="action-icon">
-                <RiMegaphoneLine />
-              </div>
-              <h3>EVENTS & ANNOUNCEMENT</h3>
-              <p>Publish important academic events and updates in real-time to keep students informed.</p>
-              <button onClick={() => navigateToSection('/announcements')}>MANAGE</button>
             </div>
             
             <div className="action-card tips">

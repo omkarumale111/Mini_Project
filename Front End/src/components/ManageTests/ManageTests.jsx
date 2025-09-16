@@ -225,13 +225,6 @@ const ManageTests = () => {
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToSection('/manage-events')}
-            >
-              <RiCalendarEventLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Manage Events</span>}
-            </li>
-            <li 
-              className="nav-item"
               onClick={() => navigateToSection('/reports')}
             >
               <RiBarChartLine className="nav-icon" />

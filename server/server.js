@@ -700,6 +700,27 @@ app.get('/api/validate-test-code/:testCode', async (req, res) => {
   }
 });
 
+// Get upcoming tests count for teacher dashboard
+app.get('/api/upcoming-tests/:teacherId', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const connection = await pool.getConnection();
+    
+    const [tests] = await connection.execute(
+      'SELECT COUNT(*) as count FROM tests WHERE teacher_id = ? AND is_active = 1 AND start_time IS NOT NULL AND start_time > NOW()',
+      [teacherId]
+    );
+    
+    connection.release();
+    
+    res.json({ count: tests[0].count });
+    
+  } catch (error) {
+    console.error('Error fetching upcoming tests:', error);
+    res.status(500).json({ error: 'Failed to fetch upcoming tests' });
+  }
+});
+
 // Get test data for students
 app.get('/api/test/:testCode', async (req, res) => {
   const { testCode } = req.params;

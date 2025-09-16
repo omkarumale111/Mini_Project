@@ -226,13 +226,6 @@ const CreateTest = () => {
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToSection('/manage-events')}
-            >
-              <RiCalendarEventLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Manage Events</span>}
-            </li>
-            <li 
-              className="nav-item"
               onClick={() => navigateToSection('/reports')}
             >
               <RiBarChartLine className="nav-icon" />
@@ -293,12 +286,12 @@ const CreateTest = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Description</label>
+            <label htmlFor="description">Description (Optional)</label>
             <textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter test description (optional)"
+              placeholder="Enter test description"
               rows="3"
             />
           </div>
