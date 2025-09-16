@@ -24,10 +24,8 @@ const Module1Lesson2 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    leaveRequest: '',
-    apologyEmail: '',
-    complaintEmail: '',
-    inquiryEmail: ''
+    extensionEmail: '',
+    complaintEmail: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -135,7 +133,7 @@ const Module1Lesson2 = () => {
 
   const handleGetFeedback = async () => {
     // Check if all questions are answered
-    if (!answers.leaveRequest || !answers.apologyEmail || !answers.complaintEmail || !answers.inquiryEmail) {
+    if (!answers.extensionEmail || !answers.complaintEmail) {
       alert('Please answer all questions before getting feedback.');
       return;
     }
@@ -145,7 +143,7 @@ const Module1Lesson2 = () => {
 
     try {
       // Combine all answers into one text for analysis
-      const combinedText = `Leave Request Email: ${answers.leaveRequest}\n\nApology Email: ${answers.apologyEmail}\n\nComplaint Email: ${answers.complaintEmail}\n\nInquiry Email: ${answers.inquiryEmail}`;
+      const combinedText = `Extension Email: ${answers.extensionEmail}\n\nComplaint Email: ${answers.complaintEmail}`;
 
       const response = await fetch('http://localhost:5001/api/analyze-text', {
         method: 'POST',
@@ -199,10 +197,8 @@ const Module1Lesson2 = () => {
 
   const handleReset = () => {
     setAnswers({
-      leaveRequest: '',
-      apologyEmail: '',
-      complaintEmail: '',
-      inquiryEmail: ''
+      extensionEmail: '',
+      complaintEmail: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -332,96 +328,50 @@ const Module1Lesson2 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Email Writing Simulations</h3>
                     <p>
-                      You need to write the following emails:
+                      Practice writing professional emails through real-world scenarios. Complete both simulations below.
                     </p>
-                    <ul style={{ color: 'black' }}>
-                      <li>A <strong>request email</strong> asking HR for leave approval</li>
-                      <li>An <strong>apology email</strong> to a client for a shipment delay</li>
-                      <li>A <strong>complaint email</strong> to IT about a non-functioning laptop</li>
-                      <li>An <strong>inquiry email</strong> to a training institute about course fees</li>
-                    </ul>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
-                      <label htmlFor="leaveRequest">
-                        <h4>1. Request Email - Leave Approval to HR</h4>
+                      <label htmlFor="extensionEmail">
+                        <h4>Simulation 1: Project Extension Request</h4>
                         <p className="instruction">
-                          Write a professional email requesting leave approval. Include subject line, proper greeting, 
-                          reason for leave, dates, and appropriate closing.
+                          Write an email to your professor requesting an extension for a project deadline.
+                          <br/><strong>Word Limit:</strong> 120–150 words
                         </p>
                       </label>
                       <textarea
-                        id="leaveRequest"
-                        value={answers.leaveRequest}
-                        onChange={(e) => handleInputChange('leaveRequest', e.target.value)}
-                        placeholder="Subject: [Your subject line]&#10;&#10;Dear [Recipient],&#10;&#10;[Your email content]&#10;&#10;Best regards,&#10;[Your name]"
-                        rows="6"
+                        id="extensionEmail"
+                        value={answers.extensionEmail}
+                        onChange={(e) => handleInputChange('extensionEmail', e.target.value)}
+                        placeholder="Subject: [Your subject line]&#10;&#10;Dear Professor [Name],&#10;&#10;[Your email content]&#10;&#10;Best regards,&#10;[Your name]"
+                        rows="8"
                       />
                       <div className="character-count">
-                        {answers.leaveRequest?.length || 0} characters
-                      </div>
-                    </div>
-
-                    <div className="exercise-item">
-                      <label htmlFor="apologyEmail">
-                        <h4>2. Apology Email - Shipment Delay to Client</h4>
-                        <p className="instruction">
-                          Write an apology email to a client about a shipment delay. Acknowledge the issue, 
-                          explain briefly, apologize sincerely, and provide next steps.
-                        </p>
-                      </label>
-                      <textarea
-                        id="apologyEmail"
-                        value={answers.apologyEmail}
-                        onChange={(e) => handleInputChange('apologyEmail', e.target.value)}
-                        placeholder="Subject: [Your subject line]&#10;&#10;Dear [Client name],&#10;&#10;[Your email content]&#10;&#10;Sincerely,&#10;[Your name]"
-                        rows="6"
-                      />
-                      <div className="character-count">
-                        {answers.apologyEmail?.length || 0} characters
+                        {answers.extensionEmail?.length || 0} characters
                       </div>
                     </div>
 
                     <div className="exercise-item">
                       <label htmlFor="complaintEmail">
-                        <h4>3. Complaint Email - Non-functioning Laptop to IT</h4>
+                        <h4>Simulation 2: Delivery Complaint</h4>
                         <p className="instruction">
-                          Write a complaint email to IT about a laptop issue. Be clear about the problem, 
-                          provide relevant details, and request specific action.
+                          Draft a complaint email to a delivery company about a damaged product.
+                          <br/><strong>Word Limit:</strong> 100–120 words
                         </p>
                       </label>
                       <textarea
                         id="complaintEmail"
                         value={answers.complaintEmail}
                         onChange={(e) => handleInputChange('complaintEmail', e.target.value)}
-                        placeholder="Subject: [Your subject line]&#10;&#10;Dear IT Support,&#10;&#10;[Your email content]&#10;&#10;Thank you,&#10;[Your name]"
-                        rows="6"
+                        placeholder="Subject: [Your subject line]&#10;&#10;Dear Customer Service,&#10;&#10;[Your email content]&#10;&#10;Sincerely,&#10;[Your name]"
+                        rows="8"
                       />
                       <div className="character-count">
                         {answers.complaintEmail?.length || 0} characters
-                      </div>
-                    </div>
-
-                    <div className="exercise-item">
-                      <label htmlFor="inquiryEmail">
-                        <h4>4. Inquiry Email - Course Fees to Training Institute</h4>
-                        <p className="instruction">
-                          Write an inquiry email asking about course fees and details. Be specific about 
-                          what information you need and maintain a professional tone.
-                        </p>
-                      </label>
-                      <textarea
-                        id="inquiryEmail"
-                        value={answers.inquiryEmail}
-                        onChange={(e) => handleInputChange('inquiryEmail', e.target.value)}
-                        placeholder="Subject: [Your subject line]&#10;&#10;Dear [Institute name],&#10;&#10;[Your email content]&#10;&#10;Best regards,&#10;[Your name]"
-                        rows="6"
-                      />
-                      <div className="character-count">
-                        {answers.inquiryEmail?.length || 0} characters
                       </div>
                     </div>
 
@@ -429,14 +379,14 @@ const Module1Lesson2 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.leaveRequest || !answers.apologyEmail || !answers.complaintEmail || !answers.inquiryEmail}
+                        disabled={isLoading || !answers.extensionEmail || !answers.complaintEmail}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.leaveRequest || !answers.apologyEmail || !answers.complaintEmail || !answers.inquiryEmail}
+                        disabled={!answers.extensionEmail || !answers.complaintEmail}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson

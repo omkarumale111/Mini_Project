@@ -25,7 +25,6 @@ const Module1Lesson4 = () => {
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
     memo: '',
-    notice: '',
     slackUpdate: ''
   });
   const [feedback, setFeedback] = useState(null);
@@ -134,8 +133,8 @@ const Module1Lesson4 = () => {
 
   const handleGetFeedback = async () => {
     // Check if all communications are written
-    if (!answers.memo || !answers.notice || !answers.slackUpdate) {
-      alert('Please complete all communication exercises before getting feedback.');
+    if (!answers.memo || !answers.slackUpdate) {
+      alert('Please complete both simulations before getting feedback.');
       return;
     }
 
@@ -144,7 +143,7 @@ const Module1Lesson4 = () => {
 
     try {
       // Combine all answers into one text for analysis
-      const combinedText = `Company Memo: ${answers.memo}\n\nFire Drill Notice: ${answers.notice}\n\nSlack Meeting Reminder: ${answers.slackUpdate}`;
+      const combinedText = `Memo: ${answers.memo}\n\nSlack Update: ${answers.slackUpdate}`;
 
       const response = await fetch('http://localhost:5001/api/analyze-text', {
         method: 'POST',
@@ -199,7 +198,6 @@ const Module1Lesson4 = () => {
   const handleReset = () => {
     setAnswers({
       memo: '',
-      notice: '',
       slackUpdate: ''
     });
     setFeedback(null);
@@ -330,31 +328,26 @@ const Module1Lesson4 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Internal Communications Simulations</h3>
                     <p>
-                      Your company is shifting to a <strong>hybrid work model</strong>. Draft the following:
+                      Practice writing effective internal communications through real-world scenarios. Complete both simulations below.
                     </p>
-                    <ul>
-                      <li>A <strong>memo</strong> to staff announcing the new schedule</li>
-                      <li>A <strong>notice</strong> about an upcoming fire drill</li>
-                      <li>A <strong>Slack/Teams update</strong> reminding everyone about tomorrow's team meeting</li>
-                    </ul>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
                       <label htmlFor="memo">
-                        <h4>1. Company Memo - Hybrid Work Model Announcement</h4>
+                        <h4>Simulation 1: Office Hours Change Memo</h4>
                         <p className="instruction">
-                          Write a formal memo announcing the new hybrid work policy. Include header (TO, FROM, DATE, SUBJECT), 
-                          clear explanation of the policy, implementation date, and contact for questions.
+                          Write a memo announcing a shift in office working hours (from 9 AM–5 PM to 10 AM–6 PM).
+                          <br/><strong>Word Limit:</strong> 80–100 words
                         </p>
                       </label>
                       <textarea
                         id="memo"
                         value={answers.memo}
                         onChange={(e) => handleInputChange('memo', e.target.value)}
-                        placeholder="MEMORANDUM&#10;&#10;TO: All Staff&#10;FROM: [Your name/title]&#10;DATE: [Current date]&#10;SUBJECT: Implementation of Hybrid Work Model&#10;&#10;[Memo content]"
+                        placeholder="MEMORANDUM&#10;&#10;TO: All Staff&#10;FROM: [Your name/title]&#10;DATE: [Current date]&#10;SUBJECT: Change in Office Working Hours&#10;&#10;[Memo content announcing the schedule change]"
                         rows="8"
                       />
                       <div className="character-count">
@@ -363,39 +356,19 @@ const Module1Lesson4 = () => {
                     </div>
 
                     <div className="exercise-item">
-                      <label htmlFor="notice">
-                        <h4>2. Fire Drill Notice</h4>
-                        <p className="instruction">
-                          Write a clear, concise notice about an upcoming fire drill. Include date, time, 
-                          procedures to follow, and any special instructions.
-                        </p>
-                      </label>
-                      <textarea
-                        id="notice"
-                        value={answers.notice}
-                        onChange={(e) => handleInputChange('notice', e.target.value)}
-                        placeholder="NOTICE: FIRE DRILL&#10;&#10;[Notice content with date, time, and procedures]"
-                        rows="6"
-                      />
-                      <div className="character-count">
-                        {answers.notice?.length || 0} characters
-                      </div>
-                    </div>
-
-                    <div className="exercise-item">
                       <label htmlFor="slackUpdate">
-                        <h4>3. Slack/Teams Meeting Reminder</h4>
+                        <h4>Simulation 2: System Maintenance Update</h4>
                         <p className="instruction">
-                          Write a casual but professional message reminding the team about tomorrow's meeting. 
-                          Include time, platform/location, agenda items, and any preparation needed.
+                          Draft a Slack/Teams update informing your team about a scheduled system maintenance tomorrow at 7 PM.
+                          <br/><strong>Word Limit:</strong> 40–60 words
                         </p>
                       </label>
                       <textarea
                         id="slackUpdate"
                         value={answers.slackUpdate}
                         onChange={(e) => handleInputChange('slackUpdate', e.target.value)}
-                        placeholder="👋 Hey team! Just a friendly reminder about tomorrow's meeting...&#10;&#10;[Meeting details and agenda]"
-                        rows="5"
+                        placeholder="📢 Team update: Scheduled system maintenance tomorrow at 7 PM...&#10;&#10;[Brief, clear message about the maintenance]"
+                        rows="6"
                       />
                       <div className="character-count">
                         {answers.slackUpdate?.length || 0} characters
@@ -406,14 +379,14 @@ const Module1Lesson4 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.memo || !answers.notice || !answers.slackUpdate}
+                        disabled={isLoading || !answers.memo || !answers.slackUpdate}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.memo || !answers.notice || !answers.slackUpdate}
+                        disabled={!answers.memo || !answers.slackUpdate}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson

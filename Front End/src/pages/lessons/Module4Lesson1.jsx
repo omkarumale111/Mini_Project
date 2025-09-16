@@ -24,8 +24,12 @@ const Module4Lesson1 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    sourceEvaluation: ''
+    sourceEvaluation: '',
+    researchPlan: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -78,11 +82,66 @@ const Module4Lesson1 = () => {
     navigate('/login');
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = async (field, value) => {
     setAnswers(prev => ({
       ...prev,
       [field]: value
     }));
+
+    // Save to database
+    if (user && user.id) {
+      try {
+        await fetch('http://localhost:5001/api/lesson-inputs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            student_id: user.id,
+            lesson_id: 'm4l1',
+            input_field: field,
+            input_value: value
+          })
+        });
+      } catch (error) {
+        console.error('Error saving lesson input:', error);
+      }
+    }
+  };
+
+  const handleGetFeedback = async () => {
+    if (!answers.sourceEvaluation || !answers.researchPlan) {
+      alert('Please complete both research method simulations before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const combinedText = `Source Evaluation: ${answers.sourceEvaluation}\n\nResearch Plan: ${answers.researchPlan}`;
+      
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: combinedText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your responses. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -110,6 +169,15 @@ const Module4Lesson1 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      sourceEvaluation: '',
+      researchPlan: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -231,60 +299,130 @@ const Module4Lesson1 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  Given a list of sources, identify which are <strong>credible</strong> and which are <strong>not</strong>, 
-                  and explain your reasoning.
-                </p>
-                <div className="source-list">
-                  <h4>Sources to Evaluate:</h4>
-                  <ol>
-                    <li><strong>Wikipedia article</strong> on climate change</li>
-                    <li><strong>Peer-reviewed journal</strong> from Nature Climate Change</li>
-                    <li><strong>News website</strong> article from BBC News</li>
-                    <li><strong>Random blog</strong> post by an anonymous author</li>
-                    <li><strong>Government report</strong> from NASA's Climate Change Division</li>
-                  </ol>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Research Methods and Sources Simulations</h3>
+                    <p>
+                      Practice evaluating source credibility and developing systematic research approaches for academic writing. Complete both simulations below.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="sourceEvaluation">
+                        <h4>Simulation 1: Source Credibility Evaluation</h4>
+                        <p className="instruction">
+                          Evaluate these 3 sources for a research paper on renewable energy:
+                          <br/>1. Wikipedia article on solar power
+                          <br/>2. Peer-reviewed study from Journal of Renewable Energy
+                          <br/>3. Blog post by energy company CEO
+                          <br/>Rate each source's credibility and explain your reasoning.
+                          <br/><strong>Word Limit:</strong> 120–150 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="sourceEvaluation"
+                        value={answers.sourceEvaluation}
+                        onChange={(e) => handleInputChange('sourceEvaluation', e.target.value)}
+                        placeholder="Evaluate each source's credibility and provide reasoning..."
+                        rows="7"
+                      />
+                      <div className="character-count">
+                        {answers.sourceEvaluation?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="researchPlan">
+                        <h4>Simulation 2: Research Strategy Development</h4>
+                        <p className="instruction">
+                          Create a systematic research plan for the topic: "Impact of social media on teenage mental health."
+                          Include: research questions, source types needed, search strategies, and evaluation criteria.
+                          <br/><strong>Word Limit:</strong> 150–180 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="researchPlan"
+                        value={answers.researchPlan}
+                        onChange={(e) => handleInputChange('researchPlan', e.target.value)}
+                        placeholder="Develop a comprehensive research plan with questions, sources, and strategies..."
+                        rows="8"
+                      />
+                      <div className="character-count">
+                        {answers.researchPlan?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.sourceEvaluation || !answers.researchPlan}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.sourceEvaluation || !answers.researchPlan}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset All
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="sourceEvaluation">
-                    <h4>Source Credibility Analysis</h4>
-                    <p className="instruction">
-                      For each source, determine if it's credible or not credible and explain your reasoning. Consider:
-                      <br />• Author expertise and credentials
-                      <br />• Publication standards and peer review
-                      <br />• Bias and objectivity
-                      <br />• Currency and relevance
-                      <br />• Supporting evidence and citations
-                    </p>
-                  </label>
-                  <textarea
-                    id="sourceEvaluation"
-                    value={answers.sourceEvaluation}
-                    onChange={(e) => handleInputChange('sourceEvaluation', e.target.value)}
-                    placeholder="SOURCE 1: Wikipedia article on climate change&#10;Credibility: [Credible/Not Credible]&#10;Reasoning: [Explain your evaluation based on credibility criteria]&#10;&#10;SOURCE 2: Peer-reviewed journal from Nature Climate Change&#10;Credibility: [Credible/Not Credible]&#10;Reasoning: [Explain your evaluation based on credibility criteria]&#10;&#10;SOURCE 3: News website article from BBC News&#10;Credibility: [Credible/Not Credible]&#10;Reasoning: [Explain your evaluation based on credibility criteria]&#10;&#10;SOURCE 4: Random blog post by anonymous author&#10;Credibility: [Credible/Not Credible]&#10;Reasoning: [Explain your evaluation based on credibility criteria]&#10;&#10;SOURCE 5: Government report from NASA's Climate Change Division&#10;Credibility: [Credible/Not Credible]&#10;Reasoning: [Explain your evaluation based on credibility criteria]&#10;&#10;SUMMARY:&#10;[Provide general guidelines for evaluating source credibility]"
-                    rows="20"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <h3>AI Feedback</h3>
+                    <p>Complete both research simulations and click "Get AI Feedback" to receive detailed analysis of your research methodology skills.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.sourceEvaluation}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Source Evaluation
-                  </button>
-                </div>
+                {isLoading && (
+                  <div className="feedback-loading">
+                    <h3>Analyzing Your Response...</h3>
+                    <div className="loading-spinner"></div>
+                    <p>Please wait while we analyze your research methods and source evaluation.</p>
+                  </div>
+                )}
+
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h3>AI Feedback</h3>
+                    
+                    <div className="feedback-section-item">
+                      <h4>Grammar & Spelling</h4>
+                      <p>{feedback.grammar}</p>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h4>Content Analysis</h4>
+                      <p>{feedback.content}</p>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h4>Suggestions for Improvement</h4>
+                      <p>{feedback.suggestions}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>

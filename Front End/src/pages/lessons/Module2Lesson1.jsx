@@ -24,7 +24,8 @@ const Module2Lesson1 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    rewrittenText: ''
+    rewrittenText: '',
+    cloudExplanation: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,9 +132,9 @@ const Module2Lesson1 = () => {
   };
 
   const handleGetFeedback = async () => {
-    // Check if text is rewritten
-    if (!answers.rewrittenText) {
-      alert('Please rewrite the technical text before getting feedback.');
+    // Check if all questions are answered
+    if (!answers.rewrittenText || !answers.cloudExplanation) {
+      alert('Please complete both simulations before getting feedback.');
       return;
     }
 
@@ -146,7 +147,7 @@ const Module2Lesson1 = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: answers.rewrittenText }),
+        body: JSON.stringify({ text: `Rewritten Text: ${answers.rewrittenText}\n\nCloud Explanation: ${answers.cloudExplanation}` }),
       });
 
       if (!response.ok) {
@@ -193,7 +194,8 @@ const Module2Lesson1 = () => {
 
   const handleReset = () => {
     setAnswers({
-      rewrittenText: ''
+      rewrittenText: '',
+      cloudExplanation: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -323,22 +325,20 @@ const Module2Lesson1 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Technical Documentation Simulations</h3>
                     <p>
-                      The following technical text is given: <strong>"The CPU executes instructions using a fetch-decode-execute cycle."</strong>
-                    </p>
-                    <p>
-                      Rewrite this for a <strong>beginner who has no technical background</strong>.
+                      Practice simplifying technical concepts for different audiences. Complete both simulations below.
                     </p>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
                       <label htmlFor="rewrittenText">
-                        <h4>Rewrite for Beginners</h4>
+                        <h4>Simulation 1: Simplify Technical Text</h4>
                         <p className="instruction">
-                          Transform the technical statement into simple, everyday language that someone with no computer 
-                          knowledge can understand. Use analogies, simple words, and clear explanations.
+                          Rewrite this technical text into beginner-friendly language:
+                          <br/><strong>"The API requires authentication using an OAuth 2.0 token for secure access."</strong>
+                          <br/><strong>Word Limit:</strong> 40–50 words
                         </p>
                       </label>
                       <textarea
@@ -346,10 +346,30 @@ const Module2Lesson1 = () => {
                         value={answers.rewrittenText}
                         onChange={(e) => handleInputChange('rewrittenText', e.target.value)}
                         placeholder="Rewrite the technical statement in simple, beginner-friendly language..."
-                        rows="10"
+                        rows="6"
                       />
                       <div className="character-count">
                         {answers.rewrittenText?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="cloudExplanation">
+                        <h4>Simulation 2: Explain Cloud Storage</h4>
+                        <p className="instruction">
+                          Explain "cloud storage" to a non-technical customer in simple terms.
+                          <br/><strong>Word Limit:</strong> 70–90 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="cloudExplanation"
+                        value={answers.cloudExplanation}
+                        onChange={(e) => handleInputChange('cloudExplanation', e.target.value)}
+                        placeholder="Explain cloud storage in simple, everyday language that anyone can understand..."
+                        rows="6"
+                      />
+                      <div className="character-count">
+                        {answers.cloudExplanation?.length || 0} characters
                       </div>
                     </div>
 
@@ -357,14 +377,14 @@ const Module2Lesson1 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.rewrittenText}
+                        disabled={isLoading || !answers.rewrittenText || !answers.cloudExplanation}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.rewrittenText}
+                        disabled={!answers.rewrittenText || !answers.cloudExplanation}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson
@@ -374,7 +394,7 @@ const Module2Lesson1 = () => {
                         onClick={handleReset}
                         disabled={isLoading}
                       >
-                        Reset Text
+                        Reset All
                       </button>
                     </div>
                   </div>

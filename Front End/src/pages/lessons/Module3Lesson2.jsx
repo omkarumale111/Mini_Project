@@ -24,7 +24,8 @@ const Module3Lesson2 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    argumentativeEssay: ''
+    argumentativeEssay: '',
+    counterargument: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,8 +132,8 @@ const Module3Lesson2 = () => {
   };
 
   const handleGetFeedback = async () => {
-    if (!answers.argumentativeEssay) {
-      alert('Please write your argumentative essay before getting feedback.');
+    if (!answers.argumentativeEssay || !answers.counterargument) {
+      alert('Please complete both compelling arguments simulations before getting feedback.');
       return;
     }
 
@@ -145,7 +146,7 @@ const Module3Lesson2 = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: answers.argumentativeEssay }),
+        body: JSON.stringify({ text: `Argumentative Essay: ${answers.argumentativeEssay}\n\nCounterargument Response: ${answers.counterargument}` }),
       });
 
       if (!response.ok) {
@@ -192,7 +193,8 @@ const Module3Lesson2 = () => {
 
   const handleReset = () => {
     setAnswers({
-      argumentativeEssay: ''
+      argumentativeEssay: '',
+      counterargument: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -322,35 +324,52 @@ const Module3Lesson2 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Creating Compelling Arguments Simulations</h3>
                     <p>
-                      Write a short <strong>argumentative essay (250–300 words)</strong> on whether companies should adopt a <strong>4-day workweek</strong>.
+                      Practice building strong, evidence-based arguments and addressing counterarguments effectively. Complete both simulations below.
                     </p>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
                       <label htmlFor="argumentativeEssay">
-                        <h4>4-Day Workweek Argumentative Essay</h4>
+                        <h4>Simulation 1: Position Argument</h4>
                         <p className="instruction">
-                          Structure your essay with:
-                          <br />• <strong>Introduction:</strong> Hook, background, and clear thesis statement
-                          <br />• <strong>Body Paragraphs:</strong> 2-3 main arguments with evidence and examples
-                          <br />• <strong>Counterargument:</strong> Address opposing viewpoint and refute it
-                          <br />• <strong>Conclusion:</strong> Restate thesis and call to action
-                          <br />
-                          Word count: 250-300 words
+                          Write a compelling argument supporting remote work policies in companies.
+                          Include: clear thesis, 2-3 supporting points with evidence, and logical structure.
+                          <br/><strong>Word Limit:</strong> 150–180 words
                         </p>
                       </label>
                       <textarea
                         id="argumentativeEssay"
                         value={answers.argumentativeEssay}
                         onChange={(e) => handleInputChange('argumentativeEssay', e.target.value)}
-                        placeholder="Should Companies Adopt a 4-Day Workweek?&#10;&#10;[Introduction with hook and thesis statement]&#10;&#10;[Body paragraph 1 - First main argument with evidence]&#10;&#10;[Body paragraph 2 - Second main argument with evidence]&#10;&#10;[Counterargument and refutation]&#10;&#10;[Conclusion with restatement and call to action]"
-                        rows="14"
+                        placeholder="Write a compelling argument supporting remote work policies..."
+                        rows="8"
                       />
-                      <div className="word-count">
-                        <p>Word count: {answers.argumentativeEssay.split(' ').filter(word => word.length > 0).length} / 250-300 words</p>
+                      <div className="character-count">
+                        {answers.argumentativeEssay?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="counterargument">
+                        <h4>Simulation 2: Address Counterarguments</h4>
+                        <p className="instruction">
+                          Address and refute this counterargument: "Remote work reduces team collaboration and company culture."
+                          Provide evidence-based responses and alternative solutions.
+                          <br/><strong>Word Limit:</strong> 100–120 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="counterargument"
+                        value={answers.counterargument}
+                        onChange={(e) => handleInputChange('counterargument', e.target.value)}
+                        placeholder="Address and refute the counterargument about remote work reducing collaboration..."
+                        rows="6"
+                      />
+                      <div className="character-count">
+                        {answers.counterargument?.length || 0} characters
                       </div>
                     </div>
 
@@ -358,14 +377,14 @@ const Module3Lesson2 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.argumentativeEssay}
+                        disabled={isLoading || !answers.argumentativeEssay || !answers.counterargument}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.argumentativeEssay}
+                        disabled={!answers.argumentativeEssay || !answers.counterargument}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson
@@ -375,7 +394,7 @@ const Module3Lesson2 = () => {
                         onClick={handleReset}
                         disabled={isLoading}
                       >
-                        Reset Essay
+                        Reset All
                       </button>
                     </div>
                   </div>

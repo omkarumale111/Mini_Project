@@ -24,7 +24,8 @@ const Module3Lesson1 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    sloganAnalysis: ''
+    sloganAnalysis: '',
+    persuasivePitch: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,8 +132,8 @@ const Module3Lesson1 = () => {
   };
 
   const handleGetFeedback = async () => {
-    if (!answers.sloganAnalysis) {
-      alert('Please complete your persuasion technique analysis before getting feedback.');
+    if (!answers.sloganAnalysis || !answers.persuasivePitch) {
+      alert('Please complete both persuasion simulations before getting feedback.');
       return;
     }
 
@@ -145,7 +146,7 @@ const Module3Lesson1 = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: answers.sloganAnalysis }),
+        body: JSON.stringify({ text: `Slogan Analysis: ${answers.sloganAnalysis}\n\nPersuasive Pitch: ${answers.persuasivePitch}` }),
       });
 
       if (!response.ok) {
@@ -192,7 +193,8 @@ const Module3Lesson1 = () => {
 
   const handleReset = () => {
     setAnswers({
-      sloganAnalysis: ''
+      sloganAnalysis: '',
+      persuasivePitch: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -322,44 +324,54 @@ const Module3Lesson1 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Psychology of Persuasion Simulations</h3>
                     <p>
-                      Examine <strong>three advertisement slogans</strong>. Identify which <strong>persuasion technique</strong> each one uses 
-                      (authority, scarcity, social proof, etc.).
+                      Practice identifying and applying psychological persuasion principles in real-world scenarios. Complete both simulations below.
                     </p>
-                    <div className="sample-slogans">
-                      <h4>Sample Advertisement Slogans:</h4>
-                      <ol>
-                        <li><strong>"9 out of 10 doctors recommend..."</strong></li>
-                        <li><strong>"Limited time offer - Only 24 hours left!"</strong></li>
-                        <li><strong>"Join millions of satisfied customers worldwide"</strong></li>
-                      </ol>
-                    </div>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
                       <label htmlFor="sloganAnalysis">
-                        <h4>Persuasion Technique Analysis</h4>
+                        <h4>Simulation 1: Analyze Persuasion Techniques</h4>
                         <p className="instruction">
-                          For each slogan, identify and explain the persuasion technique being used. Consider techniques such as:
-                          <br />• Authority (expert endorsement)
-                          <br />• Scarcity (limited availability)
-                          <br />• Social Proof (popularity/testimonials)
-                          <br />• Reciprocity (giving something first)
-                          <br />• Commitment/Consistency (alignment with values)
-                          <br />• Liking (attractiveness/similarity)
+                          Analyze these marketing messages and identify the persuasion techniques used:
+                          <br/>1. "Join 50,000+ professionals who trust our platform"
+                          <br/>2. "Only 3 spots left in this exclusive program"
+                          <br/>3. "Recommended by industry experts worldwide"
+                          <br/><strong>Word Limit:</strong> 120–150 words
                         </p>
                       </label>
                       <textarea
                         id="sloganAnalysis"
                         value={answers.sloganAnalysis}
                         onChange={(e) => handleInputChange('sloganAnalysis', e.target.value)}
-                        placeholder="SLOGAN 1: '9 out of 10 doctors recommend...'&#10;Persuasion Technique: [Identify the technique]&#10;Explanation: [Explain how this technique works and why it's effective]&#10;&#10;SLOGAN 2: 'Limited time offer - Only 24 hours left!'&#10;Persuasion Technique: [Identify the technique]&#10;Explanation: [Explain how this technique works and why it's effective]&#10;&#10;SLOGAN 3: 'Join millions of satisfied customers worldwide'&#10;Persuasion Technique: [Identify the technique]&#10;Explanation: [Explain how this technique works and why it's effective]&#10;&#10;ADDITIONAL ANALYSIS:&#10;[Compare the effectiveness of these techniques and discuss when each might be most appropriate]"
-                        rows="12"
+                        placeholder="Analyze each marketing message and identify the persuasion techniques used..."
+                        rows="6"
                       />
                       <div className="character-count">
                         {answers.sloganAnalysis?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="persuasivePitch">
+                        <h4>Simulation 2: Write a Persuasive Pitch</h4>
+                        <p className="instruction">
+                          Write a persuasive pitch to convince your manager to approve remote work policy.
+                          Use at least 2 different persuasion techniques (authority, social proof, reciprocity, etc.).
+                          <br/><strong>Word Limit:</strong> 100–130 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="persuasivePitch"
+                        value={answers.persuasivePitch}
+                        onChange={(e) => handleInputChange('persuasivePitch', e.target.value)}
+                        placeholder="Write a persuasive pitch for remote work policy approval using multiple persuasion techniques..."
+                        rows="6"
+                      />
+                      <div className="character-count">
+                        {answers.persuasivePitch?.length || 0} characters
                       </div>
                     </div>
 
@@ -367,14 +379,14 @@ const Module3Lesson1 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.sloganAnalysis}
+                        disabled={isLoading || !answers.sloganAnalysis || !answers.persuasivePitch}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.sloganAnalysis}
+                        disabled={!answers.sloganAnalysis || !answers.persuasivePitch}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson
@@ -384,7 +396,7 @@ const Module3Lesson1 = () => {
                         onClick={handleReset}
                         disabled={isLoading}
                       >
-                        Reset Analysis
+                        Reset All
                       </button>
                     </div>
                   </div>

@@ -24,9 +24,9 @@ const Module1Lesson1 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    formalMessage: '',
-    informalMessage: '',
-    analysis: ''
+    formalText: '',
+    informalText: '',
+    rewrittenMessage: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -136,7 +136,7 @@ const Module1Lesson1 = () => {
 
   const handleGetFeedback = async () => {
     // Check if all questions are answered
-    if (!answers.formalMessage || !answers.informalMessage || !answers.analysis) {
+    if (!answers.formalText || !answers.rewrittenMessage) {
       alert('Please answer all questions before getting feedback.');
       return;
     }
@@ -146,7 +146,7 @@ const Module1Lesson1 = () => {
 
     try {
       // Combine all answers into one text for analysis
-      const combinedText = `Formal Message: ${answers.formalMessage}\n\nInformal Message: ${answers.informalMessage}\n\nAnalysis: ${answers.analysis}`;
+      const combinedText = `Formal Text: ${answers.formalText}\n\nRewritten Message: ${answers.rewrittenMessage}`;
 
       const response = await fetch('http://localhost:5001/api/analyze-text', {
         method: 'POST',
@@ -208,9 +208,8 @@ const Module1Lesson1 = () => {
 
   const handleReset = () => {
     setAnswers({
-      formalMessage: '',
-      informalMessage: '',
-      analysis: ''
+      formalText: '',
+      rewrittenMessage: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -340,64 +339,51 @@ const Module1Lesson1 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Simulation-Based Practice</h3>
                     <p>
-                      You are a project manager. Draft one <strong>formal message</strong> to your client about a project delay 
-                      and one <strong>informal message</strong> to your colleague about being late for lunch. Then, identify 
-                      which of the following two messages is clear and which is unclear, and explain why.
+                      Practice effective communication principles through real-world scenarios. Complete both simulations below.
                     </p>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
-                      <label htmlFor="formalMessage">
-                        <h4>1. Formal Message to Client (Project Delay)</h4>
-                      </label>
-                      <textarea
-                        id="formalMessage"
-                        value={answers.formalMessage}
-                        onChange={(e) => handleInputChange('formalMessage', e.target.value)}
-                        placeholder="Write your formal message here..."
-                        rows="6"
-                      />
-                      <div className="character-count">
-                        {answers.formalMessage?.length || 0} characters
-                      </div>
-                    </div>
-
-                    <div className="exercise-item">
-                      <label htmlFor="informalMessage">
-                        <h4>2. Informal Message to Colleague (Late for Lunch)</h4>
-                      </label>
-                      <textarea
-                        id="informalMessage"
-                        value={answers.informalMessage}
-                        onChange={(e) => handleInputChange('informalMessage', e.target.value)}
-                        placeholder="Write your informal message here..."
-                        rows="4"
-                      />
-                      <div className="character-count">
-                        {answers.informalMessage?.length || 0} characters
-                      </div>
-                    </div>
-
-                    <div className="exercise-item">
-                      <label htmlFor="analysis">
-                        <h4>3. Analysis: Clear vs Unclear Communication</h4>
+                      <label htmlFor="formalText">
+                        <h4>Simulation 1: Manager Day-Off Request</h4>
                         <p className="instruction">
-                          Compare your two messages above. Identify which elements make communication clear or unclear, 
-                          and explain the differences in tone, structure, and formality.
+                          You are texting your manager to request a day off. Write two versions: one formal and one informal.
+                          <br/><strong>Word Limit:</strong> 50–70 words
                         </p>
                       </label>
                       <textarea
-                        id="analysis"
-                        value={answers.analysis}
-                        onChange={(e) => handleInputChange('analysis', e.target.value)}
-                        placeholder="Analyze the differences between your formal and informal messages..."
+                        id="formalText"
+                        value={answers.formalText}
+                        onChange={(e) => handleInputChange('formalText', e.target.value)}
+                        placeholder="Write both formal and informal versions here..."
                         rows="6"
                       />
                       <div className="character-count">
-                        {answers.analysis?.length || 0} characters
+                        {answers.formalText?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="rewrittenMessage">
+                        <h4>Simulation 2: Message Rewriting</h4>
+                        <p className="instruction">
+                          Read the following message: "Hey, can u send that thing soon, need it asap"
+                          <br/>Rewrite it into a clear and professional version.
+                          <br/><strong>Word Limit:</strong> 40–60 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="rewrittenMessage"
+                        value={answers.rewrittenMessage}
+                        onChange={(e) => handleInputChange('rewrittenMessage', e.target.value)}
+                        placeholder="Rewrite the message professionally..."
+                        rows="4"
+                      />
+                      <div className="character-count">
+                        {answers.rewrittenMessage?.length || 0} characters
                       </div>
                     </div>
 
@@ -405,14 +391,14 @@ const Module1Lesson1 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.formalMessage || !answers.informalMessage || !answers.analysis}
+                        disabled={isLoading || !answers.formalText || !answers.rewrittenMessage}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.formalMessage || !answers.informalMessage || !answers.analysis}
+                        disabled={!answers.formalText || !answers.rewrittenMessage}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson

@@ -24,7 +24,8 @@ const Module1Lesson3 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    businessReport: ''
+    salesReport: '',
+    conclusionReport: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,9 +132,9 @@ const Module1Lesson3 = () => {
   };
 
   const handleGetFeedback = async () => {
-    // Check if business report is written
-    if (!answers.businessReport) {
-      alert('Please write your business report before getting feedback.');
+    // Check if all questions are answered
+    if (!answers.salesReport || !answers.conclusionReport) {
+      alert('Please complete both simulations before getting feedback.');
       return;
     }
 
@@ -146,7 +147,7 @@ const Module1Lesson3 = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: answers.businessReport }),
+        body: JSON.stringify({ text: `Sales Report: ${answers.salesReport}\n\nConclusion Report: ${answers.conclusionReport}` }),
       });
 
       if (!response.ok) {
@@ -193,7 +194,8 @@ const Module1Lesson3 = () => {
 
   const handleReset = () => {
     setAnswers({
-      businessReport: ''
+      salesReport: '',
+      conclusionReport: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -323,39 +325,50 @@ const Module1Lesson3 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Business Report Simulations</h3>
                     <p>
-                      You have sales data showing: <strong>Quarter 1 – 25% growth</strong>, <strong>Quarter 2 – 18% decline</strong>, 
-                      <strong>Quarter 3 – 12% growth</strong>, <strong>Quarter 4 – 20% growth</strong>. 
-                    </p>
-                    <p>
-                      Summarize this data into a short business report (2–3 pages) highlighting <strong>key findings</strong>, 
-                      <strong>causes</strong>, and <strong>recommendations</strong>.
+                      Practice creating effective business reports through real-world scenarios. Complete both simulations below.
                     </p>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
-                      <label htmlFor="businessReport">
-                        <h4>Business Report: Quarterly Sales Analysis</h4>
+                      <label htmlFor="salesReport">
+                        <h4>Simulation 1: Sales Data Analysis</h4>
                         <p className="instruction">
-                          Structure your report with the following sections:
-                          <br />• Executive Summary
-                          <br />• Key Findings (data analysis)
-                          <br />• Possible Causes (for decline and growth patterns)
-                          <br />• Recommendations (actionable next steps)
-                          <br />• Conclusion
+                          You are given sales data for the last 3 months. Write a short business report summarizing the trend.
+                          <br/><strong>Word Limit:</strong> 250–300 words
                         </p>
                       </label>
                       <textarea
-                        id="businessReport"
-                        value={answers.businessReport}
-                        onChange={(e) => handleInputChange('businessReport', e.target.value)}
-                        placeholder="QUARTERLY SALES ANALYSIS REPORT&#10;&#10;EXECUTIVE SUMMARY&#10;[Brief overview of the report's purpose and main findings]&#10;&#10;KEY FINDINGS&#10;[Analysis of the quarterly data]&#10;&#10;POSSIBLE CAUSES&#10;[Reasons for the performance variations]&#10;&#10;RECOMMENDATIONS&#10;[Actionable strategies for improvement]&#10;&#10;CONCLUSION&#10;[Summary and next steps]"
-                        rows="18"
+                        id="salesReport"
+                        value={answers.salesReport}
+                        onChange={(e) => handleInputChange('salesReport', e.target.value)}
+                        placeholder="SALES TREND ANALYSIS REPORT&#10;&#10;[Write your business report analyzing the 3-month sales data trends, including key findings and insights]&#10;&#10;Include: Executive summary, data analysis, trends identified, and recommendations."
+                        rows="12"
                       />
                       <div className="character-count">
-                        {answers.businessReport?.length || 0} characters
+                        {answers.salesReport?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="conclusionReport">
+                        <h4>Simulation 2: Employee Satisfaction Report Conclusion</h4>
+                        <p className="instruction">
+                          Draft the conclusion section of a 2-page report on employee satisfaction survey results.
+                          <br/><strong>Word Limit:</strong> 150–180 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="conclusionReport"
+                        value={answers.conclusionReport}
+                        onChange={(e) => handleInputChange('conclusionReport', e.target.value)}
+                        placeholder="CONCLUSION&#10;&#10;[Write the conclusion section summarizing the employee satisfaction survey findings, key takeaways, and recommended next steps]&#10;&#10;Include: Summary of findings, implications, and actionable recommendations."
+                        rows="10"
+                      />
+                      <div className="character-count">
+                        {answers.conclusionReport?.length || 0} characters
                       </div>
                     </div>
 
@@ -363,14 +376,14 @@ const Module1Lesson3 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.businessReport}
+                        disabled={isLoading || !answers.salesReport || !answers.conclusionReport}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.businessReport}
+                        disabled={!answers.salesReport || !answers.conclusionReport}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson
@@ -380,7 +393,7 @@ const Module1Lesson3 = () => {
                         onClick={handleReset}
                         disabled={isLoading}
                       >
-                        Reset Report
+                        Reset All
                       </button>
                     </div>
                   </div>

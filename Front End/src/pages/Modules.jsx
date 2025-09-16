@@ -160,27 +160,27 @@ const Modules = () => {
         lessons: [
           {
             id: 1,
-            title: "Introduction to Business Writing",
+            title: "Principles of Effective Communication",
             status: lessonProgress['m1l1']?.status || 'available',
             completedDate: lessonProgress['m1l1']?.completed ? 'Completed' : null
           },
           {
             id: 2,
-            title: "Email Communication",
+            title: "Writing Professional Emails",
             status: lessonProgress['m1l2']?.status || 
               (lessonProgress['m1l1']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m1l2']?.completed ? 'Completed' : null
           },
           {
             id: 3,
-            title: "Formal Letters",
+            title: "Creating Effective Business Reports",
             status: lessonProgress['m1l3']?.status || 
               (lessonProgress['m1l2']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m1l3']?.completed ? 'Completed' : null
           },
           {
             id: 4,
-            title: "Business Reports",
+            title: "Writing for Internal Communications",
             status: lessonProgress['m1l4']?.status || 
               (lessonProgress['m1l3']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m1l4']?.completed ? 'Completed' : null
@@ -196,28 +196,28 @@ const Modules = () => {
         lessons: [
           {
             id: 1,
-            title: "Technical Documentation",
+            title: "Understanding Technical Documentation",
             status: lessonProgress['m2l1']?.status || 
               (lessonProgress['m1l4']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m2l1']?.completed ? 'Completed' : null
           },
           {
             id: 2,
-            title: "User Manuals",
+            title: "Writing User Guides",
             status: lessonProgress['m2l2']?.status || 
               (lessonProgress['m2l1']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m2l2']?.completed ? 'Completed' : null
           },
           {
             id: 3,
-            title: "Process Documentation",
+            title: "Technical Specifications",
             status: lessonProgress['m2l3']?.status || 
               (lessonProgress['m2l2']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m2l3']?.completed ? 'Completed' : null
           },
           {
             id: 4,
-            title: "API Documentation",
+            title: "Technical Presentations",
             status: lessonProgress['m2l4']?.status || 
               (lessonProgress['m2l3']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m2l4']?.completed ? 'Completed' : null
@@ -226,35 +226,35 @@ const Modules = () => {
       },
       {
         id: 3,
-        title: "Advanced Writing Techniques",
+        title: "Advanced Persuasive Writing",
         emoji: "📙",
         progress: calculateModuleProgress(3),
         completionDate: getModuleCompletionDate(3),
         lessons: [
           {
             id: 1,
-            title: "Persuasive Writing",
+            title: "Psychology of Persuasion",
             status: lessonProgress['m3l1']?.status || 
               (lessonProgress['m2l4']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m3l1']?.completed ? 'Completed' : null
           },
           {
             id: 2,
-            title: "Research Writing",
+            title: "Creating Compelling Arguments",
             status: lessonProgress['m3l2']?.status || 
               (lessonProgress['m3l1']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m3l2']?.completed ? 'Completed' : null
           },
           {
             id: 3,
-            title: "Creative Writing",
+            title: "Marketing Copy Techniques",
             status: lessonProgress['m3l3']?.status || 
               (lessonProgress['m3l2']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m3l3']?.completed ? 'Completed' : null
           },
           {
             id: 4,
-            title: "Editing and Proofreading",
+            title: "Ethical Persuasion",
             status: lessonProgress['m3l4']?.status || 
               (lessonProgress['m3l3']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m3l4']?.completed ? 'Completed' : null
@@ -263,35 +263,35 @@ const Modules = () => {
       },
       {
         id: 4,
-        title: "Professional Writing Mastery",
+        title: "Research & Academic Writing",
         emoji: "📕",
         progress: calculateModuleProgress(4),
         completionDate: getModuleCompletionDate(4),
         lessons: [
           {
             id: 1,
-            title: "Executive Communication",
+            title: "Research Methods and Sources",
             status: lessonProgress['m4l1']?.status || 
               (lessonProgress['m3l4']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m4l1']?.completed ? 'Completed' : null
           },
           {
             id: 2,
-            title: "Presentation Writing",
+            title: "Structuring Research Papers",
             status: lessonProgress['m4l2']?.status || 
               (lessonProgress['m4l1']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m4l2']?.completed ? 'Completed' : null
           },
           {
             id: 3,
-            title: "Grant Writing",
+            title: "Citation and Referencing Styles",
             status: lessonProgress['m4l3']?.status || 
               (lessonProgress['m4l2']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m4l3']?.completed ? 'Completed' : null
           },
           {
             id: 4,
-            title: "Portfolio Development",
+            title: "Writing Abstracts and Summaries",
             status: lessonProgress['m4l4']?.status || 
               (lessonProgress['m4l3']?.completed ? 'available' : 'locked'),
             completedDate: lessonProgress['m4l4']?.completed ? 'Completed' : null

@@ -24,9 +24,8 @@ const Module3Lesson3 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    smartwatchDescription: '',
-    waterBottleDescription: '',
-    elearningAppDescription: ''
+    productDescription: '',
+    emailSubject: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -133,8 +132,8 @@ const Module3Lesson3 = () => {
   };
 
   const handleGetFeedback = async () => {
-    if (!answers.smartwatchDescription || !answers.waterBottleDescription || !answers.elearningAppDescription) {
-      alert('Please complete all three product descriptions before getting feedback.');
+    if (!answers.productDescription || !answers.emailSubject) {
+      alert('Please complete both marketing copy simulations before getting feedback.');
       return;
     }
 
@@ -142,7 +141,7 @@ const Module3Lesson3 = () => {
     setShowFeedback(false);
 
     try {
-      const combinedText = `Smartwatch Description: ${answers.smartwatchDescription}\n\nEco-Friendly Water Bottle Description: ${answers.waterBottleDescription}\n\nE-Learning App Description: ${answers.elearningAppDescription}`;
+      const combinedText = `Product Description: ${answers.productDescription}\n\nEmail Subject Lines: ${answers.emailSubject}`;
       
       const response = await fetch('http://localhost:5001/api/analyze-text', {
         method: 'POST',
@@ -196,9 +195,8 @@ const Module3Lesson3 = () => {
 
   const handleReset = () => {
     setAnswers({
-      smartwatchDescription: '',
-      waterBottleDescription: '',
-      elearningAppDescription: ''
+      productDescription: '',
+      emailSubject: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -328,77 +326,67 @@ const Module3Lesson3 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Marketing Copy Techniques Simulations</h3>
                     <p>
-                      Write <strong>three catchy product descriptions (2–3 sentences each)</strong> for: 
-                      a <strong>smartwatch</strong>, an <strong>eco-friendly water bottle</strong>, and a <strong>new e-learning app</strong>.
+                      Practice creating compelling marketing copy using persuasive techniques, emotional appeals, and clear value propositions. Complete both simulations below.
                     </p>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
-                      <label htmlFor="smartwatchDescription">
-                        <h4>1. Smartwatch Product Description</h4>
+                      <label htmlFor="productDescription">
+                        <h4>Simulation 1: Product Landing Page Copy</h4>
                         <p className="instruction">
-                          Write a compelling 2-3 sentence description for a smartwatch. Focus on benefits, 
-                          unique features, and emotional appeal.
+                          Write compelling product copy for a fitness tracking app's landing page.
+                          Include: attention-grabbing headline, key benefits, and call-to-action.
+                          <br/><strong>Word Limit:</strong> 80–100 words
                         </p>
                       </label>
                       <textarea
-                        id="smartwatchDescription"
-                        value={answers.smartwatchDescription}
-                        onChange={(e) => handleInputChange('smartwatchDescription', e.target.value)}
-                        placeholder="Write your smartwatch description here..."
-                        rows="3"
+                        id="productDescription"
+                        value={answers.productDescription}
+                        onChange={(e) => handleInputChange('productDescription', e.target.value)}
+                        placeholder="Write your fitness app landing page copy..."
+                        rows="6"
                       />
+                      <div className="character-count">
+                        {answers.productDescription?.length || 0} characters
+                      </div>
                     </div>
 
                     <div className="exercise-item">
-                      <label htmlFor="waterBottleDescription">
-                        <h4>2. Eco-Friendly Water Bottle Product Description</h4>
+                      <label htmlFor="emailSubject">
+                        <h4>Simulation 2: Email Marketing Campaign</h4>
                         <p className="instruction">
-                          Create an engaging 2-3 sentence description for an eco-friendly water bottle. 
-                          Highlight environmental benefits and practical features.
+                          Create 5 different email subject lines for a flash sale promotion (50% off electronics).
+                          Use various persuasion techniques: urgency, curiosity, benefit-focused, personalization.
+                          <br/><strong>Word Limit:</strong> Each subject line 4–8 words
                         </p>
                       </label>
                       <textarea
-                        id="waterBottleDescription"
-                        value={answers.waterBottleDescription}
-                        onChange={(e) => handleInputChange('waterBottleDescription', e.target.value)}
-                        placeholder="Write your eco-friendly water bottle description here..."
-                        rows="3"
+                        id="emailSubject"
+                        value={answers.emailSubject}
+                        onChange={(e) => handleInputChange('emailSubject', e.target.value)}
+                        placeholder="1. [Subject line using urgency]&#10;2. [Subject line using curiosity]&#10;3. [Subject line focusing on benefits]&#10;4. [Personalized subject line]&#10;5. [Creative/emotional subject line]"
+                        rows="6"
                       />
-                    </div>
-
-                    <div className="exercise-item">
-                      <label htmlFor="elearningAppDescription">
-                        <h4>3. E-Learning App Product Description</h4>
-                        <p className="instruction">
-                          Craft an attractive 2-3 sentence description for a new e-learning app. 
-                          Emphasize learning outcomes and user experience.
-                        </p>
-                      </label>
-                      <textarea
-                        id="elearningAppDescription"
-                        value={answers.elearningAppDescription}
-                        onChange={(e) => handleInputChange('elearningAppDescription', e.target.value)}
-                        placeholder="Write your e-learning app description here..."
-                        rows="3"
-                      />
+                      <div className="character-count">
+                        {answers.emailSubject?.length || 0} characters
+                      </div>
                     </div>
 
                     <div className="action-buttons">
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.smartwatchDescription || !answers.waterBottleDescription || !answers.elearningAppDescription}
+                        disabled={isLoading || !answers.productDescription || !answers.emailSubject}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.smartwatchDescription || !answers.waterBottleDescription || !answers.elearningAppDescription}
+                        disabled={!answers.productDescription || !answers.emailSubject}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson

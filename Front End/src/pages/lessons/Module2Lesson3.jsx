@@ -24,7 +24,8 @@ const Module2Lesson3 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    requirementsDocument: ''
+    requirementsDocument: '',
+    apiSpec: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,8 +132,8 @@ const Module2Lesson3 = () => {
   };
 
   const handleGetFeedback = async () => {
-    if (!answers.requirementsDocument) {
-      alert('Please write your requirements document before getting feedback.');
+    if (!answers.requirementsDocument || !answers.apiSpec) {
+      alert('Please complete both technical specification simulations before getting feedback.');
       return;
     }
 
@@ -145,7 +146,7 @@ const Module2Lesson3 = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: answers.requirementsDocument }),
+        body: JSON.stringify({ text: `Requirements Document: ${answers.requirementsDocument}\n\nAPI Specification: ${answers.apiSpec}` }),
       });
 
       if (!response.ok) {
@@ -192,7 +193,8 @@ const Module2Lesson3 = () => {
 
   const handleReset = () => {
     setAnswers({
-      requirementsDocument: ''
+      requirementsDocument: '',
+      apiSpec: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -322,35 +324,52 @@ const Module2Lesson3 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Technical Specifications Simulations</h3>
                     <p>
-                      Write a feature requirements document for a <strong>"To-Do List App"</strong> that includes: 
-                      <strong>task creation</strong>, <strong>deadlines</strong>, <strong>reminders</strong>, and <strong>category tagging</strong>.
+                      Practice writing detailed technical specifications for software development. Complete both simulations below.
                     </p>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
                       <label htmlFor="requirementsDocument">
-                        <h4>Feature Requirements Document - To-Do List App</h4>
+                        <h4>Simulation 1: Software Requirements Document</h4>
                         <p className="instruction">
-                          Create a comprehensive requirements document that includes:
-                          <br />• Project overview and objectives
-                          <br />• Feature specifications for each requirement
-                          <br />• User stories and acceptance criteria
-                          <br />• Technical considerations
-                          <br />• Priority levels for features
+                          Write a requirements document for a "Password Manager App" including:
+                          secure storage, password generation, multi-device sync, and browser integration.
+                          <br/><strong>Word Limit:</strong> 200–250 words
                         </p>
                       </label>
                       <textarea
                         id="requirementsDocument"
                         value={answers.requirementsDocument}
                         onChange={(e) => handleInputChange('requirementsDocument', e.target.value)}
-                        placeholder="TO-DO LIST APP - FEATURE REQUIREMENTS DOCUMENT&#10;&#10;1. PROJECT OVERVIEW&#10;[Brief description of the app and its purpose]&#10;&#10;2. FEATURE SPECIFICATIONS&#10;&#10;2.1 TASK CREATION&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.2 DEADLINES&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.3 REMINDERS&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;2.4 CATEGORY TAGGING&#10;- Description: [What this feature does]&#10;- User Story: As a user, I want to...&#10;- Acceptance Criteria: [Specific requirements]&#10;&#10;3. TECHNICAL CONSIDERATIONS&#10;[Platform requirements, data storage, etc.]&#10;&#10;4. PRIORITY MATRIX&#10;[High/Medium/Low priority for each feature]"
-                        rows="15"
+                        placeholder="Write a comprehensive requirements document for a password manager app..."
+                        rows="8"
                       />
                       <div className="character-count">
                         {answers.requirementsDocument?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="apiSpec">
+                        <h4>Simulation 2: API Specification</h4>
+                        <p className="instruction">
+                          Write an API specification for a "User Authentication System" including:
+                          login, logout, password reset, and user registration endpoints.
+                          <br/><strong>Word Limit:</strong> 180–220 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="apiSpec"
+                        value={answers.apiSpec}
+                        onChange={(e) => handleInputChange('apiSpec', e.target.value)}
+                        placeholder="Write detailed API specifications for user authentication endpoints..."
+                        rows="8"
+                      />
+                      <div className="character-count">
+                        {answers.apiSpec?.length || 0} characters
                       </div>
                     </div>
 
@@ -358,14 +377,14 @@ const Module2Lesson3 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.requirementsDocument}
+                        disabled={isLoading || !answers.requirementsDocument || !answers.apiSpec}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.requirementsDocument}
+                        disabled={!answers.requirementsDocument || !answers.apiSpec}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson
@@ -375,7 +394,7 @@ const Module2Lesson3 = () => {
                         onClick={handleReset}
                         disabled={isLoading}
                       >
-                        Reset Document
+                        Reset All
                       </button>
                     </div>
                   </div>

@@ -24,7 +24,8 @@ const Module2Lesson4 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    slideOutlines: ''
+    slideOutlines: '',
+    executiveSummary: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,8 +132,8 @@ const Module2Lesson4 = () => {
   };
 
   const handleGetFeedback = async () => {
-    if (!answers.slideOutlines) {
-      alert('Please create your presentation outlines before getting feedback.');
+    if (!answers.slideOutlines || !answers.executiveSummary) {
+      alert('Please complete both technical presentation simulations before getting feedback.');
       return;
     }
 
@@ -145,7 +146,7 @@ const Module2Lesson4 = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: answers.slideOutlines }),
+        body: JSON.stringify({ text: `Presentation Outline: ${answers.slideOutlines}\n\nExecutive Summary: ${answers.executiveSummary}` }),
       });
 
       if (!response.ok) {
@@ -192,7 +193,8 @@ const Module2Lesson4 = () => {
 
   const handleReset = () => {
     setAnswers({
-      slideOutlines: ''
+      slideOutlines: '',
+      executiveSummary: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -322,35 +324,52 @@ const Module2Lesson4 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>Technical Presentations Simulations</h3>
                     <p>
-                      You are preparing a <strong>5-slide presentation</strong> on <strong>"Cloud Storage Security."</strong> 
-                      Create slide outlines with concise text for: <strong>Introduction</strong>, <strong>Risks</strong>, 
-                      <strong>Solutions</strong>, <strong>Case Example</strong>, and <strong>Conclusion</strong>.
+                      Practice creating structured technical presentations for different audiences. Complete both simulations below.
                     </p>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
                       <label htmlFor="slideOutlines">
-                        <h4>Cloud Storage Security Presentation Outlines</h4>
+                        <h4>Simulation 1: Technical Product Demo Outline</h4>
                         <p className="instruction">
-                          Create detailed outlines for each of the 5 slides. Include:
-                          <br />• Slide title
-                          <br />• Key bullet points (3-5 per slide)
-                          <br />• Supporting details or examples
-                          <br />• Visual suggestions (charts, images, etc.)
+                          Create a 4-slide presentation outline for demonstrating a new software feature to stakeholders.
+                          Include: Problem, Solution, Demo Flow, and Next Steps.
+                          <br/><strong>Word Limit:</strong> 120–150 words
                         </p>
                       </label>
                       <textarea
                         id="slideOutlines"
                         value={answers.slideOutlines}
                         onChange={(e) => handleInputChange('slideOutlines', e.target.value)}
-                        placeholder="CLOUD STORAGE SECURITY PRESENTATION&#10;&#10;SLIDE 1: INTRODUCTION&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 2: RISKS&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 3: SOLUTIONS&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 4: CASE EXAMPLE&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]&#10;&#10;SLIDE 5: CONCLUSION&#10;Title: [Your slide title]&#10;• [Key point 1]&#10;• [Key point 2]&#10;• [Key point 3]&#10;Visual: [Suggested visual element]"
-                        rows="16"
+                        placeholder="Create a structured presentation outline for a technical product demo..."
+                        rows="8"
                       />
                       <div className="character-count">
                         {answers.slideOutlines?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="executiveSummary">
+                        <h4>Simulation 2: Executive Summary Slide</h4>
+                        <p className="instruction">
+                          Write an executive summary slide for a technical project status report.
+                          Include key achievements, current challenges, and recommendations.
+                          <br/><strong>Word Limit:</strong> 80–100 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="executiveSummary"
+                        value={answers.executiveSummary}
+                        onChange={(e) => handleInputChange('executiveSummary', e.target.value)}
+                        placeholder="Write a concise executive summary slide for a technical project status report..."
+                        rows="6"
+                      />
+                      <div className="character-count">
+                        {answers.executiveSummary?.length || 0} characters
                       </div>
                     </div>
 
@@ -358,14 +377,14 @@ const Module2Lesson4 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.slideOutlines}
+                        disabled={isLoading || !answers.slideOutlines || !answers.executiveSummary}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.slideOutlines}
+                        disabled={!answers.slideOutlines || !answers.executiveSummary}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson
@@ -375,7 +394,7 @@ const Module2Lesson4 = () => {
                         onClick={handleReset}
                         disabled={isLoading}
                       >
-                        Reset Outlines
+                        Reset All
                       </button>
                     </div>
                   </div>

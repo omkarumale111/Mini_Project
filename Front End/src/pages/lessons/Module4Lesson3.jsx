@@ -16,7 +16,7 @@ import logo from '../../assets/Logo.png';
 import './Lesson.css';
 
 /**
- * Module 4 Lesson 3: Citation and Referencing Styles
+ * Module 4 Lesson 3: Thesis and Argument Development
  */
 const Module4Lesson3 = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -24,9 +24,12 @@ const Module4Lesson3 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    apaCitation: '',
-    mlaCitation: ''
+    thesisStatement: '',
+    argumentStructure: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -79,11 +82,88 @@ const Module4Lesson3 = () => {
     navigate('/login');
   };
 
-  const handleInputChange = (field, value) => {
+  // Load saved lesson inputs
+  useEffect(() => {
+    const loadLessonInputs = async () => {
+      if (user && user.id) {
+        try {
+          const response = await fetch(`http://localhost:5001/api/lesson-inputs/${user.id}/m4l3`);
+          if (response.ok) {
+            const savedInputs = await response.json();
+            setAnswers(prevAnswers => ({
+              ...prevAnswers,
+              ...savedInputs
+            }));
+          }
+        } catch (error) {
+          console.error('Error loading lesson inputs:', error);
+        }
+      }
+    };
+
+    loadLessonInputs();
+  }, [user]);
+
+  const handleInputChange = async (field, value) => {
     setAnswers(prev => ({
       ...prev,
       [field]: value
     }));
+
+    // Save to database
+    if (user && user.id) {
+      try {
+        await fetch('http://localhost:5001/api/lesson-inputs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            student_id: user.id,
+            lesson_id: 'm4l3',
+            input_field: field,
+            input_value: value
+          })
+        });
+      } catch (error) {
+        console.error('Error saving lesson input:', error);
+      }
+    }
+  };
+
+  const handleGetFeedback = async () => {
+    if (!answers.thesisStatement || !answers.argumentStructure) {
+      alert('Please complete both thesis development simulations before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const combinedText = `Thesis Statement: ${answers.thesisStatement}\n\nArgument Structure: ${answers.argumentStructure}`;
+      
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: combinedText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your responses. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -111,6 +191,15 @@ const Module4Lesson3 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      thesisStatement: '',
+      argumentStructure: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -226,78 +315,133 @@ const Module4Lesson3 = () => {
             </button>
             <div className="lesson-info">
               <span className="module-badge">📕 Module 4</span>
-              <h2>Citation and Referencing Styles</h2>
+              <h2>Thesis and Argument Development</h2>
               <p>Lesson 3 of 4 • Research & Academic Writing</p>
             </div>
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  Convert the following into <strong>APA</strong> and <strong>MLA</strong> style references:
-                </p>
-                <div className="source-info">
-                  <blockquote>
-                    <strong>Book:</strong> John Smith, Digital Marketing Trends, Pearson, 2021.
-                  </blockquote>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Thesis and Argument Development Simulations</h3>
+                    <p>
+                      Practice crafting strong thesis statements and developing logical argument structures for academic papers. Complete both simulations below.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="thesisStatement">
+                        <h4>Simulation 1: Thesis Statement Creation</h4>
+                        <p className="instruction">
+                          Create a strong thesis statement for this research topic: "The effectiveness of online learning compared to traditional classroom education."
+                          Your thesis should be: specific, arguable, clear, and supported by evidence.
+                          <br/><strong>Word Limit:</strong> 25–35 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="thesisStatement"
+                        value={answers.thesisStatement}
+                        onChange={(e) => handleInputChange('thesisStatement', e.target.value)}
+                        placeholder="Write a clear, arguable thesis statement..."
+                        rows="4"
+                      />
+                      <div className="character-count">
+                        {answers.thesisStatement?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="argumentStructure">
+                        <h4>Simulation 2: Argument Structure Outline</h4>
+                        <p className="instruction">
+                          Develop a logical argument structure to support your thesis statement.
+                          Include: 3 main supporting points, evidence types for each, and potential counterarguments.
+                          <br/><strong>Word Limit:</strong> 120–150 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="argumentStructure"
+                        value={answers.argumentStructure}
+                        onChange={(e) => handleInputChange('argumentStructure', e.target.value)}
+                        placeholder="Outline your argument structure with supporting points and evidence..."
+                        rows="8"
+                      />
+                      <div className="character-count">
+                        {answers.argumentStructure?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.thesisStatement || !answers.argumentStructure}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.thesisStatement || !answers.argumentStructure}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset All
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="apaCitation">
-                    <h4>APA Style Citation</h4>
-                    <p className="instruction">
-                      Convert the book information into proper APA format. Remember APA style guidelines:
-                      <br />• Author's last name, first initial
-                      <br />• Publication year in parentheses
-                      <br />• Book title in italics (sentence case)
-                      <br />• Publisher name
-                    </p>
-                  </label>
-                  <textarea
-                    id="apaCitation"
-                    value={answers.apaCitation}
-                    onChange={(e) => handleInputChange('apaCitation', e.target.value)}
-                    placeholder="Write the APA style citation here..."
-                    rows="3"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <h3>AI Feedback</h3>
+                    <p>Complete both thesis development simulations and click "Get AI Feedback" to receive detailed analysis of your argument construction skills.</p>
+                  </div>
+                )}
 
-                <div className="exercise-item">
-                  <label htmlFor="mlaCitation">
-                    <h4>MLA Style Citation</h4>
-                    <p className="instruction">
-                      Convert the same book information into proper MLA format. Remember MLA style guidelines:
-                      <br />• Author's last name, first name
-                      <br />• Book title in italics (title case)
-                      <br />• Publisher, publication year
-                    </p>
-                  </label>
-                  <textarea
-                    id="mlaCitation"
-                    value={answers.mlaCitation}
-                    onChange={(e) => handleInputChange('mlaCitation', e.target.value)}
-                    placeholder="Write the MLA style citation here..."
-                    rows="3"
-                  />
-                </div>
+                {isLoading && (
+                  <div className="feedback-loading">
+                    <h3>Analyzing Your Response...</h3>
+                    <div className="loading-spinner"></div>
+                    <p>Please wait while we analyze your thesis statement and argument structure.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.apaCitation || !answers.mlaCitation}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Citations
-                  </button>
-                </div>
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h3>AI Feedback</h3>
+                    
+                    <div className="feedback-section-item">
+                      <h4>Grammar & Spelling</h4>
+                      <p>{feedback.grammar}</p>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h4>Content Analysis</h4>
+                      <p>{feedback.content}</p>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h4>Suggestions for Improvement</h4>
+                      <p>{feedback.suggestions}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>

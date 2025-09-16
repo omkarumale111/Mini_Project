@@ -24,7 +24,8 @@ const Module2Lesson2 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    userGuide: ''
+    userGuide: '',
+    troubleshooting: ''
   });
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,8 +132,8 @@ const Module2Lesson2 = () => {
   };
 
   const handleGetFeedback = async () => {
-    if (!answers.userGuide) {
-      alert('Please write your user guide before getting feedback.');
+    if (!answers.userGuide || !answers.troubleshooting) {
+      alert('Please complete both user guide simulations before getting feedback.');
       return;
     }
 
@@ -145,7 +146,7 @@ const Module2Lesson2 = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: answers.userGuide }),
+        body: JSON.stringify({ text: `User Guide: ${answers.userGuide}\n\nTroubleshooting Section: ${answers.troubleshooting}` }),
       });
 
       if (!response.ok) {
@@ -192,7 +193,8 @@ const Module2Lesson2 = () => {
 
   const handleReset = () => {
     setAnswers({
-      userGuide: ''
+      userGuide: '',
+      troubleshooting: ''
     });
     setFeedback(null);
     setShowFeedback(false);
@@ -322,36 +324,52 @@ const Module2Lesson2 = () => {
               <div className="questions-section">
                 <div className="lesson-card">
                   <div className="problem-statement">
-                    <h3>Problem Statement</h3>
+                    <h3>User Guides Simulations</h3>
                     <p>
-                      Create a simple step-by-step user guide for <strong>installing and using a mobile payment app</strong> 
-                      (e.g., download, register, add bank account, make first payment).
+                      Practice writing clear, step-by-step instructions for different user scenarios. Complete both simulations below.
                     </p>
                   </div>
 
                   <div className="exercise-section">
                     <div className="exercise-item">
                       <label htmlFor="userGuide">
-                        <h4>Mobile Payment App User Guide</h4>
+                        <h4>Simulation 1: Software Installation Guide</h4>
                         <p className="instruction">
-                          Write a comprehensive user guide that covers:
-                          <br />• Downloading the app
-                          <br />• Registration process
-                          <br />• Adding a bank account
-                          <br />• Making your first payment
-                          <br />
-                          Use clear, numbered steps and simple language.
+                          Write step-by-step instructions for installing and setting up a video conferencing app (like Zoom).
+                          Include downloading, installation, account creation, and first meeting setup.
+                          <br/><strong>Word Limit:</strong> 150–200 words
                         </p>
                       </label>
                       <textarea
                         id="userGuide"
                         value={answers.userGuide}
                         onChange={(e) => handleInputChange('userGuide', e.target.value)}
-                        placeholder="MOBILE PAYMENT APP USER GUIDE&#10;&#10;Getting Started with [App Name]&#10;&#10;STEP 1: DOWNLOADING THE APP&#10;1. Open your phone's app store...&#10;&#10;STEP 2: REGISTRATION&#10;1. Open the app...&#10;&#10;STEP 3: ADDING YOUR BANK ACCOUNT&#10;1. Tap on 'Add Payment Method'...&#10;&#10;STEP 4: MAKING YOUR FIRST PAYMENT&#10;1. Select 'Send Money'..."
-                        rows="12"
+                        placeholder="Write clear, numbered steps for installing and setting up a video conferencing app..."
+                        rows="8"
                       />
                       <div className="character-count">
                         {answers.userGuide?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="troubleshooting">
+                        <h4>Simulation 2: Troubleshooting Section</h4>
+                        <p className="instruction">
+                          Write a troubleshooting section for common Wi-Fi connection problems.
+                          Include 3-4 common issues with step-by-step solutions.
+                          <br/><strong>Word Limit:</strong> 120–150 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="troubleshooting"
+                        value={answers.troubleshooting}
+                        onChange={(e) => handleInputChange('troubleshooting', e.target.value)}
+                        placeholder="Write troubleshooting steps for common Wi-Fi connection issues..."
+                        rows="8"
+                      />
+                      <div className="character-count">
+                        {answers.troubleshooting?.length || 0} characters
                       </div>
                     </div>
 
@@ -359,14 +377,14 @@ const Module2Lesson2 = () => {
                       <button 
                         className="feedback-button"
                         onClick={handleGetFeedback}
-                        disabled={isLoading || !answers.userGuide}
+                        disabled={isLoading || !answers.userGuide || !answers.troubleshooting}
                       >
                         {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
                       </button>
                       <button 
                         className="submit-button"
                         onClick={handleSubmit}
-                        disabled={!answers.userGuide}
+                        disabled={!answers.userGuide || !answers.troubleshooting}
                       >
                         <RiSendPlaneLine />
                         Complete Lesson
@@ -376,7 +394,7 @@ const Module2Lesson2 = () => {
                         onClick={handleReset}
                         disabled={isLoading}
                       >
-                        Reset Guide
+                        Reset All
                       </button>
                     </div>
                   </div>

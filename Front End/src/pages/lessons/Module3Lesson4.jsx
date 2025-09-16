@@ -24,8 +24,12 @@ const Module3Lesson4 = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
-    ethicalRewrite: ''
+    ethicalAnalysis: '',
+    persuasiveRewrite: ''
   });
+  const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -127,6 +131,41 @@ const Module3Lesson4 = () => {
     }
   };
 
+  const handleGetFeedback = async () => {
+    if (!answers.ethicalAnalysis || !answers.persuasiveRewrite) {
+      alert('Please complete both ethical persuasion simulations before getting feedback.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowFeedback(false);
+
+    try {
+      const combinedText = `Ethical Analysis: ${answers.ethicalAnalysis}\n\nPersuasive Rewrite: ${answers.persuasiveRewrite}`;
+      
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: combinedText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your responses. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Mark lesson as completed
@@ -152,6 +191,15 @@ const Module3Lesson4 = () => {
       console.error('Error completing lesson:', error);
       alert('Answers submitted, but there was an error updating progress.');
     }
+  };
+
+  const handleReset = () => {
+    setAnswers({
+      ethicalAnalysis: '',
+      persuasiveRewrite: ''
+    });
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -273,65 +321,128 @@ const Module3Lesson4 = () => {
           </div>
 
           <div className="lesson-main">
-            <div className="lesson-card">
-              <div className="problem-statement">
-                <h3>Problem Statement</h3>
-                <p>
-                  Rewrite the following <strong>manipulative statement</strong> into an <strong>ethical persuasive one</strong>:
-                </p>
-                <div className="manipulative-example">
-                  <blockquote>
-                    <strong>"Buy this product now, or you'll regret it forever!"</strong>
-                  </blockquote>
+            <div className="practice-content">
+              {/* Questions Section - 70% */}
+              <div className="questions-section">
+                <div className="lesson-card">
+                  <div className="problem-statement">
+                    <h3>Ethical Persuasion Simulations</h3>
+                    <p>
+                      Practice identifying unethical persuasion tactics and transforming them into ethical, respectful communication. Complete both simulations below.
+                    </p>
+                  </div>
+
+                  <div className="exercise-section">
+                    <div className="exercise-item">
+                      <label htmlFor="ethicalAnalysis">
+                        <h4>Simulation 1: Identify Unethical Tactics</h4>
+                        <p className="instruction">
+                          Analyze this marketing message and identify the unethical persuasion tactics used:
+                          <br/><strong>"Limited time! Only 3 left! Everyone is buying this - don't be the only one missing out!"</strong>
+                          <br/>Identify tactics like false scarcity, bandwagon effect, FOMO, etc.
+                          <br/><strong>Word Limit:</strong> 80–100 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="ethicalAnalysis"
+                        value={answers.ethicalAnalysis}
+                        onChange={(e) => handleInputChange('ethicalAnalysis', e.target.value)}
+                        placeholder="Identify and explain the unethical persuasion tactics in the message..."
+                        rows="6"
+                      />
+                      <div className="character-count">
+                        {answers.ethicalAnalysis?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="exercise-item">
+                      <label htmlFor="persuasiveRewrite">
+                        <h4>Simulation 2: Ethical Rewrite</h4>
+                        <p className="instruction">
+                          Rewrite the manipulative message above into an ethical, honest version.
+                          Focus on genuine value, respect customer autonomy, and build trust.
+                          <br/><strong>Word Limit:</strong> 60–80 words
+                        </p>
+                      </label>
+                      <textarea
+                        id="persuasiveRewrite"
+                        value={answers.persuasiveRewrite}
+                        onChange={(e) => handleInputChange('persuasiveRewrite', e.target.value)}
+                        placeholder="Rewrite the message using ethical persuasion techniques..."
+                        rows="5"
+                      />
+                      <div className="character-count">
+                        {answers.persuasiveRewrite?.length || 0} characters
+                      </div>
+                    </div>
+
+                    <div className="action-buttons">
+                      <button 
+                        className="feedback-button"
+                        onClick={handleGetFeedback}
+                        disabled={isLoading || !answers.ethicalAnalysis || !answers.persuasiveRewrite}
+                      >
+                        {isLoading ? 'Analyzing...' : 'Get AI Feedback'}
+                      </button>
+                      <button 
+                        className="submit-button"
+                        onClick={handleSubmit}
+                        disabled={!answers.ethicalAnalysis || !answers.persuasiveRewrite}
+                      >
+                        <RiSendPlaneLine />
+                        Complete Lesson
+                      </button>
+                      <button 
+                        className="reset-button"
+                        onClick={handleReset}
+                        disabled={isLoading}
+                      >
+                        Reset All
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="exercise-section">
-                <div className="exercise-item">
-                  <label htmlFor="ethicalRewrite">
-                    <h4>Ethical Persuasive Rewrite</h4>
-                    <p className="instruction">
-                      Transform the manipulative statement into an ethical persuasive message that:
-                      <br />• Respects the customer's autonomy
-                      <br />• Provides genuine value proposition
-                      <br />• Uses honest language without fear tactics
-                      <br />• Focuses on benefits rather than threats
-                      <br />• Allows for informed decision-making
-                    </p>
-                  </label>
-                  <textarea
-                    id="ethicalRewrite"
-                    value={answers.ethicalRewrite}
-                    onChange={(e) => handleInputChange('ethicalRewrite', e.target.value)}
-                    placeholder="Rewrite the manipulative statement into an ethical persuasive message..."
-                    rows="8"
-                  />
-                </div>
+              {/* Feedback Section - 30% */}
+              <div className="feedback-section">
+                {!showFeedback && !isLoading && (
+                  <div className="feedback-placeholder">
+                    <h3>AI Feedback</h3>
+                    <p>Complete both simulations and click "Get AI Feedback" to receive detailed analysis of your ethical persuasion skills.</p>
+                  </div>
+                )}
 
-                <div className="analysis-section">
-                  <h4>Reflection Questions</h4>
-                  <p className="instruction">
-                    After writing your ethical version, consider:
-                    <br />• What makes the original statement manipulative?
-                    <br />• How does your rewrite respect the customer's choice?
-                    <br />• What persuasive techniques did you use ethically?
-                    <br />• How does ethical persuasion build long-term trust?
-                  </p>
-                </div>
+                {isLoading && (
+                  <div className="feedback-loading">
+                    <h3>Analyzing Your Response...</h3>
+                    <div className="loading-spinner"></div>
+                    <p>Please wait while we analyze your ethical persuasion techniques.</p>
+                  </div>
+                )}
 
-                <div className="submit-section">
-                  <button 
-                    className="submit-button"
-                    onClick={handleSubmit}
-                    disabled={!answers.ethicalRewrite}
-                  >
-                    <RiSendPlaneLine />
-                    Submit Ethical Rewrite
-                  </button>
-                </div>
+                {showFeedback && feedback && (
+                  <div className="feedback-content">
+                    <h3>AI Feedback</h3>
+                    
+                    <div className="feedback-section-item">
+                      <h4>Grammar & Spelling</h4>
+                      <p>{feedback.grammar}</p>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h4>Content Analysis</h4>
+                      <p>{feedback.content}</p>
+                    </div>
+
+                    <div className="feedback-section-item">
+                      <h4>Suggestions for Improvement</h4>
+                      <p>{feedback.suggestions}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
         </div>
       </div>
