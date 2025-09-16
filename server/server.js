@@ -85,6 +85,7 @@ async function initializeDatabase() {
         test_name VARCHAR(255) NOT NULL,
         test_code VARCHAR(10) UNIQUE NOT NULL,
         description TEXT,
+        start_time DATETIME NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         deleted_at TIMESTAMP NULL,
         is_active BOOLEAN DEFAULT TRUE,
@@ -174,6 +175,20 @@ async function initializeDatabase() {
       if (teacherColumns.length === 0) {
         await connection.query(`ALTER TABLE teacher_profiles ADD COLUMN address TEXT`);
         console.log('Added address column to teacher_profiles');
+      }
+
+      // Check if start_time column exists in tests table
+      const [testColumns] = await connection.query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'mini_project_db' 
+        AND TABLE_NAME = 'tests' 
+        AND COLUMN_NAME = 'start_time'
+      `);
+      
+      if (testColumns.length === 0) {
+        await connection.query(`ALTER TABLE tests ADD COLUMN start_time DATETIME NULL`);
+        console.log('Added start_time column to tests');
       }
     } catch (error) {
       console.log('Column migration error:', error.message);
@@ -560,7 +575,7 @@ function generateTestCode() {
 
 // Create a new test
 app.post('/api/create-test', async (req, res) => {
-  const { testName, description, questions, teacherId } = req.body;
+  const { testName, description, questions, teacherId, startTime } = req.body;
   
   try {
     const connection = await pool.getConnection();
@@ -582,8 +597,8 @@ app.post('/api/create-test', async (req, res) => {
     
     // Insert test
     const [testResult] = await connection.execute(
-      'INSERT INTO tests (teacher_id, test_name, test_code, description) VALUES (?, ?, ?, ?)',
-      [teacherId, testName, testCode, description || null]
+      'INSERT INTO tests (teacher_id, test_name, test_code, description, start_time) VALUES (?, ?, ?, ?, ?)',
+      [teacherId, testName, testCode, description || null, startTime || null]
     );
     
     const testId = testResult.insertId;
@@ -649,17 +664,29 @@ app.get('/api/validate-test-code/:testCode', async (req, res) => {
     const connection = await pool.getConnection();
     
     const [tests] = await connection.execute(
-      'SELECT id, test_name FROM tests WHERE test_code = ? AND is_active = 1',
+      'SELECT id, test_name, start_time FROM tests WHERE test_code = ? AND is_active = 1',
       [testCode]
     );
     
     connection.release();
     
     if (tests.length > 0) {
-      res.json({ 
-        valid: true, 
-        test: tests[0] 
-      });
+      const test = tests[0];
+      const now = new Date();
+      
+      // Check if test has a start time and if it's in the future
+      if (test.start_time && new Date(test.start_time) > now) {
+        res.json({ 
+          valid: false, 
+          error: `Test is not available yet. It will start on ${new Date(test.start_time).toLocaleString()}`,
+          startTime: test.start_time
+        });
+      } else {
+        res.json({ 
+          valid: true, 
+          test: { id: test.id, test_name: test.test_name }
+        });
+      }
     } else {
       res.json({ 
         valid: false, 
@@ -692,6 +719,16 @@ app.get('/api/test/:testCode', async (req, res) => {
     }
     
     const test = tests[0];
+    const now = new Date();
+    
+    // Check if test has a start time and if it's in the future
+    if (test.start_time && new Date(test.start_time) > now) {
+      connection.release();
+      return res.status(403).json({ 
+        error: `Test is not available yet. It will start on ${new Date(test.start_time).toLocaleString()}`,
+        startTime: test.start_time
+      });
+    }
     
     // Get questions
     const [questions] = await connection.execute(

@@ -1,41 +1,14 @@
-.create-test-container {
+/* Import Teacher Dashboard Styles */
+@import '../TeacherDashboard/TeacherDashboard.css';
+
+/* Create Test Specific Content */
+.create-test-content {
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  background: #f8f9fa;
-  min-height: 100vh;
-}
-
-.create-test-header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.back-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
-}
-
-.back-button:hover {
-  background: #5a6268;
-}
-
-.create-test-header h1 {
-  color: #2c3e50;
-  margin: 0;
-  font-size: 28px;
-  font-weight: 600;
+  margin-left: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .create-test-form {
@@ -87,6 +60,14 @@
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-help {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6c757d;
+  font-style: italic;
 }
 
 .questions-section h2 {
@@ -235,18 +216,8 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .create-test-container {
-    padding: 15px;
-  }
-
-  .create-test-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-
-  .create-test-header h1 {
-    font-size: 24px;
+  .create-test-content {
+    padding: 1rem;
   }
 
   .create-test-form {

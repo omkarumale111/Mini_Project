@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS tests (
     test_name VARCHAR(255) NOT NULL,
     test_code VARCHAR(10) UNIQUE NOT NULL,
     description TEXT,
+    start_time DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (teacher_id) REFERENCES users(id)

@@ -1,14 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CreateTest.css';
-import { RiAddLine, RiDeleteBin6Line, RiArrowLeftLine, RiSave3Line } from 'react-icons/ri';
+import { 
+  RiAddLine, 
+  RiDeleteBin6Line, 
+  RiSave3Line,
+  RiDashboardLine, 
+  RiUserLine, 
+  RiFileTextLine, 
+  RiGroupLine, 
+  RiBarChartLine, 
+  RiSettings4Line, 
+  RiQuestionLine, 
+  RiLogoutCircleRLine, 
+  RiMenuFoldLine,
+  RiMenuUnfoldLine,
+  RiFileEditLine,
+  RiCalendarEventLine
+} from 'react-icons/ri';
+import logo from '../../assets/Logo.png';
 
 const CreateTest = () => {
   const [testName, setTestName] = useState('');
   const [description, setDescription] = useState('');
+  const [startTime, setStartTime] = useState('');
   const [questions, setQuestions] = useState([{ id: 1, text: '' }]);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,6 +40,48 @@ const CreateTest = () => {
       navigate('/login');
     }
   }, [navigate]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarVisible(true);
+      } else {
+        setSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setSidebarVisible(!sidebarVisible);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
+  };
+
+  const closeSidebarOnMobile = () => {
+    if (isMobile) {
+      setSidebarVisible(false);
+    }
+  };
+
+  const navigateToSection = (path) => {
+    navigate(path);
+    closeSidebarOnMobile();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   const addQuestion = () => {
     const newId = Math.max(...questions.map(q => q.id)) + 1;
@@ -54,12 +117,23 @@ const CreateTest = () => {
       return;
     }
 
+    // Validate start time is not in the past
+    if (startTime) {
+      const selectedTime = new Date(startTime);
+      const now = new Date();
+      if (selectedTime <= now) {
+        alert('Start time must be in the future');
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
       const testData = {
         testName: testName.trim(),
         description: description.trim(),
+        startTime: startTime || null,
         questions: questions.map((q, index) => ({
           text: q.text.trim(),
           order: index + 1
@@ -92,18 +166,117 @@ const CreateTest = () => {
   };
 
   return (
-    <div className="create-test-container">
-      <div className="create-test-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/teacher-dashboard')}
-        >
-          <RiArrowLeftLine /> Back to Dashboard
-        </button>
-        <h1>Create New Test</h1>
+    <div className="teacher-dashboard-container">
+      {/* Mobile backdrop */}
+      {isMobile && sidebarVisible && (
+        <div 
+          className="backdrop visible" 
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar navigation */}
+      <div 
+        className={`teacher-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
+      >
+        <div className="sidebar-header">
+          <button 
+            className="sidebar-menu-toggle" 
+            onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
+          >
+            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
+          </button>
+          <div className="logo-section">
+            <img src={logo} alt="WriteEdge Logo" className="sidebar-logo" />
+            {!sidebarCollapsed && <span className="logo-text">WriteEdge</span>}
+          </div>
+        </div>
+
+        {/* Navigation Menu */}
+        <nav className="teacher-nav-menu">
+          <ul>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/teacher-dashboard')}
+            >
+              <RiDashboardLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Dashboard</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/teacher-profile')}
+            >
+              <RiUserLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Profile</span>}
+            </li>
+            <li 
+              className="nav-item active"
+              onClick={() => navigateToSection('/create-test')}
+            >
+              <RiFileTextLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Create Test</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/manage-tests')}
+            >
+              <RiFileEditLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Manage Tests</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/manage-events')}
+            >
+              <RiCalendarEventLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Manage Events</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/reports')}
+            >
+              <RiBarChartLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Reports</span>}
+            </li>
+          </ul>
+        </nav>
+
+        {/* Bottom Menu */}
+        <div className="bottom-menu">
+          <ul>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/teacher-about')}
+            >
+              <RiQuestionLine className="nav-icon" />
+              {!sidebarCollapsed && <span>About</span>}
+            </li>
+            <li 
+              className="nav-item" 
+              onClick={handleLogout}
+            >
+              <RiLogoutCircleRLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Log Out</span>}
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="create-test-form">
+      {/* Main content area */}
+      <div className="teacher-main-content">
+        {/* Top Navigation Bar */}
+        <div className="teacher-top-bar">
+          <div className="top-bar-title">
+            <h1>Create New Test</h1>
+          </div>
+          
+          <div className="top-bar-nav">
+          </div>
+        </div>
+
+        {/* Create Test Content */}
+        <div className="create-test-content">
+          <form onSubmit={handleSubmit} className="create-test-form">
         <div className="test-info-section">
           <h2>Test Information</h2>
           
@@ -128,6 +301,18 @@ const CreateTest = () => {
               placeholder="Enter test description (optional)"
               rows="3"
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="startTime">Test Start Time (Optional)</label>
+            <input
+              type="datetime-local"
+              id="startTime"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              placeholder="Select when the test should start"
+            />
+            <small className="form-help">If no start time is set, the test will be available immediately</small>
           </div>
         </div>
 
@@ -186,8 +371,10 @@ const CreateTest = () => {
             <RiSave3Line />
             {isLoading ? 'Creating...' : 'Create Test'}
           </button>
+          </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

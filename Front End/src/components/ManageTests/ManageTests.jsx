@@ -2,14 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ManageTests.css';
 import { 
-  RiArrowLeftLine, 
   RiEyeLine, 
   RiDeleteBin6Line, 
   RiFileTextLine,
   RiGroupLine,
   RiCalendarLine,
-  RiCodeLine
+  RiCodeLine,
+  RiDashboardLine, 
+  RiUserLine, 
+  RiBarChartLine, 
+  RiSettings4Line, 
+  RiQuestionLine, 
+  RiLogoutCircleRLine, 
+  RiMenuFoldLine,
+  RiMenuUnfoldLine,
+  RiFileEditLine,
+  RiCalendarEventLine
 } from 'react-icons/ri';
+import logo from '../../assets/Logo.png';
 
 const ManageTests = () => {
   const [tests, setTests] = useState([]);
@@ -17,6 +27,9 @@ const ManageTests = () => {
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +41,48 @@ const ManageTests = () => {
       navigate('/login');
     }
   }, [navigate]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarVisible(true);
+      } else {
+        setSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setSidebarVisible(!sidebarVisible);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
+  };
+
+  const closeSidebarOnMobile = () => {
+    if (isMobile) {
+      setSidebarVisible(false);
+    }
+  };
+
+  const navigateToSection = (path) => {
+    navigate(path);
+    closeSidebarOnMobile();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   const fetchTests = async (teacherId) => {
     try {
@@ -110,18 +165,116 @@ const ManageTests = () => {
   }
 
   return (
-    <div className="manage-tests-container">
-      <div className="manage-tests-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/teacher-dashboard')}
-        >
-          <RiArrowLeftLine /> Back to Dashboard
-        </button>
-        <h1>Manage Tests</h1>
+    <div className="teacher-dashboard-container">
+      {/* Mobile backdrop */}
+      {isMobile && sidebarVisible && (
+        <div 
+          className="backdrop visible" 
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar navigation */}
+      <div 
+        className={`teacher-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarVisible ? 'visible' : ''}`}
+      >
+        <div className="sidebar-header">
+          <button 
+            className="sidebar-menu-toggle" 
+            onClick={toggleSidebar}
+            aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
+          >
+            {sidebarCollapsed ? <RiMenuUnfoldLine /> : <RiMenuFoldLine />}
+          </button>
+          <div className="logo-section">
+            <img src={logo} alt="WriteEdge Logo" className="sidebar-logo" />
+            {!sidebarCollapsed && <span className="logo-text">WriteEdge</span>}
+          </div>
+        </div>
+
+        {/* Navigation Menu */}
+        <nav className="teacher-nav-menu">
+          <ul>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/teacher-dashboard')}
+            >
+              <RiDashboardLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Dashboard</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/teacher-profile')}
+            >
+              <RiUserLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Profile</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/create-test')}
+            >
+              <RiFileTextLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Create Test</span>}
+            </li>
+            <li 
+              className="nav-item active"
+              onClick={() => navigateToSection('/manage-tests')}
+            >
+              <RiFileEditLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Manage Tests</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/manage-events')}
+            >
+              <RiCalendarEventLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Manage Events</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/reports')}
+            >
+              <RiBarChartLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Reports</span>}
+            </li>
+          </ul>
+        </nav>
+
+        {/* Bottom Menu */}
+        <div className="bottom-menu">
+          <ul>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/teacher-about')}
+            >
+              <RiQuestionLine className="nav-icon" />
+              {!sidebarCollapsed && <span>About</span>}
+            </li>
+            <li 
+              className="nav-item" 
+              onClick={handleLogout}
+            >
+              <RiLogoutCircleRLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Log Out</span>}
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <div className="manage-tests-content">
+      {/* Main content area */}
+      <div className="teacher-main-content">
+        {/* Top Navigation Bar */}
+        <div className="teacher-top-bar">
+          <div className="top-bar-title">
+            <h1>Manage Tests</h1>
+          </div>
+          
+          <div className="top-bar-nav">
+          </div>
+        </div>
+
+        {/* Manage Tests Content */}
+        <div className="manage-tests-content">
         {/* Tests List */}
         <div className="tests-section">
           <h2>Your Tests ({tests.length})</h2>
@@ -164,8 +317,14 @@ const ManageTests = () => {
                     </div>
                     <div className="stat">
                       <RiCalendarLine />
-                      <span>{formatDate(test.created_at)}</span>
+                      <span>Created: {formatDate(test.created_at)}</span>
                     </div>
+                    {test.start_time && (
+                      <div className="stat start-time">
+                        <RiCalendarLine />
+                        <span>Starts: {formatDate(test.start_time)}</span>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="test-actions">
@@ -201,6 +360,11 @@ const ManageTests = () => {
               <div className="info-row">
                 <strong>Created:</strong> {formatDate(selectedTest.created_at)}
               </div>
+              {selectedTest.start_time && (
+                <div className="info-row">
+                  <strong>Start Time:</strong> {formatDate(selectedTest.start_time)}
+                </div>
+              )}
               <div className="info-row">
                 <strong>Questions:</strong> {selectedTest.question_count}
               </div>
@@ -244,6 +408,7 @@ const ManageTests = () => {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

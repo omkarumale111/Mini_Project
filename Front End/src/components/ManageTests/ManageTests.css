@@ -1,41 +1,9 @@
-.manage-tests-container {
+/* Import Teacher Dashboard Styles */
+@import '../TeacherDashboard/TeacherDashboard.css';
+
+.manage-tests-content {
   padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-  background: #f8f9fa;
-  min-height: 100vh;
-}
-
-.manage-tests-header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.back-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
-}
-
-.back-button:hover {
-  background: #5a6268;
-}
-
-.manage-tests-header h1 {
-  color: #2c3e50;
-  margin: 0;
-  font-size: 28px;
-  font-weight: 600;
+  margin-left: 20px;
 }
 
 .loading {
@@ -156,9 +124,15 @@
 
 .test-stats {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.stat.start-time {
+  background: #e3f2fd;
+  border: 1px solid #2196f3;
+  color: #1976d2;
 }
 
 .stat {
