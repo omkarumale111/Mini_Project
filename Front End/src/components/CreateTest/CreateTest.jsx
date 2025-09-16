@@ -24,7 +24,8 @@ const CreateTest = () => {
   const [testName, setTestName] = useState('');
   const [description, setDescription] = useState('');
   const [startTime, setStartTime] = useState('');
-  const [questions, setQuestions] = useState([{ id: 1, text: '' }]);
+  const [timeLimit, setTimeLimit] = useState('');
+  const [questions, setQuestions] = useState([{ id: 1, text: '', wordLimit: '' }]);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -85,7 +86,7 @@ const CreateTest = () => {
 
   const addQuestion = () => {
     const newId = Math.max(...questions.map(q => q.id)) + 1;
-    setQuestions([...questions, { id: newId, text: '' }]);
+    setQuestions([...questions, { id: newId, text: '', wordLimit: '' }]);
   };
 
   const removeQuestion = (id) => {
@@ -94,9 +95,9 @@ const CreateTest = () => {
     }
   };
 
-  const updateQuestion = (id, text) => {
+  const updateQuestion = (id, field, value) => {
     setQuestions(questions.map(q => 
-      q.id === id ? { ...q, text } : q
+      q.id === id ? { ...q, [field]: value } : q
     ));
   };
 
@@ -134,9 +135,11 @@ const CreateTest = () => {
         testName: testName.trim(),
         description: description.trim(),
         startTime: startTime || null,
+        timeLimit: timeLimit ? parseInt(timeLimit) : null,
         questions: questions.map((q, index) => ({
           text: q.text.trim(),
-          order: index + 1
+          order: index + 1,
+          wordLimit: q.wordLimit ? parseInt(q.wordLimit) : null
         })),
         teacherId: user.id
       };
@@ -307,6 +310,20 @@ const CreateTest = () => {
             />
             <small className="form-help">If no start time is set, the test will be available immediately</small>
           </div>
+
+          <div className="form-group">
+            <label htmlFor="timeLimit">Time Limit (Optional)</label>
+            <input
+              type="number"
+              id="timeLimit"
+              value={timeLimit}
+              onChange={(e) => setTimeLimit(e.target.value)}
+              placeholder="Enter time limit in minutes"
+              min="1"
+              max="300"
+            />
+            <small className="form-help">Leave empty for no time limit. Maximum 300 minutes (5 hours)</small>
+          </div>
         </div>
 
         <div className="questions-section">
@@ -338,11 +355,26 @@ const CreateTest = () => {
                 </div>
                 <textarea
                   value={question.text}
-                  onChange={(e) => updateQuestion(question.id, e.target.value)}
+                  onChange={(e) => updateQuestion(question.id, 'text', e.target.value)}
                   placeholder="Enter your question here... (Students will provide 3-4 sentence paragraph answers)"
                   rows="4"
                   required
                 />
+                <div className="question-settings">
+                  <div className="word-limit-input">
+                    <label htmlFor={`wordLimit-${question.id}`}>Word Limit (Optional):</label>
+                    <input
+                      type="number"
+                      id={`wordLimit-${question.id}`}
+                      value={question.wordLimit}
+                      onChange={(e) => updateQuestion(question.id, 'wordLimit', e.target.value)}
+                      placeholder="Max words"
+                      min="10"
+                      max="1000"
+                    />
+                    <small>Leave empty for no word limit</small>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

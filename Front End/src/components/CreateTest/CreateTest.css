@@ -165,6 +165,43 @@
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
+.question-settings {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #dee2e6;
+}
+
+.word-limit-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.word-limit-input label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.word-limit-input input {
+  width: 150px;
+  padding: 8px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.word-limit-input input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.word-limit-input small {
+  font-size: 11px;
+  color: #6c757d;
+  font-style: italic;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

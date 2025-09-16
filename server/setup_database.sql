@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS tests (
     test_code VARCHAR(10) UNIQUE NOT NULL,
     description TEXT,
     start_time DATETIME NULL,
+    time_limit_minutes INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (teacher_id) REFERENCES users(id)
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS test_questions (
     test_id INT NOT NULL,
     question_text TEXT NOT NULL,
     question_order INT NOT NULL,
+    word_limit INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
 );

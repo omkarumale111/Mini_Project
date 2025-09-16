@@ -86,6 +86,7 @@ async function initializeDatabase() {
         test_code VARCHAR(10) UNIQUE NOT NULL,
         description TEXT,
         start_time DATETIME NULL,
+        time_limit_minutes INT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         deleted_at TIMESTAMP NULL,
         is_active BOOLEAN DEFAULT TRUE,
@@ -99,6 +100,7 @@ async function initializeDatabase() {
         test_id INT NOT NULL,
         question_text TEXT NOT NULL,
         question_order INT NOT NULL,
+        word_limit INT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
       )
@@ -189,6 +191,34 @@ async function initializeDatabase() {
       if (testColumns.length === 0) {
         await connection.query(`ALTER TABLE tests ADD COLUMN start_time DATETIME NULL`);
         console.log('Added start_time column to tests');
+      }
+
+      // Check if time_limit_minutes column exists in tests table
+      const [timeLimitColumns] = await connection.query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'mini_project_db' 
+        AND TABLE_NAME = 'tests' 
+        AND COLUMN_NAME = 'time_limit_minutes'
+      `);
+      
+      if (timeLimitColumns.length === 0) {
+        await connection.query(`ALTER TABLE tests ADD COLUMN time_limit_minutes INT NULL`);
+        console.log('Added time_limit_minutes column to tests');
+      }
+
+      // Check if word_limit column exists in test_questions table
+      const [wordLimitColumns] = await connection.query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'mini_project_db' 
+        AND TABLE_NAME = 'test_questions' 
+        AND COLUMN_NAME = 'word_limit'
+      `);
+      
+      if (wordLimitColumns.length === 0) {
+        await connection.query(`ALTER TABLE test_questions ADD COLUMN word_limit INT NULL`);
+        console.log('Added word_limit column to test_questions');
       }
     } catch (error) {
       console.log('Column migration error:', error.message);
@@ -575,7 +605,7 @@ function generateTestCode() {
 
 // Create a new test
 app.post('/api/create-test', async (req, res) => {
-  const { testName, description, questions, teacherId, startTime } = req.body;
+  const { testName, description, questions, teacherId, startTime, timeLimit } = req.body;
   
   try {
     const connection = await pool.getConnection();
@@ -597,8 +627,8 @@ app.post('/api/create-test', async (req, res) => {
     
     // Insert test
     const [testResult] = await connection.execute(
-      'INSERT INTO tests (teacher_id, test_name, test_code, description, start_time) VALUES (?, ?, ?, ?, ?)',
-      [teacherId, testName, testCode, description || null, startTime || null]
+      'INSERT INTO tests (teacher_id, test_name, test_code, description, start_time, time_limit_minutes) VALUES (?, ?, ?, ?, ?, ?)',
+      [teacherId, testName, testCode, description || null, startTime || null, timeLimit || null]
     );
     
     const testId = testResult.insertId;
@@ -606,8 +636,8 @@ app.post('/api/create-test', async (req, res) => {
     // Insert questions
     for (const question of questions) {
       await connection.execute(
-        'INSERT INTO test_questions (test_id, question_text, question_order) VALUES (?, ?, ?)',
-        [testId, question.text, question.order]
+        'INSERT INTO test_questions (test_id, question_text, question_order, word_limit) VALUES (?, ?, ?, ?)',
+        [testId, question.text, question.order, question.wordLimit || null]
       );
     }
     

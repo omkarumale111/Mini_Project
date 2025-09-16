@@ -13,6 +13,7 @@ const TestInterface = () => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
   const [timeRemaining, setTimeRemaining] = useState(null);
+  const [testStartTime, setTestStartTime] = useState(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -23,6 +24,70 @@ const TestInterface = () => {
       navigate('/login');
     }
   }, [testCode, navigate]);
+
+  // Timer effect
+  useEffect(() => {
+    if (timeRemaining === null || timeRemaining <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          // Time's up - auto submit
+          handleAutoSubmit();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeRemaining]);
+
+  const handleAutoSubmit = async () => {
+    if (isSubmitting) return;
+    
+    alert('Time is up! Your test will be submitted automatically.');
+    await submitTest(true);
+  };
+
+  const submitTest = async (isAutoSubmit = false) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+
+    try {
+      const submissionData = {
+        testId: test.id,
+        studentId: user.id,
+        answers: test.questions.map(question => ({
+          questionId: question.id,
+          answerText: answers[question.id] ? answers[question.id].trim() : ''
+        }))
+      };
+
+      const response = await fetch('http://localhost:5001/api/submit-test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(isAutoSubmit ? 'Test submitted automatically due to time limit!' : 'Test submitted successfully!');
+        navigate('/dashboard');
+      } else {
+        alert(result.error || 'Failed to submit test');
+      }
+    } catch (error) {
+      console.error('Error submitting test:', error);
+      alert('Failed to submit test. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const fetchTestData = async () => {
     try {
@@ -37,6 +102,13 @@ const TestInterface = () => {
           initialAnswers[question.id] = '';
         });
         setAnswers(initialAnswers);
+        
+        // Set up timer if test has time limit
+        if (data.test.time_limit_minutes) {
+          const startTime = Date.now();
+          setTestStartTime(startTime);
+          setTimeRemaining(data.test.time_limit_minutes * 60); // Convert to seconds
+        }
       } else {
         setError(data.error || 'Failed to load test');
       }
@@ -70,45 +142,31 @@ const TestInterface = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      const submissionData = {
-        testId: test.id,
-        studentId: user.id,
-        answers: test.questions.map(question => ({
-          questionId: question.id,
-          answerText: answers[question.id].trim()
-        }))
-      };
-
-      const response = await fetch('http://localhost:5001/api/submit-test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submissionData)
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        alert('Test submitted successfully!');
-        navigate('/dashboard');
-      } else {
-        alert(result.error || 'Failed to submit test');
-      }
-    } catch (error) {
-      console.error('Error submitting test:', error);
-      alert('Failed to submit test. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    await submitTest(false);
   };
 
   const getAnswerWordCount = (questionId) => {
     const answer = answers[questionId] || '';
     return answer.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  const formatTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const isWordLimitExceeded = (questionId) => {
+    const question = test?.questions.find(q => q.id === questionId);
+    if (!question || !question.word_limit) return false;
+    
+    const wordCount = getAnswerWordCount(questionId);
+    return wordCount > question.word_limit;
   };
 
   if (isLoading) {
@@ -147,6 +205,11 @@ const TestInterface = () => {
             <span className="question-count">
               <RiFileTextLine /> {test.questions.length} Questions
             </span>
+            {timeRemaining !== null && (
+              <span className={`timer ${timeRemaining <= 300 ? 'warning' : ''} ${timeRemaining <= 60 ? 'critical' : ''}`}>
+                <RiTimeLine /> Time Remaining: {formatTime(timeRemaining)}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -164,12 +227,23 @@ const TestInterface = () => {
               <div className="question-header">
                 <h3>Question {index + 1}</h3>
                 <div className="word-count">
-                  Words: {getAnswerWordCount(question.id)}
+                  <span className={isWordLimitExceeded(question.id) ? 'word-count-exceeded' : ''}>
+                    Words: {getAnswerWordCount(question.id)}
+                    {question.word_limit && ` / ${question.word_limit} max`}
+                  </span>
+                  {isWordLimitExceeded(question.id) && (
+                    <span className="word-limit-warning">Word limit exceeded!</span>
+                  )}
                 </div>
               </div>
               
               <div className="question-text">
                 {question.question_text}
+                {question.word_limit && (
+                  <div className="word-limit-info">
+                    <small>Maximum {question.word_limit} words</small>
+                  </div>
+                )}
               </div>
               
               <div className="answer-section">
@@ -181,6 +255,7 @@ const TestInterface = () => {
                   placeholder="Write your answer here (3-4 sentences recommended)..."
                   rows="6"
                   required
+                  className={isWordLimitExceeded(question.id) ? 'word-limit-exceeded' : ''}
                 />
               </div>
             </div>

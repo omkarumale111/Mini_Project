@@ -17,7 +17,8 @@ import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiFileEditLine,
-  RiCalendarEventLine
+  RiCalendarEventLine,
+  RiTimeLine
 } from 'react-icons/ri';
 import logo from '../../assets/Logo.png';
 
@@ -314,8 +315,14 @@ const ManageTests = () => {
                     </div>
                     {test.start_time && (
                       <div className="stat start-time">
-                        <RiCalendarLine />
+                        <RiCalendarEventLine />
                         <span>Starts: {formatDate(test.start_time)}</span>
+                      </div>
+                    )}
+                    {test.time_limit_minutes && (
+                      <div className="stat time-limit">
+                        <RiTimeLine />
+                        <span>Time Limit: {test.time_limit_minutes} minutes</span>
                       </div>
                     )}
                   </div>
@@ -361,6 +368,11 @@ const ManageTests = () => {
               <div className="info-row">
                 <strong>Questions:</strong> {selectedTest.question_count}
               </div>
+              {selectedTest.time_limit_minutes && (
+                <div className="info-row">
+                  <strong>Time Limit:</strong> {selectedTest.time_limit_minutes} minutes
+                </div>
+              )}
               <div className="info-row">
                 <strong>Total Submissions:</strong> {submissions.length}
               </div>
