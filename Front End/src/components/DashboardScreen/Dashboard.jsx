@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [testCount, setTestCount] = useState(0);
+  const [lessonCount, setLessonCount] = useState(0);
   const [todaysTip, setTodaysTip] = useState('');
   const navigate = useNavigate();
 
@@ -59,6 +60,27 @@ const Dashboard = () => {
     };
 
     fetchTestCount();
+  }, [user]);
+
+  // Fetch lesson completion count
+  useEffect(() => {
+    const fetchLessonCount = async () => {
+      if (user && user.id) {
+        try {
+          const response = await fetch(`http://localhost:5001/api/student-lesson-count/${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setLessonCount(data.completedLessons);
+          } else {
+            console.error('Failed to fetch lesson count');
+          }
+        } catch (error) {
+          console.error('Error fetching lesson count:', error);
+        }
+      }
+    };
+
+    fetchLessonCount();
   }, [user]);
 
   // Set today's writing tip
@@ -224,8 +246,8 @@ const Dashboard = () => {
               <RiTimeLine />
             </div>
             <div className="stat-info">
-              <h3>Average Score</h3>
-              <span className="stat-number">72%</span>
+              <h3>Lessons Completed</h3>
+              <span className="stat-number">{lessonCount}</span>
             </div>
           </div>
         </div>

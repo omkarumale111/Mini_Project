@@ -1107,6 +1107,28 @@ app.get('/api/student-test-count/:studentId', async (req, res) => {
   }
 });
 
+// Get student lesson completion count
+app.get('/api/student-lesson-count/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const connection = await pool.getConnection();
+    
+    const [result] = await connection.query(
+      'SELECT COUNT(*) as completed_lessons FROM lesson_completions WHERE student_id = ?',
+      [studentId]
+    );
+    
+    connection.release();
+    
+    res.json({ 
+      completedLessons: result[0].completed_lessons 
+    });
+  } catch (error) {
+    console.error('Error fetching student lesson count:', error);
+    res.status(500).json({ error: 'Failed to fetch lesson count' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
