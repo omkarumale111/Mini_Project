@@ -31,6 +31,7 @@ const Dashboard = () => {
   const [testCount, setTestCount] = useState(0);
   const [lessonCount, setLessonCount] = useState(0);
   const [todaysTip, setTodaysTip] = useState('');
+  const [upcomingTests, setUpcomingTests] = useState([]);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -88,6 +89,27 @@ const Dashboard = () => {
     setTodaysTip(getTodaysWritingTip());
   }, []);
 
+  // Fetch upcoming tests
+  useEffect(() => {
+    const fetchUpcomingTests = async () => {
+      if (user && user.id) {
+        try {
+          const response = await fetch(`http://localhost:5001/api/upcoming-tests-student/${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setUpcomingTests(data.upcomingTests);
+          } else {
+            console.error('Failed to fetch upcoming tests');
+          }
+        } catch (error) {
+          console.error('Error fetching upcoming tests:', error);
+        }
+      }
+    };
+
+    fetchUpcomingTests();
+  }, [user]);
+
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
@@ -128,6 +150,40 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/login');
+  };
+
+  // Helper function to format test date and time
+  const formatTestDateTime = (test) => {
+    const startTime = test.start_time ? new Date(test.start_time) : null;
+    const attemptDeadline = test.attempt_deadline ? new Date(test.attempt_deadline) : null;
+    const now = new Date();
+
+    if (startTime && startTime > now) {
+      // Test hasn't started yet
+      return {
+        date: startTime.getDate(),
+        month: startTime.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+        time: startTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+        status: 'Starts at'
+      };
+    } else if (attemptDeadline && attemptDeadline > now) {
+      // Test is available now but has a deadline
+      return {
+        date: attemptDeadline.getDate(),
+        month: attemptDeadline.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+        time: attemptDeadline.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+        status: 'Available until'
+      };
+    } else {
+      // Test is available now with no specific deadline
+      const createdDate = new Date(test.created_at);
+      return {
+        date: createdDate.getDate(),
+        month: createdDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+        time: 'Available now',
+        status: 'Ready to take'
+      };
+    }
   };
 
   return (
@@ -273,29 +329,45 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Upcoming Events */}
+        {/* Upcoming Tests */}
         <div className="upcoming-events">
-          <h3>Upcoming Events</h3>
-          <div className="event-item">
-            <div className="event-date">
-              <span className="date-number">10</span>
-              <span className="date-month">MAY</span>
+          <h3>Upcoming Tests</h3>
+          {upcomingTests.length > 0 ? (
+            upcomingTests.map((test) => {
+              const dateTime = formatTestDateTime(test);
+              const teacherName = test.teacher_first_name && test.teacher_last_name 
+                ? `${test.teacher_first_name} ${test.teacher_last_name}`
+                : test.teacher_email;
+              
+              return (
+                <div key={test.id} className="event-item">
+                  <div className="event-date">
+                    <span className="date-number">{dateTime.date}</span>
+                    <span className="date-month">{dateTime.month}</span>
+                  </div>
+                  <div className="event-details">
+                    <h4>{test.test_name}</h4>
+                    <p>
+                      {dateTime.status} {dateTime.time}
+                      {test.time_limit_minutes && ` - ${test.time_limit_minutes} minutes`}
+                    </p>
+                    <small>By {teacherName} • Code: {test.test_code}</small>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="event-item">
+              <div className="event-date">
+                <span className="date-number">--</span>
+                <span className="date-month">---</span>
+              </div>
+              <div className="event-details">
+                <h4>No Upcoming Tests</h4>
+                <p>Check back later for new test assignments</p>
+              </div>
             </div>
-            <div className="event-details">
-              <h4>Business Writing Assessment</h4>
-              <p>9:00 AM - Test will be available for 2 hours</p>
-            </div>
-          </div>
-          <div className="event-item">
-            <div className="event-date">
-              <span className="date-number">15</span>
-              <span className="date-month">MAY</span>
-            </div>
-            <div className="event-details">
-              <h4>Technical Documentation Test</h4>
-              <p>2:00 PM - Test will be available for 90 minutes</p>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Writing Tip of the Day */}

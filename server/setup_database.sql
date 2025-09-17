@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS tests (
     attempt_deadline DATETIME NULL,
     time_limit_minutes INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
     is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (teacher_id) REFERENCES users(id)
 );

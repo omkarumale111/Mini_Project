@@ -685,7 +685,7 @@ app.get('/api/teacher-tests/:teacherId', async (req, res) => {
       FROM tests t
       LEFT JOIN test_questions tq ON t.id = tq.test_id
       LEFT JOIN student_test_submissions sts ON t.id = sts.test_id
-      WHERE t.teacher_id = ? AND t.is_active = 1
+      WHERE t.teacher_id = ? AND t.deleted_at IS NULL
       GROUP BY t.id
       ORDER BY t.created_at DESC
     `, [teacherId]);
@@ -708,7 +708,7 @@ app.get('/api/validate-test-code/:testCode', async (req, res) => {
     const connection = await pool.getConnection();
     
     const [tests] = await connection.execute(
-      'SELECT id, test_name, start_time, attempt_deadline FROM tests WHERE test_code = ? AND is_active = 1',
+      'SELECT id, test_name, start_time, attempt_deadline FROM tests WHERE test_code = ? AND deleted_at IS NULL',
       [testCode]
     );
     
@@ -759,7 +759,7 @@ app.get('/api/upcoming-tests/:teacherId', async (req, res) => {
     const connection = await pool.getConnection();
     
     const [tests] = await connection.execute(
-      'SELECT COUNT(*) as count FROM tests WHERE teacher_id = ? AND is_active = 1 AND start_time IS NOT NULL AND start_time > NOW()',
+      'SELECT COUNT(*) as count FROM tests WHERE teacher_id = ? AND deleted_at IS NULL AND start_time IS NOT NULL AND start_time > NOW()',
       [teacherId]
     );
     
@@ -782,7 +782,7 @@ app.get('/api/test/:testCode', async (req, res) => {
     
     // Get test info
     const [tests] = await connection.execute(
-      'SELECT * FROM tests WHERE test_code = ? AND is_active = 1',
+      'SELECT * FROM tests WHERE test_code = ? AND deleted_at IS NULL',
       [testCode]
     );
     
@@ -1157,6 +1157,58 @@ app.get('/api/student-lesson-count/:studentId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching student lesson count:', error);
     res.status(500).json({ error: 'Failed to fetch lesson count' });
+  }
+});
+
+// Get upcoming tests for student dashboard
+app.get('/api/upcoming-tests-student/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const connection = await pool.getConnection();
+    
+    // Get upcoming tests that haven't been submitted by the student yet
+    // Tests are considered upcoming if they have a start_time in the future OR
+    // they have started but the attempt_deadline hasn't passed yet
+    const [tests] = await connection.query(`
+      SELECT 
+        t.id,
+        t.test_name,
+        t.test_code,
+        t.description,
+        t.start_time,
+        t.attempt_deadline,
+        t.time_limit_minutes,
+        t.created_at,
+        tp.first_name as teacher_first_name,
+        tp.last_name as teacher_last_name,
+        u.email as teacher_email
+      FROM tests t
+      JOIN users u ON t.teacher_id = u.id
+      LEFT JOIN teacher_profiles tp ON u.id = tp.user_id
+      LEFT JOIN student_test_submissions sts ON t.id = sts.test_id AND sts.student_id = ?
+      WHERE t.deleted_at IS NULL 
+        AND sts.id IS NULL
+        AND (
+          (t.start_time IS NOT NULL AND t.start_time > NOW()) OR
+          (t.start_time IS NULL OR t.start_time <= NOW()) AND 
+          (t.attempt_deadline IS NULL OR t.attempt_deadline > NOW())
+        )
+      ORDER BY 
+        CASE 
+          WHEN t.start_time IS NOT NULL AND t.start_time > NOW() THEN t.start_time
+          WHEN t.attempt_deadline IS NOT NULL THEN t.attempt_deadline
+          ELSE t.created_at
+        END ASC
+      LIMIT 10
+    `, [studentId]);
+    
+    connection.release();
+    
+    res.json({ upcomingTests: tests });
+    
+  } catch (error) {
+    console.error('Error fetching upcoming tests for student:', error);
+    res.status(500).json({ error: 'Failed to fetch upcoming tests' });
   }
 });
 
