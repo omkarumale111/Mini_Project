@@ -18,7 +18,8 @@ import {
   RiMenuUnfoldLine,
   RiFileEditLine,
   RiCalendarEventLine,
-  RiTimeLine
+  RiTimeLine,
+  RiCloseLine
 } from 'react-icons/ri';
 import logo from '../../assets/Logo.png';
 
@@ -356,7 +357,16 @@ const ManageTests = () => {
         {/* Test Details and Submissions */}
         {selectedTest && (
           <div className="test-details-section">
-            <h2>Test Details: {selectedTest.test_name}</h2>
+            <div className="test-details-header">
+              <h2>Test Details: {selectedTest.test_name}</h2>
+              <button 
+                className="close-details-btn"
+                onClick={() => setSelectedTest(null)}
+                aria-label="Close test details"
+              >
+                <RiCloseLine />
+              </button>
+            </div>
             
             <div className="test-info-card">
               <div className="info-row">
