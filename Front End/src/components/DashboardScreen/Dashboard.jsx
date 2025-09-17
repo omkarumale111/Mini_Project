@@ -16,6 +16,7 @@ import {
   RiTimeLine
 } from "react-icons/ri";
 import logo from '../../assets/Logo.png';
+import { getTodaysWritingTip } from '../../data/writingTips';
 
 /**
  * Dashboard component provides the main layout for authenticated users.
@@ -28,6 +29,7 @@ const Dashboard = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
   const [testCount, setTestCount] = useState(0);
+  const [todaysTip, setTodaysTip] = useState('');
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -58,6 +60,11 @@ const Dashboard = () => {
 
     fetchTestCount();
   }, [user]);
+
+  // Set today's writing tip
+  useEffect(() => {
+    setTodaysTip(getTodaysWritingTip());
+  }, []);
 
   // Handle window resize
   useEffect(() => {
@@ -273,7 +280,7 @@ const Dashboard = () => {
         <div className="writing-tip">
           <h3>Writing Tip of the Day</h3>
           <div className="tip-content">
-            <p>"Use strong verbs — they carry more weight than adjectives. Instead of saying 'the meeting was good,' try 'the meeting energized the team.'"</p>
+            <p>"{todaysTip}"</p>
           </div>
         </div>
       </div>
