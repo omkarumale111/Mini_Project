@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS tests (
     test_code VARCHAR(10) UNIQUE NOT NULL,
     description TEXT,
     start_time DATETIME NULL,
+    attempt_deadline DATETIME NULL,
     time_limit_minutes INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,

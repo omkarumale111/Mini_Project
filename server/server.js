@@ -193,6 +193,20 @@ async function initializeDatabase() {
         console.log('Added start_time column to tests');
       }
 
+      // Check if attempt_deadline column exists in tests table
+      const [attemptDeadlineColumns] = await connection.query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'mini_project_db' 
+        AND TABLE_NAME = 'tests' 
+        AND COLUMN_NAME = 'attempt_deadline'
+      `);
+      
+      if (attemptDeadlineColumns.length === 0) {
+        await connection.query(`ALTER TABLE tests ADD COLUMN attempt_deadline DATETIME NULL`);
+        console.log('Added attempt_deadline column to tests');
+      }
+
       // Check if time_limit_minutes column exists in tests table
       const [timeLimitColumns] = await connection.query(`
         SELECT COLUMN_NAME 
@@ -605,7 +619,7 @@ function generateTestCode() {
 
 // Create a new test
 app.post('/api/create-test', async (req, res) => {
-  const { testName, description, questions, teacherId, startTime, timeLimit } = req.body;
+  const { testName, description, questions, teacherId, startTime, attemptDeadline, timeLimit } = req.body;
   
   try {
     const connection = await pool.getConnection();
@@ -627,8 +641,8 @@ app.post('/api/create-test', async (req, res) => {
     
     // Insert test
     const [testResult] = await connection.execute(
-      'INSERT INTO tests (teacher_id, test_name, test_code, description, start_time, time_limit_minutes) VALUES (?, ?, ?, ?, ?, ?)',
-      [teacherId, testName, testCode, description || null, startTime || null, timeLimit || null]
+      'INSERT INTO tests (teacher_id, test_name, test_code, description, start_time, attempt_deadline, time_limit_minutes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [teacherId, testName, testCode, description || null, startTime || null, attemptDeadline || null, timeLimit || null]
     );
     
     const testId = testResult.insertId;
@@ -694,7 +708,7 @@ app.get('/api/validate-test-code/:testCode', async (req, res) => {
     const connection = await pool.getConnection();
     
     const [tests] = await connection.execute(
-      'SELECT id, test_name, start_time FROM tests WHERE test_code = ? AND is_active = 1',
+      'SELECT id, test_name, start_time, attempt_deadline FROM tests WHERE test_code = ? AND is_active = 1',
       [testCode]
     );
     
@@ -710,6 +724,14 @@ app.get('/api/validate-test-code/:testCode', async (req, res) => {
           valid: false, 
           error: `Test is not available yet. It will start on ${new Date(test.start_time).toLocaleString()}`,
           startTime: test.start_time
+        });
+      } 
+      // Check if test has an attempt deadline and if it has passed
+      else if (test.attempt_deadline && new Date(test.attempt_deadline) < now) {
+        res.json({ 
+          valid: false, 
+          error: `Test attempt deadline has passed. The deadline was ${new Date(test.attempt_deadline).toLocaleString()}`,
+          attemptDeadline: test.attempt_deadline
         });
       } else {
         res.json({ 
@@ -778,6 +800,15 @@ app.get('/api/test/:testCode', async (req, res) => {
       return res.status(403).json({ 
         error: `Test is not available yet. It will start on ${new Date(test.start_time).toLocaleString()}`,
         startTime: test.start_time
+      });
+    }
+    
+    // Check if test has an attempt deadline and if it has passed
+    if (test.attempt_deadline && new Date(test.attempt_deadline) < now) {
+      connection.release();
+      return res.status(403).json({ 
+        error: `Test attempt deadline has passed. The deadline was ${new Date(test.attempt_deadline).toLocaleString()}`,
+        attemptDeadline: test.attempt_deadline
       });
     }
     

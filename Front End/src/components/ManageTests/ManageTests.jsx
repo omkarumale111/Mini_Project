@@ -319,6 +319,12 @@ const ManageTests = () => {
                         <span>Starts: {formatDate(test.start_time)}</span>
                       </div>
                     )}
+                    {test.attempt_deadline && (
+                      <div className="stat attempt-deadline">
+                        <RiCalendarEventLine />
+                        <span>Deadline: {formatDate(test.attempt_deadline)}</span>
+                      </div>
+                    )}
                     {test.time_limit_minutes && (
                       <div className="stat time-limit">
                         <RiTimeLine />
@@ -363,6 +369,11 @@ const ManageTests = () => {
               {selectedTest.start_time && (
                 <div className="info-row">
                   <strong>Start Time:</strong> {formatDate(selectedTest.start_time)}
+                </div>
+              )}
+              {selectedTest.attempt_deadline && (
+                <div className="info-row">
+                  <strong>Attempt Deadline:</strong> {formatDate(selectedTest.attempt_deadline)}
                 </div>
               )}
               <div className="info-row">

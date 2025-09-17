@@ -24,6 +24,7 @@ const CreateTest = () => {
   const [testName, setTestName] = useState('');
   const [description, setDescription] = useState('');
   const [startTime, setStartTime] = useState('');
+  const [attemptDeadline, setAttemptDeadline] = useState('');
   const [timeLimit, setTimeLimit] = useState('');
   const [questions, setQuestions] = useState([{ id: 1, text: '', wordLimit: '' }]);
   const [isLoading, setIsLoading] = useState(false);
@@ -128,6 +129,21 @@ const CreateTest = () => {
       }
     }
 
+    // Validate attempt deadline is not in the past and is after start time
+    if (attemptDeadline) {
+      const selectedDeadline = new Date(attemptDeadline);
+      const now = new Date();
+      if (selectedDeadline <= now) {
+        alert('Attempt deadline must be in the future');
+        return;
+      }
+      
+      if (startTime && selectedDeadline <= new Date(startTime)) {
+        alert('Attempt deadline must be after the start time');
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
@@ -135,6 +151,7 @@ const CreateTest = () => {
         testName: testName.trim(),
         description: description.trim(),
         startTime: startTime || null,
+        attemptDeadline: attemptDeadline || null,
         timeLimit: timeLimit ? parseInt(timeLimit) : null,
         questions: questions.map((q, index) => ({
           text: q.text.trim(),
@@ -312,6 +329,18 @@ const CreateTest = () => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="attemptDeadline">Attempt Deadline (Optional)</label>
+            <input
+              type="datetime-local"
+              id="attemptDeadline"
+              value={attemptDeadline}
+              onChange={(e) => setAttemptDeadline(e.target.value)}
+              placeholder="Select until when students can attempt the test"
+            />
+            <small className="form-help">Students cannot start the test after this deadline</small>
+          </div>
+
+          <div className="form-group">
             <label htmlFor="timeLimit">Time Limit (Optional)</label>
             <input
               type="number"
@@ -320,9 +349,9 @@ const CreateTest = () => {
               onChange={(e) => setTimeLimit(e.target.value)}
               placeholder="Enter time limit in minutes"
               min="1"
-              max="300"
+              max="120"
             />
-            <small className="form-help">Leave empty for no time limit. Maximum 300 minutes (5 hours)</small>
+            <small className="form-help">Leave empty for no time limit. Maximum 120 minutes (2 hours)</small>
           </div>
         </div>
 
