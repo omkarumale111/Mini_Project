@@ -220,8 +220,10 @@ const TakeTest = () => {
 
         {/* Test Content */}
         <div className="test-content">
+          <div className="page-title">
+            <h1>Take Test</h1>
+          </div>
           <div className="test-header">
-            <h2>Take Test</h2>
             <p>Enter the test ID provided by your instructor to begin your assessment</p>
           </div>
 

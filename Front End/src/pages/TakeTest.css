@@ -236,8 +236,21 @@
   margin: 0;
 }
 
+.page-title {
+  margin-bottom: 1rem;
+}
+
+.page-title h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  color: #0a2440;
+  font-weight: 700;
+  text-align: center;
+}
+
 .test-header {
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 .test-header h2 {
