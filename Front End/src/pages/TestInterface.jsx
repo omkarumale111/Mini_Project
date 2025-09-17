@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './TestInterface.css';
-import { RiArrowLeftLine, RiSendPlaneLine, RiTimeLine, RiFileTextLine } from 'react-icons/ri';
+import { RiSendPlaneLine, RiTimeLine, RiFileTextLine } from 'react-icons/ri';
 
 const TestInterface = () => {
   const { testCode } = useParams();
@@ -192,12 +192,6 @@ const TestInterface = () => {
   return (
     <div className="test-interface-container">
       <div className="test-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/take-test')}
-        >
-          <RiArrowLeftLine /> Back
-        </button>
         <div className="test-info">
           <h1>{test.test_name}</h1>
           <div className="test-meta">
