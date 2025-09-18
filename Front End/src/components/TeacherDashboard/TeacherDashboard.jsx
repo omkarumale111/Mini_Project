@@ -267,7 +267,7 @@ const TeacherDashboard = () => {
               <button onClick={() => navigateToSection('/manage-tests')}>MANAGE</button>
             </div>
             
-            <div className="action-card tips">
+            <div className="action-card tips" style={{ gridColumn: "1 / span 2", justifySelf: "center", width: "300px" }}>
               <div className="action-icon">
                 <RiBarChartLine />
               </div>
