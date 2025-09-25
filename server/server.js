@@ -3,16 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
-import { CohereClient } from 'cohere-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
 
 const app = express();
 
-// Initialize Cohere
-const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY
-});
+// Initialize Google's Generative AI
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Middleware
 app.use(cors());
@@ -560,53 +558,90 @@ app.get('/api/lesson-progress/:student_id', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001; 
-// Text analysis endpoint
+// Text analysis endpoint using Google's Gemini AI
 app.post('/api/analyze-text', async (req, res) => {
   try {
     console.log('Received text for analysis:', req.body.text);
-    console.log('Using OpenAI API Key:', process.env.OPENAI_API_KEY?.substring(0, 10) + '...');
     const { text } = req.body;
     
     if (!text) {
       return res.status(400).json({ message: 'Text content is required' });
     }
 
+    // Get the Gemini model (using gemini-2.5-flash for fast and efficient text processing)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     console.log('Starting grammar check...');
-    // Grammar and Spell Check
-    const grammarResponse = await cohere.generate({
-      prompt: `Correct grammar and spelling. Output only the Incorrected words or phrases and thier correct form:\n\n${text}`,
-      maxTokens: 60,
-      temperature: 0
-    });    
+// Grammar and Spell Check
+// Output: List of "Incorrect -> Correct" lines in Markdown format
+const grammarPrompt = `
+Correct grammar and spelling. 
+Output each correction on a new line in the format: Incorrect -> Correct
+If no errors, write: No errors found
+Do not use *, -, or Markdown styling
+Keep under 30 words
 
-    console.log('Starting content feedback...');
-    // Content Feedback
-    const feedbackResponse = await cohere.generate({
-      prompt: `Evaluate clarity, tone, and structure. Give 1–2 concise improvement notes per aspect:\n\n${text}`,
-      maxTokens: 60,
-      temperature: 0
-    });
-    
+${text}
+`;
 
-    console.log('Starting suggestions...');
-    // Suggestions
-    const suggestionsResponse = await cohere.generate({
-      prompt: `List exactly 3 actionable ways to improve this text (no intro):\n\n${text}`,
-      maxTokens: 60,
-      temperature: 0
-    });
-    
+const grammarResult = await model.generateContent(grammarPrompt, {
+    maxOutputTokens: 100, 
+});
+const grammarResponse = await grammarResult.response;
+const grammarText = grammarResponse.text().trim();
+
+console.log('Starting content feedback...');
+// Content Feedback
+// Output: Bulleted list of concise notes in Markdown format
+const feedbackPrompt = `
+Evaluate the text for clarity, tone, and structure. 
+Give 1–2 short improvement notes per aspect. 
+Output format must be:
+Clarity: [note 1] 
+Clarity: [note 2] 
+Tone: [note 1] 
+Tone: [note 2] 
+Structure: [note 1] 
+Structure: [note 2] 
+Each note max 7 words. 
+Do not use *, -, or Markdown styling
+
+${text}
+`;
+
+const feedbackResult = await model.generateContent(feedbackPrompt, {
+    maxOutputTokens: 100,
+});
+const feedbackResponse = await feedbackResult.response;
+const feedbackText = feedbackResponse.text().trim();
+
+console.log('Starting suggestions...');
+// Suggestions
+// Output: Numbered list of exactly 3 suggestions in Markdown format
+const suggestionsPrompt = `
+List exactly 3 actionable improvements. 
+Format as numbered lines (1., 2., 3.) 
+Each suggestion under 10 words 
+No introduction, no Markdown, no stars
+
+${text}
+`;
+
+const suggestionResult = await model.generateContent(suggestionsPrompt, {
+    maxOutputTokens: 100,
+});
+const suggestionsResponse = await suggestionResult.response;
+const suggestionsText = suggestionsResponse.text().trim();
 
     res.json({
-      spellAndGrammar: grammarResponse.generations[0].text.replace(/^Here is an analysis of the text provided:\s*/i, '').trim(),
-      contentFeedback: feedbackResponse.generations[0].text.replace(/^Here is an analysis of the text provided:\s*/i, '').trim(),
-      suggestions: suggestionsResponse.generations[0].text.replace(/^Here is an analysis of the text provided:\s*/i, '').trim()
+      spellAndGrammar: grammarText,
+      contentFeedback: feedbackText,
+      suggestions: suggestionsText
     });
 
   } catch (error) {
-    console.error('Text analysis error:', error.message);
+    console.error('Text analysis error with Gemini:', error.message);
     console.error('Full error:', error);
-    res.status(500).json({ message: 'Error analyzing text' });
+    res.status(500).json({ message: 'Error analyzing text with Gemini', error: error.message });
   }
 });
 
