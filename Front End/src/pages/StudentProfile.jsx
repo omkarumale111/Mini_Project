@@ -137,7 +137,24 @@ const StudentProfile = () => {
     }));
   };
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSaveChanges = async () => {
+    // Basic validation
+    if (!profileData.firstName.trim() || !profileData.lastName.trim()) {
+      alert('First name and last name are required');
+      return;
+    }
+
+    // Email validation
+    if (!profileData.email || !validateEmail(profileData.email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:5001/api/save-student-profile', {
         method: 'POST',
@@ -146,8 +163,9 @@ const StudentProfile = () => {
         },
         body: JSON.stringify({
           userId: user.id,
-          firstName: profileData.firstName,
-          lastName: profileData.lastName,
+          email: profileData.email,
+          firstName: profileData.firstName.trim(),
+          lastName: profileData.lastName.trim(),
           dateOfBirth: profileData.dateOfBirth,
           phone: profileData.phone,
           address: profileData.address,
@@ -158,16 +176,24 @@ const StudentProfile = () => {
         }),
       });
 
+      const result = await response.json();
+
       if (response.ok) {
+        // Update user data in localStorage if email was changed
+        if (result.email && result.email !== user.email) {
+          const updatedUser = { ...user, email: result.email };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        }
+        
         setIsEditing(false);
-        // Show success message
         alert('Profile updated successfully!');
       } else {
-        alert('Failed to update profile. Please try again.');
+        alert(result.error || 'Failed to update profile. Please try again.');
       }
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to connect to server. Please try again.');
+      alert('Failed to connect to server. Please check your connection and try again.');
     }
   };
 
@@ -386,7 +412,16 @@ const StudentProfile = () => {
                 <div className="info-row">
                   <div className="info-field">
                     <label>Email Address</label>
-                    <span>{profileData.email}</span>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        value={profileData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        required
+                      />
+                    ) : (
+                      <span>{profileData.email || 'Not provided'}</span>
+                    )}
                   </div>
                   <div className="info-field">
                     <label>Date of Birth</label>

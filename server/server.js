@@ -984,11 +984,13 @@ app.delete('/api/delete-test/:testId', async (req, res) => {
 
 // Save student profile endpoint
 app.post('/api/save-student-profile', async (req, res) => {
+  const connection = await pool.getConnection();
   try {
     console.log('Received student profile save request:', req.body);
     
     const {
       userId,
+      email,
       firstName,
       lastName,
       dateOfBirth,
@@ -1006,37 +1008,79 @@ app.post('/api/save-student-profile', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields: userId, firstName, lastName' });
     }
 
-    const connection = await pool.getConnection();
-    
+    // Validate email format if provided
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+
+      // Check if email already exists for another user
+      const [existingEmail] = await connection.execute(
+        'SELECT id FROM users WHERE email = ? AND id != ?',
+        [email, userId]
+      );
+
+      if (existingEmail.length > 0) {
+        return res.status(400).json({ error: 'Email already in use by another account' });
+      }
+
+      // Update email in users table
+      await connection.execute(
+        'UPDATE users SET email = ? WHERE id = ?',
+        [email, userId]
+      );
+    }
+
     console.log('Executing database query with values:', [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, interests, goals]);
     
-    // Insert or update student profile
-    const result = await connection.query(`
-      INSERT INTO student_profiles 
-      (user_id, first_name, last_name, date_of_birth, phone, address, school_college, grade_year, interests, goals)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-      first_name = VALUES(first_name),
-      last_name = VALUES(last_name),
-      date_of_birth = VALUES(date_of_birth),
-      phone = VALUES(phone),
-      address = VALUES(address),
-      school_college = VALUES(school_college),
-      grade_year = VALUES(grade_year),
-      interests = VALUES(interests),
-      goals = VALUES(goals),
-      updated_at = CURRENT_TIMESTAMP
-    `, [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, interests, goals]);
+    // Start a transaction
+    await connection.beginTransaction();
     
-    console.log('Database query result:', result);
+    try {
+      // Insert or update student profile
+      const result = await connection.query(`
+        INSERT INTO student_profiles 
+        (user_id, first_name, last_name, date_of_birth, phone, address, school_college, grade_year, interests, goals)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        first_name = VALUES(first_name),
+        last_name = VALUES(last_name),
+        date_of_birth = VALUES(date_of_birth),
+        phone = VALUES(phone),
+        address = VALUES(address),
+        school_college = VALUES(school_college),
+        grade_year = VALUES(grade_year),
+        interests = VALUES(interests),
+        goals = VALUES(goals),
+        updated_at = CURRENT_TIMESTAMP
+      `, [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, interests, goals]);
+      
+      // Commit the transaction
+      await connection.commit();
     
-    connection.release();
-    res.json({ success: true, message: 'Student profile saved successfully' });
+      console.log('Database query result:', result);
+      
+      res.json({ 
+        success: true, 
+        message: 'Student profile saved successfully',
+        email: email // Return the updated email if it was changed
+      });
+    } catch (error) {
+      // Rollback the transaction in case of error
+      await connection.rollback();
+      throw error;
+    }
   } catch (error) {
     console.error('Error saving student profile:', error);
     console.error('Error details:', error.message);
     console.error('Error stack:', error.stack);
-    res.status(500).json({ error: 'Failed to save student profile', details: error.message });
+    res.status(500).json({ 
+      error: 'Failed to save student profile', 
+      details: error.message 
+    });
+  } finally {
+    connection.release();
   }
 });
 
