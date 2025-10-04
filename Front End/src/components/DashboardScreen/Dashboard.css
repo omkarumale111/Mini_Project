@@ -391,7 +391,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
 }
-
 .action-card:hover {
   transform: translateY(-4px);
 }
@@ -401,9 +400,17 @@
   color: #fff;
 }
 
+.action-card.test h3 {
+  color: #fff;
+}
+
 .action-card.practice {
   background: #f0ede6;
   color: #333;
+}
+
+.action-card.practice h3 {
+  color: #000;
 }
 
 .action-icon {
