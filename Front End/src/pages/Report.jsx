@@ -177,7 +177,6 @@ const Report = () => {
           {!selectedStudent ? (
             // Student Selection View
             <div className="students-grid-container">
-              <h2 className="section-title">Select a Student to View Report</h2>
               <div className="students-grid">
                 {students.map((student) => (
                   <div key={student.id} className="student-card">
