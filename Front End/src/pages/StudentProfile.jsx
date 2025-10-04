@@ -38,6 +38,7 @@ const StudentProfile = () => {
     interests: '',
     goals: ''
   });
+  const [originalProfileData, setOriginalProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ const StudentProfile = () => {
           const data = await response.json();
           
           if (response.ok && data.profile) {
-            setProfileData({
+            const loadedProfile = {
               firstName: data.profile.first_name || '',
               lastName: data.profile.last_name || '',
               email: parsedUser.email,
@@ -66,20 +67,26 @@ const StudentProfile = () => {
               gradeYear: data.profile.grade_year || '',
               interests: data.profile.interests || '',
               goals: data.profile.goals || ''
-            });
+            };
+            setProfileData(loadedProfile);
+            setOriginalProfileData(loadedProfile);
           } else {
             // No profile found, set default with user email
-            setProfileData(prev => ({
-              ...prev,
+            const defaultProfile = {
+              ...profileData,
               email: parsedUser.email
-            }));
+            };
+            setProfileData(defaultProfile);
+            setOriginalProfileData(defaultProfile);
           }
         } catch (error) {
           console.error('Error fetching profile:', error);
-          setProfileData(prev => ({
-            ...prev,
+          const defaultProfile = {
+            ...profileData,
             email: parsedUser.email
-          }));
+          };
+          setProfileData(defaultProfile);
+          setOriginalProfileData(defaultProfile);
         }
       }
       setLoading(false);
@@ -137,9 +144,37 @@ const StudentProfile = () => {
     }));
   };
 
+  const handleCancelEdit = () => {
+    // Restore original profile data
+    if (originalProfileData) {
+      setProfileData({ ...originalProfileData });
+    }
+    setIsEditing(false);
+  };
+
+  const handleEditClick = () => {
+    if (!isEditing) {
+      // Save current state as backup before editing
+      setOriginalProfileData({ ...profileData });
+    }
+    setIsEditing(true);
+  };
+
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const formatDateForDatabase = (dateString) => {
+    if (!dateString) return null;
+    // If it's already in YYYY-MM-DD format, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+    // Convert ISO string or other formats to YYYY-MM-DD
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString().split('T')[0];
   };
 
   const handleSaveChanges = async () => {
@@ -166,7 +201,7 @@ const StudentProfile = () => {
           email: profileData.email,
           firstName: profileData.firstName.trim(),
           lastName: profileData.lastName.trim(),
-          dateOfBirth: profileData.dateOfBirth,
+          dateOfBirth: formatDateForDatabase(profileData.dateOfBirth),
           phone: profileData.phone,
           address: profileData.address,
           schoolCollege: profileData.schoolCollege,
@@ -186,6 +221,8 @@ const StudentProfile = () => {
           setUser(updatedUser);
         }
         
+        // Update original profile data to match saved data
+        setOriginalProfileData({ ...profileData });
         setIsEditing(false);
         alert('Profile updated successfully!');
       } else {
@@ -372,13 +409,23 @@ const StudentProfile = () => {
             <div className="personal-info">
               <div className="info-header">
                 <h3>Personal Information</h3>
-                <button 
-                  className="edit-btn"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  <RiFileEditLine />
-                  {isEditing ? 'Cancel' : 'Edit'}
-                </button>
+                {!isEditing ? (
+                  <button 
+                    className="edit-btn"
+                    onClick={handleEditClick}
+                  >
+                    <RiFileEditLine />
+                    Edit
+                  </button>
+                ) : (
+                  <button 
+                    className="edit-btn"
+                    onClick={handleCancelEdit}
+                  >
+                    <RiFileEditLine />
+                    Cancel
+                  </button>
+                )}
               </div>
 
               <div className="info-grid">
