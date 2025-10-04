@@ -313,9 +313,17 @@
   color: #fff;
 }
 
+.action-card.create-manage h3 {
+  color: #fff;
+}
+
 .action-card.ai-generator {
   background: linear-gradient(135deg, #FFD700 0%, #FFC800 100%);
   color: #333;
+}
+
+.action-card.ai-generator h3 {
+  color: #000;
 }
 
 .action-card.events {
@@ -325,6 +333,10 @@
 
 .action-card.tips {
   background: linear-gradient(135deg, #0a2440 0%, #1a3a5c 100%);
+  color: #fff;
+}
+
+.action-card.tips h3 {
   color: #fff;
 }
 

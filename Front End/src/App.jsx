@@ -20,6 +20,7 @@ import ManageTests from './components/ManageTests/ManageTests';
 import TestInterface from './pages/TestInterface';
 import StudentDetails from './pages/StudentDetails';
 import TeacherDetails from './pages/TeacherDetails';
+import Report from './pages/Report';
 
 // Module 1 Lessons
 import Module1Lesson1 from './pages/lessons/Module1Lesson1';
@@ -85,6 +86,7 @@ function App() {
       <Route path="/test/:testCode" element={<TestInterface />} />
       <Route path="/student-details" element={<StudentDetails />} />
       <Route path="/teacher-details" element={<TeacherDetails />} />
+      <Route path="/reports" element={<Report />} />
       
       {/* Module 1 Lesson Routes */}
       <Route path="/module1/lesson1" element={<Module1Lesson1 />} />
