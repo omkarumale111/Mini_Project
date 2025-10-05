@@ -139,6 +139,7 @@ async function initializeDatabase() {
         address TEXT,
         school_college VARCHAR(255),
         grade_year VARCHAR(50),
+        class_teacher_name VARCHAR(255),
         interests TEXT,
         goals TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -231,6 +232,20 @@ async function initializeDatabase() {
       if (wordLimitColumns.length === 0) {
         await connection.query(`ALTER TABLE test_questions ADD COLUMN word_limit INT NULL`);
         console.log('Added word_limit column to test_questions');
+      }
+
+      // Check if class_teacher_name column exists in student_profiles table
+      const [classTeacherColumns] = await connection.query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'mini_project_db' 
+        AND TABLE_NAME = 'student_profiles' 
+        AND COLUMN_NAME = 'class_teacher_name'
+      `);
+      
+      if (classTeacherColumns.length === 0) {
+        await connection.query(`ALTER TABLE student_profiles ADD COLUMN class_teacher_name VARCHAR(255)`);
+        console.log('Added class_teacher_name column to student_profiles');
       }
     } catch (error) {
       console.log('Column migration error:', error.message);
@@ -919,21 +934,52 @@ app.post('/api/submit-test', async (req, res) => {
 // Get test submissions for teachers
 app.get('/api/test-submissions/:testId', async (req, res) => {
   const { testId } = req.params;
+  const { teacherId } = req.query;
   
   try {
     const connection = await pool.getConnection();
     
-    const [submissions] = await connection.execute(`
+    // Get teacher's full name if teacherId is provided
+    let teacherFullName = null;
+    if (teacherId) {
+      const [teacher] = await connection.query(`
+        SELECT tp.first_name, tp.last_name
+        FROM teacher_profiles tp
+        WHERE tp.user_id = ?
+      `, [teacherId]);
+      
+      if (teacher.length > 0 && teacher[0].first_name && teacher[0].last_name) {
+        teacherFullName = `${teacher[0].first_name} ${teacher[0].last_name}`;
+      }
+    }
+    
+    // Build query with optional class teacher filter
+    let query = `
       SELECT 
         sts.id,
         sts.submitted_at,
         u.email as student_email,
-        u.id as student_id
+        u.id as student_id,
+        sp.first_name as student_first_name,
+        sp.last_name as student_last_name,
+        sp.class_teacher_name
       FROM student_test_submissions sts
       JOIN users u ON sts.student_id = u.id
+      LEFT JOIN student_profiles sp ON u.id = sp.user_id
       WHERE sts.test_id = ?
-      ORDER BY sts.submitted_at DESC
-    `, [testId]);
+    `;
+    
+    const params = [testId];
+    
+    // Add class teacher filter if teacher name is available
+    if (teacherFullName) {
+      query += ` AND (sp.class_teacher_name = ? OR sp.class_teacher_name IS NULL)`;
+      params.push(teacherFullName);
+    }
+    
+    query += ` ORDER BY sts.submitted_at DESC`;
+    
+    const [submissions] = await connection.execute(query, params);
     
     // Get answers for each submission
     for (let submission of submissions) {
@@ -1291,13 +1337,132 @@ app.get('/api/upcoming-tests-student/:studentId', async (req, res) => {
   }
 });
 
+// Get students by class teacher for reports
+app.get('/api/students-by-teacher/:teacherId', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const connection = await pool.getConnection();
+    
+    // Get teacher's full name
+    const [teacher] = await connection.query(`
+      SELECT tp.first_name, tp.last_name
+      FROM teacher_profiles tp
+      WHERE tp.user_id = ?
+    `, [teacherId]);
+    
+    let teacherFullName = null;
+    if (teacher.length > 0 && teacher[0].first_name && teacher[0].last_name) {
+      teacherFullName = `${teacher[0].first_name} ${teacher[0].last_name}`;
+    }
+    
+    // Get students whose class teacher matches
+    const [students] = await connection.query(`
+      SELECT 
+        u.id,
+        u.email,
+        sp.first_name,
+        sp.last_name,
+        sp.grade_year,
+        sp.school_college,
+        sp.class_teacher_name,
+        COUNT(DISTINCT sts.id) as total_tests
+      FROM users u
+      LEFT JOIN student_profiles sp ON u.id = sp.user_id
+      LEFT JOIN student_test_submissions sts ON u.id = sts.student_id
+      WHERE u.role = 'student'
+        AND (sp.class_teacher_name = ? OR sp.class_teacher_name IS NULL)
+      GROUP BY u.id, u.email, sp.first_name, sp.last_name, sp.grade_year, sp.school_college, sp.class_teacher_name
+      ORDER BY sp.last_name, sp.first_name
+    `, [teacherFullName]);
+    
+    connection.release();
+    
+    res.json({ students });
+    
+  } catch (error) {
+    console.error('Error fetching students by teacher:', error);
+    res.status(500).json({ error: 'Failed to fetch students' });
+  }
+});
+
+// Get student report details (filtered by class teacher)
+app.get('/api/student-report/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { teacherId } = req.query;
+    const connection = await pool.getConnection();
+    
+    // Get teacher's full name if provided
+    let teacherFullName = null;
+    if (teacherId) {
+      const [teacher] = await connection.query(`
+        SELECT tp.first_name, tp.last_name
+        FROM teacher_profiles tp
+        WHERE tp.user_id = ?
+      `, [teacherId]);
+      
+      if (teacher.length > 0 && teacher[0].first_name && teacher[0].last_name) {
+        teacherFullName = `${teacher[0].first_name} ${teacher[0].last_name}`;
+      }
+    }
+    
+    // Verify student belongs to this teacher's class
+    const [studentCheck] = await connection.query(`
+      SELECT sp.class_teacher_name
+      FROM student_profiles sp
+      WHERE sp.user_id = ?
+    `, [studentId]);
+    
+    if (teacherFullName && studentCheck.length > 0 && 
+        studentCheck[0].class_teacher_name && 
+        studentCheck[0].class_teacher_name !== teacherFullName) {
+      connection.release();
+      return res.status(403).json({ error: 'Access denied: Student not in your class' });
+    }
+    
+    // Get student's test submissions and performance data
+    const [submissions] = await connection.query(`
+      SELECT 
+        t.id as test_id,
+        t.test_name,
+        sts.submitted_at,
+        t.created_at
+      FROM student_test_submissions sts
+      JOIN tests t ON sts.test_id = t.id
+      WHERE sts.student_id = ?
+      ORDER BY sts.submitted_at DESC
+    `, [studentId]);
+    
+    connection.release();
+    
+    res.json({ submissions });
+    
+  } catch (error) {
+    console.error('Error fetching student report:', error);
+    res.status(500).json({ error: 'Failed to fetch student report' });
+  }
+});
+
 // Get recent submissions for ongoing tests (teacher dashboard)
 app.get('/api/recent-submissions/:teacherId', async (req, res) => {
   try {
     const { teacherId } = req.params;
     const connection = await pool.getConnection();
     
+    // Get teacher's full name
+    const [teacher] = await connection.query(`
+      SELECT tp.first_name, tp.last_name
+      FROM teacher_profiles tp
+      WHERE tp.user_id = ?
+    `, [teacherId]);
+    
+    let teacherFullName = null;
+    if (teacher.length > 0 && teacher[0].first_name && teacher[0].last_name) {
+      teacherFullName = `${teacher[0].first_name} ${teacher[0].last_name}`;
+    }
+    
     // Get recent submissions from ongoing tests
+    // Filter by students whose class_teacher_name matches the teacher's full name
     // A test is considered ongoing if it has started and hasn't passed its attempt deadline
     const [submissions] = await connection.query(`
       SELECT 
@@ -1310,20 +1475,22 @@ app.get('/api/recent-submissions/:teacherId', async (req, res) => {
         t.time_limit_minutes,
         u.email as student_email,
         sp.first_name as student_first_name,
-        sp.last_name as student_last_name
+        sp.last_name as student_last_name,
+        sp.class_teacher_name
       FROM student_test_submissions sts
       JOIN tests t ON sts.test_id = t.id
       JOIN users u ON sts.student_id = u.id
       LEFT JOIN student_profiles sp ON u.id = sp.user_id
       WHERE t.teacher_id = ?
         AND t.deleted_at IS NULL
+        AND (sp.class_teacher_name = ? OR sp.class_teacher_name IS NULL)
         AND (
           (t.start_time IS NULL OR t.start_time <= NOW()) AND
           (t.attempt_deadline IS NULL OR t.attempt_deadline >= NOW())
         )
       ORDER BY sts.submitted_at DESC
       LIMIT 20
-    `, [teacherId]);
+    `, [teacherId, teacherFullName]);
     
     connection.release();
     
