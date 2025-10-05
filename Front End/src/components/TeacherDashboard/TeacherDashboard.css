@@ -405,14 +405,19 @@
 /* Recent Submissions */
 .recent-submissions {
   background: #fff;
-  margin: 2rem;
+  margin: 0;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 .submissions-header {
   padding: 1.5rem;
   border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .submissions-header h3 {
@@ -422,9 +427,43 @@
 }
 
 .submissions-content {
-  padding: 2rem;
-  text-align: center;
+  padding: 1rem;
   color: #666;
+  flex: 1;
+}
+
+.submission-item {
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.submission-item:last-child {
+  border-bottom: none;
+}
+
+.submission-item:hover {
+  background-color: #f9f9f9;
+}
+
+.submission-info h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #0a2440;
+  font-weight: 600;
+}
+
+.submission-info .student-name {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.submission-info .submission-time {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #999;
 }
 
 /* Login Status */

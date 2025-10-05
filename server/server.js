@@ -1291,6 +1291,50 @@ app.get('/api/upcoming-tests-student/:studentId', async (req, res) => {
   }
 });
 
+// Get recent submissions for ongoing tests (teacher dashboard)
+app.get('/api/recent-submissions/:teacherId', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const connection = await pool.getConnection();
+    
+    // Get recent submissions from ongoing tests
+    // A test is considered ongoing if it has started and hasn't passed its attempt deadline
+    const [submissions] = await connection.query(`
+      SELECT 
+        sts.id as submission_id,
+        sts.submitted_at,
+        t.test_name,
+        t.test_code,
+        t.start_time,
+        t.attempt_deadline,
+        t.time_limit_minutes,
+        u.email as student_email,
+        sp.first_name as student_first_name,
+        sp.last_name as student_last_name
+      FROM student_test_submissions sts
+      JOIN tests t ON sts.test_id = t.id
+      JOIN users u ON sts.student_id = u.id
+      LEFT JOIN student_profiles sp ON u.id = sp.user_id
+      WHERE t.teacher_id = ?
+        AND t.deleted_at IS NULL
+        AND (
+          (t.start_time IS NULL OR t.start_time <= NOW()) AND
+          (t.attempt_deadline IS NULL OR t.attempt_deadline >= NOW())
+        )
+      ORDER BY sts.submitted_at DESC
+      LIMIT 20
+    `, [teacherId]);
+    
+    connection.release();
+    
+    res.json({ submissions });
+    
+  } catch (error) {
+    console.error('Error fetching recent submissions:', error);
+    res.status(500).json({ error: 'Failed to fetch recent submissions' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

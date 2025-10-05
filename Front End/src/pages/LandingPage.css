@@ -137,7 +137,8 @@ body, .landing-root {
 }
 
 .hero-titles .highlight {
-  color: #FFD700;
+  color: #fff;
+  background-color: #081c34;
 }
 
 .hero-description {

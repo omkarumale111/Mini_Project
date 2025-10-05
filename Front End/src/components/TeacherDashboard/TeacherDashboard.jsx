@@ -31,6 +31,7 @@ const TeacherDashboard = () => {
   const [upcomingTestsCount, setUpcomingTestsCount] = useState(0);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [user, setUser] = useState(null);
+  const [recentSubmissions, setRecentSubmissions] = useState([]);
   const navigate = useNavigate();
 
   // Get user data from localStorage
@@ -40,8 +41,20 @@ const TeacherDashboard = () => {
       const user = JSON.parse(userData);
       setUser(user);
       fetchUpcomingTests(user.id);
+      fetchRecentSubmissions(user.id);
     }
   }, []);
+
+  // Poll for new submissions every 30 seconds
+  useEffect(() => {
+    if (user && user.id) {
+      const interval = setInterval(() => {
+        fetchRecentSubmissions(user.id);
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   // Fetch upcoming tests count
   const fetchUpcomingTests = async (teacherId) => {
@@ -56,6 +69,22 @@ const TeacherDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching upcoming tests:', error);
+    }
+  };
+
+  // Fetch recent submissions
+  const fetchRecentSubmissions = async (teacherId) => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/recent-submissions/${teacherId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setRecentSubmissions(data.submissions || []);
+      } else {
+        console.error('Failed to fetch recent submissions:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching recent submissions:', error);
     }
   };
 
@@ -99,6 +128,22 @@ const TeacherDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/login');
+  };
+
+  // Helper function to format time ago
+  const getTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    
+    const days = Math.floor(hours / 24);
+    return `${days} day${days > 1 ? 's' : ''} ago`;
   };
 
   return (
@@ -210,18 +255,6 @@ const TeacherDashboard = () => {
 
         {/* Stats Cards */}
         <div className="stats-grid">
-          
-          <div className="stat-card">
-            <div className="stat-icon green">
-              <RiCalendarEventLine />
-            </div>
-            <div className="stat-info">
-              <h3>Upcoming Events</h3>
-              <span className="stat-number">0</span>
-            </div>
-          </div>
-          
-          
           <div className="stat-card">
             <div className="stat-icon purple">
               <RiFileTextLine />
@@ -247,7 +280,7 @@ const TeacherDashboard = () => {
             gridTemplateColumns: '1fr 1fr', 
             gridTemplateRows: '1fr 1fr', 
             gap: '20px',
-            flex: '2'
+            flex: '1.5'
           }}>
             <div className="action-card create-manage">
               <div className="action-icon">
@@ -282,8 +315,29 @@ const TeacherDashboard = () => {
             <div className="submissions-header">
               <h3>Recent Submissions</h3>
             </div>
-            <div className="submissions-content">
-              <p>No submissions yet</p>
+            <div className="submissions-content" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+              {recentSubmissions.length > 0 ? (
+                recentSubmissions.map((submission) => {
+                  const studentName = submission.student_first_name && submission.student_last_name
+                    ? `${submission.student_first_name} ${submission.student_last_name}`
+                    : submission.student_email;
+                  
+                  const submittedTime = new Date(submission.submitted_at);
+                  const timeAgo = getTimeAgo(submittedTime);
+                  
+                  return (
+                    <div key={submission.submission_id} className="submission-item">
+                      <div className="submission-info">
+                        <h4>{submission.test_name}</h4>
+                        <p className="student-name">{studentName}</p>
+                        <p className="submission-time">{timeAgo}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>No recent submissions</p>
+              )}
             </div>
           </div>
         </div>
