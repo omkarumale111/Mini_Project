@@ -12,6 +12,7 @@ const StudentDetails = () => {
     address: '',
     schoolCollege: '',
     gradeYear: '',
+    classTeacherName: '',
     interests: '',
     goals: ''
   });
@@ -171,6 +172,21 @@ const StudentDetails = () => {
                 placeholder="e.g., Grade 10, 2nd Year"
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="classTeacherName">Class Teacher Name</label>
+            <input
+              type="text"
+              id="classTeacherName"
+              name="classTeacherName"
+              value={formData.classTeacherName}
+              onChange={handleInputChange}
+              placeholder="Enter your class teacher's full name (e.g., John Smith)"
+            />
+            <small style={{ color: '#666', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
+              Enter the full name exactly as it appears in your teacher's profile
+            </small>
           </div>
 
           <div className="form-group">

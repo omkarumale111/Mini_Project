@@ -965,7 +965,7 @@ app.get('/api/test-submissions/:testId', async (req, res) => {
         sp.class_teacher_name
       FROM student_test_submissions sts
       JOIN users u ON sts.student_id = u.id
-      LEFT JOIN student_profiles sp ON u.id = sp.user_id
+      INNER JOIN student_profiles sp ON u.id = sp.user_id
       WHERE sts.test_id = ?
     `;
     
@@ -973,7 +973,7 @@ app.get('/api/test-submissions/:testId', async (req, res) => {
     
     // Add class teacher filter if teacher name is available
     if (teacherFullName) {
-      query += ` AND (sp.class_teacher_name = ? OR sp.class_teacher_name IS NULL)`;
+      query += ` AND sp.class_teacher_name = ?`;
       params.push(teacherFullName);
     }
     
@@ -1044,6 +1044,7 @@ app.post('/api/save-student-profile', async (req, res) => {
       address,
       schoolCollege,
       gradeYear,
+      classTeacherName,
       interests,
       goals
     } = req.body;
@@ -1078,7 +1079,7 @@ app.post('/api/save-student-profile', async (req, res) => {
       );
     }
 
-    console.log('Executing database query with values:', [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, interests, goals]);
+    console.log('Executing database query with values:', [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, classTeacherName, interests, goals]);
     
     // Start a transaction
     await connection.beginTransaction();
@@ -1087,8 +1088,8 @@ app.post('/api/save-student-profile', async (req, res) => {
       // Insert or update student profile
       const result = await connection.query(`
         INSERT INTO student_profiles 
-        (user_id, first_name, last_name, date_of_birth, phone, address, school_college, grade_year, interests, goals)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (user_id, first_name, last_name, date_of_birth, phone, address, school_college, grade_year, class_teacher_name, interests, goals)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
         first_name = VALUES(first_name),
         last_name = VALUES(last_name),
@@ -1097,10 +1098,11 @@ app.post('/api/save-student-profile', async (req, res) => {
         address = VALUES(address),
         school_college = VALUES(school_college),
         grade_year = VALUES(grade_year),
+        class_teacher_name = VALUES(class_teacher_name),
         interests = VALUES(interests),
         goals = VALUES(goals),
         updated_at = CURRENT_TIMESTAMP
-      `, [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, interests, goals]);
+      `, [userId, firstName, lastName, dateOfBirth, phone, address, schoolCollege, gradeYear, classTeacherName, interests, goals]);
       
       // Commit the transaction
       await connection.commit();
@@ -1355,7 +1357,13 @@ app.get('/api/students-by-teacher/:teacherId', async (req, res) => {
       teacherFullName = `${teacher[0].first_name} ${teacher[0].last_name}`;
     }
     
-    // Get students whose class teacher matches
+    // If teacher profile is not complete, return empty array
+    if (!teacherFullName) {
+      connection.release();
+      return res.json({ students: [], message: 'Teacher profile incomplete' });
+    }
+    
+    // Get students whose class teacher matches exactly
     const [students] = await connection.query(`
       SELECT 
         u.id,
@@ -1367,10 +1375,10 @@ app.get('/api/students-by-teacher/:teacherId', async (req, res) => {
         sp.class_teacher_name,
         COUNT(DISTINCT sts.id) as total_tests
       FROM users u
-      LEFT JOIN student_profiles sp ON u.id = sp.user_id
+      INNER JOIN student_profiles sp ON u.id = sp.user_id
       LEFT JOIN student_test_submissions sts ON u.id = sts.student_id
       WHERE u.role = 'student'
-        AND (sp.class_teacher_name = ? OR sp.class_teacher_name IS NULL)
+        AND sp.class_teacher_name = ?
       GROUP BY u.id, u.email, sp.first_name, sp.last_name, sp.grade_year, sp.school_college, sp.class_teacher_name
       ORDER BY sp.last_name, sp.first_name
     `, [teacherFullName]);
@@ -1464,6 +1472,13 @@ app.get('/api/recent-submissions/:teacherId', async (req, res) => {
     // Get recent submissions from ongoing tests
     // Filter by students whose class_teacher_name matches the teacher's full name
     // A test is considered ongoing if it has started and hasn't passed its attempt deadline
+    
+    // If teacher profile is incomplete, return empty array
+    if (!teacherFullName) {
+      connection.release();
+      return res.json({ submissions: [] });
+    }
+    
     const [submissions] = await connection.query(`
       SELECT 
         sts.id as submission_id,
@@ -1480,10 +1495,10 @@ app.get('/api/recent-submissions/:teacherId', async (req, res) => {
       FROM student_test_submissions sts
       JOIN tests t ON sts.test_id = t.id
       JOIN users u ON sts.student_id = u.id
-      LEFT JOIN student_profiles sp ON u.id = sp.user_id
+      INNER JOIN student_profiles sp ON u.id = sp.user_id
       WHERE t.teacher_id = ?
         AND t.deleted_at IS NULL
-        AND (sp.class_teacher_name = ? OR sp.class_teacher_name IS NULL)
+        AND sp.class_teacher_name = ?
         AND (
           (t.start_time IS NULL OR t.start_time <= NOW()) AND
           (t.attempt_deadline IS NULL OR t.attempt_deadline >= NOW())

@@ -35,6 +35,7 @@ const StudentProfile = () => {
     address: '',
     schoolCollege: '',
     gradeYear: '',
+    classTeacherName: '',
     interests: '',
     goals: ''
   });
@@ -65,6 +66,7 @@ const StudentProfile = () => {
               address: data.profile.address || '',
               schoolCollege: data.profile.school_college || '',
               gradeYear: data.profile.grade_year || '',
+              classTeacherName: data.profile.class_teacher_name || '',
               interests: data.profile.interests || '',
               goals: data.profile.goals || ''
             };
@@ -206,6 +208,7 @@ const StudentProfile = () => {
           address: profileData.address,
           schoolCollege: profileData.schoolCollege,
           gradeYear: profileData.gradeYear,
+          classTeacherName: profileData.classTeacherName,
           interests: profileData.interests,
           goals: profileData.goals
         }),
@@ -524,6 +527,22 @@ const StudentProfile = () => {
                       <span>{profileData.gradeYear || 'Not provided'}</span>
                     )}
                   </div>
+                  <div className="info-field">
+                    <label>Class Teacher Name</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={profileData.classTeacherName}
+                        onChange={(e) => handleInputChange('classTeacherName', e.target.value)}
+                        placeholder="e.g., John Smith"
+                      />
+                    ) : (
+                      <span>{profileData.classTeacherName || 'Not provided'}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="info-row full-width">
                   <div className="info-field">
                     <label>Address</label>
                     {isEditing ? (
