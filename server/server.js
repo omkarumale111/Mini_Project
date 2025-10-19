@@ -428,32 +428,6 @@ app.post('/api/signin', async (req, res) => {
   }
 });
 
-// Add problem statement endpoint
-app.post('/api/problem-statements', async (req, res) => {
-  try {
-    const { userId, content } = req.body;
-    
-    if (!userId || !content) {
-      return res.status(400).json({ message: 'User ID and content are required' });
-    }
-
-    // Insert problem statement
-    const [result] = await pool.query(
-      'INSERT INTO problem_statements (user_id, content) VALUES (?, ?)',
-      [userId, content]
-    );
-
-    res.status(201).json({ 
-      message: 'Problem statement saved successfully',
-      id: result.insertId
-    });
-  } catch (error) {
-    console.error('Error saving problem statement:', error);
-    res.status(500).json({ message: 'Error saving problem statement' });
-  }
-});
-
-
 // Lesson inputs endpoints
 app.post('/api/lesson-inputs', async (req, res) => {
   try {

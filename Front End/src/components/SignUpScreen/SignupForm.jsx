@@ -56,10 +56,6 @@ const SignupForm = () => {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Logging in with ${provider}`);
-    // Implement social login logic here
-  };
 
   return (
     <div className="signup-form-section" style={{ margin: '1.5rem auto', padding: '1.2rem', background: '#fff', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
