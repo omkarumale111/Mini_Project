@@ -11,7 +11,9 @@ import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiBarChartLine,
-  RiCheckboxCircleLine
+  RiCheckboxCircleLine,
+  RiTimeLine,
+  RiUserLine as RiTeacherIcon
 } from "react-icons/ri";
 import logo from '../assets/Logo.png';
 
@@ -234,25 +236,63 @@ const StudentReport = () => {
                 <h3>📝 Test Reports</h3>
                 {reportData.recentTests.length > 0 ? (
                   <div className="tests-grid">
-                    {reportData.recentTests.map((test, index) => (
-                      <div key={index} className="test-card">
-                        <div className="test-header">
-                          <h4>{test.test_name || 'Test'}</h4>
-                          <span className="test-date">
-                            {new Date(test.submitted_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="test-info">
-                          <p className="test-time">
-                            Submitted: {new Date(test.submitted_at).toLocaleTimeString()}
-                          </p>
-                          <div className="test-status">
-                            <RiCheckboxCircleLine className="status-icon" />
-                            <span>Completed</span>
+                    {reportData.recentTests.map((test, index) => {
+                      const teacherName = test.teacher_first_name && test.teacher_last_name 
+                        ? `${test.teacher_first_name} ${test.teacher_last_name}`
+                        : test.teacher_email;
+                      const completionRate = test.total_questions > 0 
+                        ? Math.round((test.answered_questions / test.total_questions) * 100)
+                        : 0;
+                      
+                      return (
+                        <div key={index} className="test-card">
+                          <div className="test-header">
+                            <h4>{test.test_name || 'Test'}</h4>
+                            <span className="test-date">
+                              {new Date(test.submitted_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="test-details">
+                            <div className="detail-row">
+                              <RiTeacherIcon className="detail-icon" />
+                              <span>Teacher: <strong>{teacherName}</strong></span>
+                            </div>
+                            <div className="detail-row">
+                              <RiTimeLine className="detail-icon" />
+                              <span>Submitted: <strong>{new Date(test.submitted_at).toLocaleString()}</strong></span>
+                            </div>
+                            {test.time_limit_minutes && (
+                              <div className="detail-row">
+                                <RiTimeLine className="detail-icon" />
+                                <span>Time Limit: <strong>{test.time_limit_minutes} minutes</strong></span>
+                              </div>
+                            )}
+                            <div className="detail-row">
+                              <RiCheckboxCircleLine className="detail-icon" />
+                              <span>Questions Answered: <strong>{test.answered_questions} / {test.total_questions}</strong></span>
+                            </div>
+                          </div>
+                          <div className="test-footer">
+                            <div className="completion-bar">
+                              <div className="completion-label">
+                                <span>Completion</span>
+                                <span className="completion-percentage">{completionRate}%</span>
+                              </div>
+                              <div className="completion-progress">
+                                <div 
+                                  className="completion-fill" 
+                                  style={{ width: `${completionRate}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                            <div className="test-status">
+                              <RiCheckboxCircleLine className="status-icon" />
+                              <span>Completed</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="empty-state">

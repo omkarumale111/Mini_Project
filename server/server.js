@@ -1425,6 +1425,49 @@ app.get('/api/student-report/:studentId', async (req, res) => {
   }
 });
 
+// Get detailed student submissions with answers and questions
+app.get('/api/student-submissions/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const connection = await pool.getConnection();
+    
+    // Get student's test submissions with detailed information
+    const [submissions] = await connection.query(`
+      SELECT 
+        sts.id as submission_id,
+        t.id as test_id,
+        t.test_name,
+        t.test_code,
+        t.time_limit_minutes,
+        sts.submitted_at,
+        t.created_at,
+        COUNT(DISTINCT tq.id) as total_questions,
+        COUNT(DISTINCT sa.id) as answered_questions,
+        u.email as teacher_email,
+        tp.first_name as teacher_first_name,
+        tp.last_name as teacher_last_name
+      FROM student_test_submissions sts
+      JOIN tests t ON sts.test_id = t.id
+      JOIN users u ON t.teacher_id = u.id
+      LEFT JOIN teacher_profiles tp ON u.id = tp.user_id
+      LEFT JOIN test_questions tq ON t.id = tq.test_id
+      LEFT JOIN student_answers sa ON sts.id = sa.submission_id
+      WHERE sts.student_id = ?
+      GROUP BY sts.id, t.id, t.test_name, t.test_code, t.time_limit_minutes, 
+               sts.submitted_at, t.created_at, u.email, tp.first_name, tp.last_name
+      ORDER BY sts.submitted_at DESC
+    `, [studentId]);
+    
+    connection.release();
+    
+    res.json({ submissions });
+    
+  } catch (error) {
+    console.error('Error fetching student submissions:', error);
+    res.status(500).json({ error: 'Failed to fetch student submissions' });
+  }
+});
+
 // Get recent submissions for ongoing tests (teacher dashboard)
 app.get('/api/recent-submissions/:teacherId', async (req, res) => {
   try {
