@@ -9,7 +9,8 @@ import {
   RiQuestionLine, 
   RiLogoutCircleRLine, 
   RiMenuFoldLine,
-  RiMenuUnfoldLine
+  RiMenuUnfoldLine,
+  RiBarChartLine
 } from 'react-icons/ri';
 import logo from '../assets/Logo.png';
 import './TakeTest.css';
@@ -184,6 +185,13 @@ const TakeTest = () => {
             >
               <RiFileTextLine className="nav-icon" />
               {!sidebarCollapsed && <span>Take Test</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/student-report')}
+            >
+              <RiBarChartLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Reports</span>}
             </li>
           </ul>
         </nav>

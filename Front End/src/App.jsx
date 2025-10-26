@@ -21,6 +21,7 @@ import TestInterface from './pages/TestInterface';
 import StudentDetails from './pages/StudentDetails';
 import TeacherDetails from './pages/TeacherDetails';
 import Report from './pages/Report';
+import StudentReport from './pages/StudentReport';
 
 // Module 1 Lessons
 import Module1Lesson1 from './pages/lessons/Module1Lesson1';
@@ -87,6 +88,7 @@ function App() {
       <Route path="/student-details" element={<StudentDetails />} />
       <Route path="/teacher-details" element={<TeacherDetails />} />
       <Route path="/reports" element={<Report />} />
+      <Route path="/student-report" element={<StudentReport />} />
       
       {/* Module 1 Lesson Routes */}
       <Route path="/module1/lesson1" element={<Module1Lesson1 />} />
