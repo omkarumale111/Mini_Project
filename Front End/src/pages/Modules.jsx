@@ -26,6 +26,7 @@ const Modules = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [activeSection, setActiveSection] = useState('writing'); // 'writing' or 'listening'
 
   // Get user data and load lesson progress
   useEffect(() => {
@@ -132,6 +133,19 @@ const Modules = () => {
     return Math.round((completedLessons / lessonIds.length) * 100);
   };
 
+  const calculateListeningModuleProgress = (moduleId) => {
+    const lessonIds = [];
+    for (let i = 1; i <= 10; i++) {
+      lessonIds.push(`${moduleId}l${i}`);
+    }
+    
+    const completedLessons = lessonIds.filter(lessonId => 
+      lessonProgress[lessonId]?.completed
+    ).length;
+    
+    return Math.round((completedLessons / lessonIds.length) * 100);
+  };
+
   const getModuleCompletionDate = (moduleId) => {
     const lesson4Id = `m${moduleId}l4`;
     const lesson4Data = lessonProgress[lesson4Id];
@@ -149,7 +163,24 @@ const Modules = () => {
     return 'NA';
   };
 
-  const getModulesData = () => {
+  const getListeningModuleCompletionDate = (moduleId) => {
+    const lesson10Id = `${moduleId}l10`;
+    const lesson10Data = lessonProgress[lesson10Id];
+    
+    if (lesson10Data?.completed) {
+      // Return formatted date from completed_at timestamp
+      const completedAt = new Date(lesson10Data.completed_at || Date.now());
+      return completedAt.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+    
+    return 'NA';
+  };
+
+  const getWritingModulesData = () => {
     console.log('Current lessonProgress state:', lessonProgress);
     console.log('M1L2 lesson data:', lessonProgress['m1l2']);
     return [
@@ -303,15 +334,202 @@ const Modules = () => {
     ];
   };
 
+  const getListeningModulesData = () => {
+    return [
+      {
+        id: 'L1',
+        title: "Error Identification and Correction",
+        emoji: "🎙️",
+        type: 'listening',
+        progress: calculateListeningModuleProgress('L1'),
+        completionDate: getListeningModuleCompletionDate('L1'),
+        lessons: [
+          {
+            id: 1,
+            title: "Subject-Verb Agreement Error",
+            sentence: "He don't likes to play cricket.",
+            correctAnswer: "He doesn't like to play cricket.",
+            status: lessonProgress['L1l1']?.status || 'available',
+            completedDate: lessonProgress['L1l1']?.completed ? 'Completed' : null
+          },
+          {
+            id: 2,
+            title: "Singular-Plural Mismatch",
+            sentence: "The meeting are scheduled for tomorrow.",
+            correctAnswer: "The meeting is scheduled for tomorrow.",
+            status: lessonProgress['L1l2']?.status || (lessonProgress['L1l1']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l2']?.completed ? 'Completed' : null
+          },
+          {
+            id: 3,
+            title: "Comparative Adjective Error",
+            sentence: "She is more smarter than her brother.",
+            correctAnswer: "She is smarter than her brother.",
+            status: lessonProgress['L1l3']?.status || (lessonProgress['L1l2']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l3']?.completed ? 'Completed' : null
+          },
+          {
+            id: 4,
+            title: "Incorrect Verb Usage",
+            sentence: "I am agree with your opinion.",
+            correctAnswer: "I agree with your opinion.",
+            status: lessonProgress['L1l4']?.status || (lessonProgress['L1l3']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l4']?.completed ? 'Completed' : null
+          },
+          {
+            id: 5,
+            title: "Past Tense Error",
+            sentence: "He did not told me about the problem.",
+            correctAnswer: "He did not tell me about the problem.",
+            status: lessonProgress['L1l5']?.status || (lessonProgress['L1l4']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l5']?.completed ? 'Completed' : null
+          },
+          {
+            id: 6,
+            title: "There Is/Are Agreement",
+            sentence: "There is five members in my team.",
+            correctAnswer: "There are five members in my team.",
+            status: lessonProgress['L1l6']?.status || (lessonProgress['L1l5']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l6']?.completed ? 'Completed' : null
+          },
+          {
+            id: 7,
+            title: "Tense Consistency Error",
+            sentence: "My friend have completed the project yesterday.",
+            correctAnswer: "My friend completed the project yesterday.",
+            status: lessonProgress['L1l7']?.status || (lessonProgress['L1l6']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l7']?.completed ? 'Completed' : null
+          },
+          {
+            id: 8,
+            title: "Plural Subject Agreement",
+            sentence: "They was very tired after the journey.",
+            correctAnswer: "They were very tired after the journey.",
+            status: lessonProgress['L1l8']?.status || (lessonProgress['L1l7']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l8']?.completed ? 'Completed' : null
+          },
+          {
+            id: 9,
+            title: "Each/Every Agreement",
+            sentence: "Each of the students have submitted their reports.",
+            correctAnswer: "Each of the students has submitted their reports.",
+            status: lessonProgress['L1l9']?.status || (lessonProgress['L1l8']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l9']?.completed ? 'Completed' : null
+          },
+          {
+            id: 10,
+            title: "Preposition Usage Error",
+            sentence: "The manager discussed about the issue in detail.",
+            correctAnswer: "The manager discussed the issue in detail.",
+            status: lessonProgress['L1l10']?.status || (lessonProgress['L1l9']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L1l10']?.completed ? 'Completed' : null
+          }
+        ]
+      },
+      {
+        id: 'L2',
+        title: "Situational Communication",
+        emoji: "💼",
+        type: 'listening',
+        progress: calculateListeningModuleProgress('L2'),
+        completionDate: getListeningModuleCompletionDate('L2'),
+        lessons: [
+          {
+            id: 1,
+            title: "Office Event Invitation",
+            scenario: "Invite all employees to the annual office gala in a friendly tone.",
+            status: lessonProgress['L2l1']?.status || (lessonProgress['L1l10']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l1']?.completed ? 'Completed' : null
+          },
+          {
+            id: 2,
+            title: "Client Meeting Update",
+            scenario: "Inform your client that the meeting will be held online, as per their request.",
+            status: lessonProgress['L2l2']?.status || (lessonProgress['L2l1']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l2']?.completed ? 'Completed' : null
+          },
+          {
+            id: 3,
+            title: "Leave Request",
+            scenario: "Politely ask your manager for a short leave due to a personal reason.",
+            status: lessonProgress['L2l3']?.status || (lessonProgress['L2l2']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l3']?.completed ? 'Completed' : null
+          },
+          {
+            id: 4,
+            title: "Team Congratulations",
+            scenario: "Congratulate your team on completing a major project successfully.",
+            status: lessonProgress['L2l4']?.status || (lessonProgress['L2l3']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l4']?.completed ? 'Completed' : null
+          },
+          {
+            id: 5,
+            title: "Delay Notification",
+            scenario: "Explain to a client that their project delivery might be delayed and apologize professionally.",
+            status: lessonProgress['L2l5']?.status || (lessonProgress['L2l4']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l5']?.completed ? 'Completed' : null
+          },
+          {
+            id: 6,
+            title: "New Intern Welcome",
+            scenario: "Welcome a new intern joining your team for the first time.",
+            status: lessonProgress['L2l6']?.status || (lessonProgress['L2l5']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l6']?.completed ? 'Completed' : null
+          },
+          {
+            id: 7,
+            title: "Supervisor Appreciation",
+            scenario: "Thank your supervisor for guiding you during a difficult task.",
+            status: lessonProgress['L2l7']?.status || (lessonProgress['L2l6']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l7']?.completed ? 'Completed' : null
+          },
+          {
+            id: 8,
+            title: "Customer Complaint Response",
+            scenario: "Respond to a customer complaint politely and assure them of a quick resolution.",
+            status: lessonProgress['L2l8']?.status || (lessonProgress['L2l7']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l8']?.completed ? 'Completed' : null
+          },
+          {
+            id: 9,
+            title: "Meeting Announcement",
+            scenario: "Inform your team about an important meeting scheduled tomorrow morning.",
+            status: lessonProgress['L2l9']?.status || (lessonProgress['L2l8']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l9']?.completed ? 'Completed' : null
+          },
+          {
+            id: 10,
+            title: "Farewell Message",
+            scenario: "Give a short farewell message to a colleague who is leaving the company.",
+            status: lessonProgress['L2l10']?.status || (lessonProgress['L2l9']?.completed ? 'available' : 'locked'),
+            completedDate: lessonProgress['L2l10']?.completed ? 'Completed' : null
+          }
+        ]
+      }
+    ];
+  };
+
+  const getCurrentModulesData = () => {
+    return activeSection === 'writing' ? getWritingModulesData() : getListeningModulesData();
+  };
+
   // Set selected module after modules data is available and progress is loaded
   useEffect(() => {
     if (progressLoaded) {
-      const modulesData = getModulesData();
+      const modulesData = getCurrentModulesData();
       if (modulesData.length > 0 && !selectedModule) {
         setSelectedModule(modulesData[0]);
       }
     }
-  }, [lessonProgress, selectedModule, progressLoaded]);
+  }, [lessonProgress, selectedModule, progressLoaded, activeSection]);
+
+  // Reset selected module when switching sections
+  useEffect(() => {
+    const modulesData = getCurrentModulesData();
+    if (modulesData.length > 0) {
+      setSelectedModule(modulesData[0]);
+    }
+  }, [activeSection]);
 
 
   const handleNavigation = (path) => {
@@ -336,7 +554,11 @@ const Modules = () => {
   const handleLessonClick = (lesson) => {
     // Only allow navigation to completed or available lessons
     if (lesson.status === 'completed' || lesson.status === 'available') {
-      navigate(`/module${selectedModule.id}/lesson${lesson.id}`);
+      if (selectedModule.type === 'listening') {
+        navigate(`/listening/${selectedModule.id}/lesson${lesson.id}`);
+      } else {
+        navigate(`/module${selectedModule.id}/lesson${lesson.id}`);
+      }
     }
   };
 
@@ -452,9 +674,47 @@ const Modules = () => {
         <div className="modules-content">
           {/* Module List Sidebar */}
           <div className="modules-sidebar">
-            <h2>Available Modules</h2>
+            {/* Section Toggle */}
+            <div className="section-toggle" style={{ marginBottom: '1.5rem' }}>
+              <button 
+                className={`section-btn ${activeSection === 'writing' ? 'active' : ''}`}
+                onClick={() => setActiveSection('writing')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: 'none',
+                  borderRadius: '8px 0 0 8px',
+                  background: activeSection === 'writing' ? '#4CAF50' : '#f0f0f0',
+                  color: activeSection === 'writing' ? 'white' : '#666',
+                  fontWeight: activeSection === 'writing' ? '600' : '400',
+                  cursor: 'pointer',
+                  flex: 1,
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                ✍️ Writing
+              </button>
+              <button 
+                className={`section-btn ${activeSection === 'listening' ? 'active' : ''}`}
+                onClick={() => setActiveSection('listening')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: 'none',
+                  borderRadius: '0 8px 8px 0',
+                  background: activeSection === 'listening' ? '#2196F3' : '#f0f0f0',
+                  color: activeSection === 'listening' ? 'white' : '#666',
+                  fontWeight: activeSection === 'listening' ? '600' : '400',
+                  cursor: 'pointer',
+                  flex: 1,
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                🎧 Listening
+              </button>
+            </div>
+            
+            <h2>{activeSection === 'writing' ? 'Writing Modules' : 'Listening Modules'}</h2>
             <div className="modules-list">
-              {progressLoaded ? getModulesData().map((module) => (
+              {progressLoaded ? getCurrentModulesData().map((module) => (
                 <div 
                   key={module.id} 
                   className={`module-item ${selectedModule?.id === module.id ? 'active' : ''}`}
@@ -485,6 +745,16 @@ const Modules = () => {
                 <span className="module-emoji-large">{selectedModule?.emoji}</span>
                 {selectedModule?.title}
               </h1>
+              {selectedModule?.description && (
+                <p style={{ 
+                  fontSize: '1rem', 
+                  color: '#666', 
+                  marginTop: '0.5rem',
+                  fontStyle: 'italic' 
+                }}>
+                  {selectedModule.description}
+                </p>
+              )}
             </div>
             
             <div className="lessons-list">

@@ -508,33 +508,60 @@ app.get('/api/lesson-progress/:student_id', async (req, res) => {
     console.log('Fetching lesson progress for student:', student_id);
     
     const [rows] = await pool.execute(
-      'SELECT lesson_id FROM lesson_completions WHERE student_id = ?',
+      'SELECT lesson_id, completed_at FROM lesson_completions WHERE student_id = ?',
       [student_id]
     );
 
     const completedLessons = rows.map(row => row.lesson_id);
     console.log('Completed lessons:', completedLessons);
     
-    // Define lesson progression logic
-    const lessonOrder = [
+    // Define lesson progression logic for writing modules
+    const writingLessonOrder = [
       'm1l1', 'm1l2', 'm1l3', 'm1l4',
       'm2l1', 'm2l2', 'm2l3', 'm2l4', 
       'm3l1', 'm3l2', 'm3l3', 'm3l4',
       'm4l1', 'm4l2', 'm4l3', 'm4l4'
     ];
 
+    // Define lesson progression logic for listening modules
+    const listeningLessonOrder = [
+      'L1l1', 'L1l2', 'L1l3', 'L1l4', 'L1l5', 'L1l6', 'L1l7', 'L1l8', 'L1l9', 'L1l10',
+      'L2l1', 'L2l2', 'L2l3', 'L2l4', 'L2l5', 'L2l6', 'L2l7', 'L2l8', 'L2l9', 'L2l10'
+    ];
+
     const progress = {};
-    lessonOrder.forEach((lessonId, index) => {
+    
+    // Process writing lessons
+    writingLessonOrder.forEach((lessonId, index) => {
       const isCompleted = completedLessons.includes(lessonId);
-      const isUnlocked = index === 0 || completedLessons.includes(lessonOrder[index - 1]);
-      
-      // Debug logging for all lessons
-      console.log(`${lessonId} Debug - isCompleted:`, isCompleted, `(in completedLessons: ${completedLessons.includes(lessonId)})`);
+      const isUnlocked = index === 0 || completedLessons.includes(writingLessonOrder[index - 1]);
       
       progress[lessonId] = {
         completed: isCompleted,
         unlocked: isUnlocked,
-        status: isCompleted ? 'completed' : (isUnlocked ? 'available' : 'locked')
+        status: isCompleted ? 'completed' : (isUnlocked ? 'available' : 'locked'),
+        completed_at: isCompleted ? rows.find(r => r.lesson_id === lessonId)?.completed_at : null
+      };
+    });
+
+    // Process listening lessons
+    listeningLessonOrder.forEach((lessonId, index) => {
+      const isCompleted = completedLessons.includes(lessonId);
+      // L1l1 is always unlocked, L2l1 unlocks after L1l10, others unlock after previous lesson
+      let isUnlocked;
+      if (lessonId === 'L1l1') {
+        isUnlocked = true;
+      } else if (lessonId === 'L2l1') {
+        isUnlocked = completedLessons.includes('L1l10');
+      } else {
+        isUnlocked = completedLessons.includes(listeningLessonOrder[index - 1]);
+      }
+      
+      progress[lessonId] = {
+        completed: isCompleted,
+        unlocked: isUnlocked,
+        status: isCompleted ? 'completed' : (isUnlocked ? 'available' : 'locked'),
+        completed_at: isCompleted ? rows.find(r => r.lesson_id === lessonId)?.completed_at : null
       };
     });
 
