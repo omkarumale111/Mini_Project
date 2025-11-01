@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import "./StudentReport.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './StudentReport.css';
+import { storage } from '../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -41,22 +42,21 @@ const StudentReport = () => {
   // Fetch user data and report statistics
   useEffect(() => {
     const fetchReportData = async () => {
-      const userData = localStorage.getItem('user');
+      const userData = storage.getUser();
       if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+        setUser(userData);
         
         try {
           // Fetch test count
-          const testResponse = await fetch(`http://localhost:5001/api/student-test-count/${parsedUser.id}`);
+          const testResponse = await fetch(`http://localhost:5001/api/student-test-count/${userData.id}`);
           const testData = await testResponse.json();
           
           // Fetch lesson count
-          const lessonResponse = await fetch(`http://localhost:5001/api/student-lesson-count/${parsedUser.id}`);
+          const lessonResponse = await fetch(`http://localhost:5001/api/student-lesson-count/${userData.id}`);
           const lessonData = await lessonResponse.json();
           
           // Fetch recent test submissions
-          const submissionsResponse = await fetch(`http://localhost:5001/api/student-submissions/${parsedUser.id}`);
+          const submissionsResponse = await fetch(`http://localhost:5001/api/student-submissions/${userData.id}`);
           const submissionsData = await submissionsResponse.json();
           
           setReportData({
@@ -118,7 +118,7 @@ const StudentReport = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 

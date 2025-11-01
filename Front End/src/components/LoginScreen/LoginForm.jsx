@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from '../../assets/Logo.png';
+import { storage } from '../../utils/storage';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -31,8 +32,8 @@ const LoginForm = () => {
       console.log('Server response:', data);
 
       if (response.ok) {
-        // Store user data if needed
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Store user data in sessionStorage (isolated per tab)
+        storage.setUser(data.user);
         // Redirect based on user role
         if (data.user.role === 'admin') {
           navigate("/teacher-dashboard");

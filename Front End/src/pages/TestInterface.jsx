@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './TestInterface.css';
 import { RiSendPlaneLine, RiTimeLine, RiFileTextLine } from 'react-icons/ri';
+import { storage } from '../utils/storage';
 
 const TestInterface = () => {
   const { testCode } = useParams();
@@ -16,9 +17,9 @@ const TestInterface = () => {
   const [testStartTime, setTestStartTime] = useState(null);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      setUser(JSON.parse(userData));
+      setUser(userData);
       fetchTestData();
     } else {
       navigate('/login');

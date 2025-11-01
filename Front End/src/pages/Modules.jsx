@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { storage } from '../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -28,9 +29,9 @@ const Modules = () => {
 
   // Get user data and load lesson progress
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      setUser(JSON.parse(userData));
+      setUser(userData);
     }
   }, []);
 
@@ -340,7 +341,7 @@ const Modules = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 

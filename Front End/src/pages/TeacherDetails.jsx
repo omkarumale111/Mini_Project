@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TeacherDetails.css';
+import { storage } from '../utils/storage';
 
 const TeacherDetails = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const TeacherDetails = () => {
     setError('');
 
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
+      const user = storage.getUser();
       if (!user) {
         setError('User session not found. Please log in again.');
         return;
@@ -55,9 +56,9 @@ const TeacherDetails = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Update user in localStorage to indicate profile is complete
+        // Update user in sessionStorage to indicate profile is complete
         const updatedUser = { ...user, profileComplete: true };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        storage.setUser(updatedUser);
         
         // Navigate to teacher dashboard
         navigate('/teacher-dashboard');

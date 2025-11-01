@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import "./TeacherDashboard.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './TeacherDashboard.css';
+import { storage } from '../../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -34,12 +35,11 @@ const TeacherDashboard = () => {
   const [recentSubmissions, setRecentSubmissions] = useState([]);
   const navigate = useNavigate();
 
-  // Get user data from localStorage
+  // Get user data from sessionStorage
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      const user = JSON.parse(userData);
-      setUser(user);
+      setUser(userData);
       fetchUpcomingTests(user.id);
       fetchRecentSubmissions(user.id);
     }
@@ -126,7 +126,7 @@ const TeacherDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 

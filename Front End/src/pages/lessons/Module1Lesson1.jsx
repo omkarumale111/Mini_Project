@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -33,13 +34,12 @@ const Module1Lesson1 = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
-  // Get user data from localStorage
+  // Get user data from sessionStorage
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      const parsedUser = JSON.parse(userData);
-      console.log('User data in M1L1:', parsedUser);
-      setUser(parsedUser);
+      console.log('User data in M1L1:', userData);
+      setUser(userData);
     }
   }, []);
 
@@ -103,7 +103,7 @@ const Module1Lesson1 = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 

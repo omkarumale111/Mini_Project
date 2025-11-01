@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from '../../assets/Logo.png';
+import { storage } from '../../utils/storage';
 
 const SignupForm = () => {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const SignupForm = () => {
 
       if (response.ok) {
         // Store user data temporarily and redirect to profile setup
-        localStorage.setItem('user', JSON.stringify(data.user));
+        storage.setUser(data.user);
         
         // Redirect to respective detail page based on role
         if (role === 'student') {
