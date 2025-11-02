@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./TeacherProfile.css";
+import { storage } from '../../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -25,7 +26,7 @@ import logo from '../../assets/Logo.png';
 const TeacherProfile = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(window.innerWidth >= 1024);
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -47,12 +48,12 @@ const TeacherProfile = () => {
   
   const navigate = useNavigate();
 
-  // Get user data and profile from localStorage and API
+  // Get user data and profile from sessionStorage and API
   useEffect(() => {
     const fetchProfile = async () => {
-      const userData = localStorage.getItem('user');
+      const userData = storage.getUser();
       if (userData) {
-        const parsedUser = JSON.parse(userData);
+        const parsedUser = userData;
         setUser(parsedUser);
         
         try {
@@ -139,7 +140,7 @@ const TeacherProfile = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 

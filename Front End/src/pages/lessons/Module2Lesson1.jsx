@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -21,7 +22,7 @@ import './Lesson.css';
 const Module2Lesson1 = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(window.innerWidth >= 1024);
   const [user, setUser] = useState(null);
   const [answers, setAnswers] = useState({
     rewrittenText: '',
@@ -32,11 +33,11 @@ const Module2Lesson1 = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
-  // Get user data from localStorage
+  // Get user data from sessionStorage
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      setUser(JSON.parse(userData));
+      setUser(userData);
     }
   }, []);
 
@@ -100,7 +101,7 @@ const Module2Lesson1 = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 

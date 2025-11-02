@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Report.css";
+import { storage } from '../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -17,7 +18,7 @@ import logo from '../assets/Logo.png';
 const Report = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(window.innerWidth >= 1024);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +29,9 @@ const Report = () => {
 
   // Fetch user and students data
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      const parsedUser = JSON.parse(userData);
+      const parsedUser = userData;
       setUser(parsedUser);
       fetchStudents(parsedUser.id);
     } else {
@@ -107,7 +108,7 @@ const Report = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 

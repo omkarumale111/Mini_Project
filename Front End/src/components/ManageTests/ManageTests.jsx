@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ManageTests.css';
+import { storage } from '../../utils/storage';
 import { 
   RiEyeLine, 
   RiDeleteBin6Line, 
@@ -31,14 +32,14 @@ const ManageTests = () => {
   const [user, setUser] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(window.innerWidth >= 1024);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      setUser(JSON.parse(userData));
-      fetchTests(JSON.parse(userData).id);
+      setUser(userData);
+      fetchTests(userData.id);
     } else {
       navigate('/login');
     }
@@ -82,7 +83,7 @@ const ManageTests = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 
