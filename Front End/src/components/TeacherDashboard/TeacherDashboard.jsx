@@ -30,20 +30,25 @@ const TeacherDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [upcomingTestsCount, setUpcomingTestsCount] = useState(0);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(window.innerWidth >= 1024);
   const [user, setUser] = useState(null);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
   const navigate = useNavigate();
 
   // Get user data from sessionStorage
   useEffect(() => {
+    console.log('TeacherDashboard mounted');
     const userData = storage.getUser();
+    console.log('User data from storage:', userData);
     if (userData) {
       setUser(userData);
-      fetchUpcomingTests(user.id);
-      fetchRecentSubmissions(user.id);
+      fetchUpcomingTests(userData.id);
+      fetchRecentSubmissions(userData.id);
+    } else {
+      console.log('No user data found, redirecting to login');
+      navigate('/login');
     }
-  }, []);
+  }, [navigate]);
 
   // Poll for new submissions every 30 seconds
   useEffect(() => {
