@@ -30,6 +30,11 @@ const ListeningL2Lesson5 = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [transcript, setTranscript] = useState('');
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   const scenario = "Explain to a client that their project delivery might be delayed and apologize professionally.";
@@ -107,10 +112,81 @@ const ListeningL2Lesson5 = () => {
     }
   };
 
-  const stopRecording = () => {
+  const stopRecording = async () => {
     if (mediaRecorder && isRecording) {
       mediaRecorder.stop();
       setIsRecording(false);
+    }
+  };
+
+  const handleTranscribe = async () => {
+    if (!audioBlob) {
+      alert('Please record audio first.');
+      return;
+    }
+
+    setIsTranscribing(true);
+    setTranscript('');
+    setFeedback(null);
+    setShowFeedback(false);
+
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.wav');
+      formData.append('student_id', user?.id || '');
+      formData.append('lesson_id', 'L2l5');
+      formData.append('input_field', 'voiceRecording');
+
+      const response = await fetch('http://localhost:5001/api/transcribe-audio', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to transcribe audio');
+      }
+
+      const result = await response.json();
+      setTranscript(result.transcript);
+      console.log('Transcription:', result.transcript);
+    } catch (error) {
+      console.error('Error transcribing audio:', error);
+      alert('Error transcribing audio. Please try again.');
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const handleGetFeedback = async () => {
+    if (!transcript) {
+      alert('Please transcribe your recording first.');
+      return;
+    }
+
+    setIsLoadingFeedback(true);
+    setShowFeedback(false);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: transcript }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze text');
+      }
+
+      const result = await response.json();
+      setFeedback(result);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      alert('Error analyzing your response. Please try again.');
+    } finally {
+      setIsLoadingFeedback(false);
     }
   };
 
@@ -159,6 +235,9 @@ const ListeningL2Lesson5 = () => {
   const handleReset = () => {
     setAudioBlob(null);
     setIsRecording(false);
+    setTranscript('');
+    setFeedback(null);
+    setShowFeedback(false);
   };
 
   return (
@@ -271,7 +350,86 @@ const ListeningL2Lesson5 = () => {
                   </div>
                 )}
               </div>
+
+              {audioBlob && !transcript && (
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                  <button 
+                    className="submit-button" 
+                    onClick={handleTranscribe}
+                    disabled={isTranscribing}
+                    style={{ minWidth: '200px' }}
+                  >
+                    {isTranscribing ? 'Transcribing...' : 'Transcribe Audio'}
+                  </button>
+                </div>
+              )}
+
+              {transcript && (
+                <div style={{ marginTop: '20px' }}>
+                  <div style={{ 
+                    background: 'rgba(59, 130, 246, 0.05)', 
+                    padding: '16px', 
+                    borderRadius: '12px',
+                    border: '1px solid rgba(59, 130, 246, 0.2)'
+                  }}>
+                    <h4 style={{ color: '#1e40af', marginBottom: '8px', fontSize: '16px' }}>📝 Your Transcription:</h4>
+                    <p style={{ color: '#333', fontSize: '15px', lineHeight: '1.6', margin: 0 }}>"{transcript}"</p>
+                  </div>
+                  <div style={{ marginTop: '16px', textAlign: 'center' }}>
+                    <button 
+                      className="submit-button" 
+                      onClick={handleGetFeedback}
+                      disabled={isLoadingFeedback}
+                      style={{ minWidth: '200px' }}
+                    >
+                      {isLoadingFeedback ? 'Analyzing...' : 'Get AI Feedback'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {showFeedback && feedback && (
+              <div className="feedback-section" style={{ 
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '16px',
+                padding: '24px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(226, 232, 240, 0.6)'
+              }}>
+                <h3 style={{ color: '#0a2440', marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
+                  🤖 AI Feedback
+                </h3>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <h4 style={{ color: '#ef4444', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
+                    Spelling & Grammar:
+                  </h4>
+                  <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+                    {feedback.spellAndGrammar}
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <h4 style={{ color: '#3b82f6', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
+                    Content Feedback:
+                  </h4>
+                  <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+                    {feedback.contentFeedback}
+                  </p>
+                </div>
+
+                <div>
+                  <h4 style={{ color: '#10b981', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
+                    Suggestions:
+                  </h4>
+                  <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+                    {feedback.suggestions}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="tips-section">
               <h3>💡 Tips for Success:</h3>

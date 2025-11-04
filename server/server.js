@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createClient } from '@deepgram/sdk';
+import multer from 'multer';
 
 dotenv.config();
 
@@ -11,6 +13,13 @@ const app = express();
 
 // Initialize Google's Generative AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// Initialize Deepgram client
+const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
+
+// Configure multer for handling audio file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // Middleware
 app.use(cors());
@@ -607,19 +616,14 @@ const grammarText = grammarResponse.text().trim();
 
 console.log('Starting content feedback...');
 // Content Feedback
-// Output: Bulleted list of concise notes in Markdown format
+// Output: Concise paragraph format without repetition
 const feedbackPrompt = `
 Evaluate the text for clarity, tone, and structure. 
-Give 1–2 short improvement notes per aspect. 
-Output format must be:
-Clarity: [note 1] 
-Clarity: [note 2] 
-Tone: [note 1] 
-Tone: [note 2] 
-Structure: [note 1] 
-Structure: [note 2] 
-Each note max 7 words. 
-Do not use *, -, or Markdown styling
+Provide brief feedback in a single paragraph format.
+Mention each aspect (Clarity, Tone, Structure) only once.
+Keep total response under 50 words.
+Do not use *, -, or Markdown styling.
+Be specific and actionable.
 
 ${text}
 `;
@@ -658,6 +662,208 @@ const suggestionsText = suggestionsResponse.text().trim();
     console.error('Text analysis error with Gemini:', error.message);
     console.error('Full error:', error);
     res.status(500).json({ message: 'Error analyzing text with Gemini', error: error.message });
+  }
+});
+
+// Analyze L1 Listening lesson (error correction) - compares with correct answer
+app.post('/api/analyze-listening-l1', async (req, res) => {
+  try {
+    console.log('Received L1 listening analysis request');
+    const { transcript, correctAnswer } = req.body;
+    
+    console.log('Transcript:', transcript);
+    console.log('Correct Answer:', correctAnswer);
+    
+    if (!transcript || !correctAnswer) {
+      return res.status(400).json({ message: 'Transcript and correct answer are required' });
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    
+    // Normalize both strings for comparison
+    const normalizedTranscript = transcript.toLowerCase().trim();
+    const normalizedCorrect = correctAnswer.toLowerCase().trim();
+    
+    // Extract key words from correct answer (ignore common words but keep pronouns)
+    const commonWords = ['a', 'an', 'the', 'to', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'of', 'for', 'with', 'from'];
+    const correctKeyWords = normalizedCorrect.split(/\s+/).filter(word => 
+      word.length > 1 && !commonWords.includes(word)  // Changed from > 2 to > 1 to include pronouns like "he", "she"
+    );
+    
+    // Check if transcript contains key words from correct answer
+    // Handle contractions: "doesn't" = "does not", "don't" = "do not", etc.
+    const contractionMap = {
+      "doesn't": ["does", "not"],
+      "don't": ["do", "not"],
+      "isn't": ["is", "not"],
+      "aren't": ["are", "not"],
+      "wasn't": ["was", "not"],
+      "weren't": ["were", "not"],
+      "hasn't": ["has", "not"],
+      "haven't": ["have", "not"],
+      "won't": ["will", "not"],
+      "can't": ["can", "not"],
+      "couldn't": ["could", "not"],
+      "shouldn't": ["should", "not"],
+      "wouldn't": ["would", "not"]
+    };
+    
+    const matchingKeyWords = correctKeyWords.filter(word => {
+      // Direct match
+      if (normalizedTranscript.includes(word)) {
+        return true;
+      }
+      // Check if it's a contraction that can be expanded
+      if (contractionMap[word]) {
+        const expanded = contractionMap[word];
+        return expanded.every(part => normalizedTranscript.includes(part));
+      }
+      return false;
+    });
+    const keyWordMatchPercentage = matchingKeyWords.length / correctKeyWords.length;
+    
+    console.log('Key words in correct answer:', correctKeyWords);
+    console.log('Matching key words:', matchingKeyWords);
+    console.log('Match percentage:', keyWordMatchPercentage);
+    
+    // If less than 90% of key words match, it's definitely wrong
+    // This ensures pronouns, subjects, and all important words must match
+    if (keyWordMatchPercentage < 0.9) {
+      console.log('Rejected: Not enough key word matches');
+      return res.json({
+        isCorrect: false,
+        correctAnswer: correctAnswer,
+        message: 'Your answer needs improvement. Here is the correct version:'
+      });
+    }
+    
+    // Check if transcript matches the correct answer (strict comparison)
+    const comparisonPrompt = `
+You are checking if a student's spoken answer matches the expected correct answer for a grammar correction exercise.
+
+Student's answer: "${transcript}"
+Expected correct answer: "${correctAnswer}"
+
+CRITICAL RULES:
+1. The student MUST be correcting the SAME sentence about the SAME topic
+2. If the student says something COMPLETELY UNRELATED (different topic, different sentence), respond "INCORRECT"
+3. Only respond "CORRECT" if the student is clearly attempting to correct the grammar of the given sentence
+4. Minor pronunciation differences are OK (e.g., "doesn't" vs "does not")
+5. If you're unsure, respond "INCORRECT"
+
+Examples of INCORRECT:
+- Expected: "He doesn't like to play cricket" | Student: "What's up, nigga?" → INCORRECT (completely unrelated)
+- Expected: "He doesn't like to play cricket" | Student: "Hello there" → INCORRECT (completely unrelated)
+- Expected: "The cat is sleeping" | Student: "Dogs are running" → INCORRECT (different topic)
+
+Examples of CORRECT:
+- Expected: "He doesn't like to play cricket" | Student: "He doesn't like to play cricket" → CORRECT
+- Expected: "He doesn't like to play cricket" | Student: "He does not like to play cricket" → CORRECT (minor variation)
+
+Respond with ONLY one word: "CORRECT" or "INCORRECT"
+`;
+
+    const comparisonResult = await model.generateContent(comparisonPrompt, {
+      maxOutputTokens: 20,
+    });
+    const comparisonResponse = await comparisonResult.response;
+    const responseText = comparisonResponse.text().trim().toUpperCase();
+    console.log('AI Response:', responseText);
+    const isCorrect = responseText === 'CORRECT' || responseText.includes('CORRECT');
+    console.log('Is Correct:', isCorrect);
+
+    if (isCorrect) {
+      // If correct, only check for grammar/spelling errors
+      const grammarPrompt = `
+Check for grammar and spelling errors only.
+Output each correction on a new line in the format: Incorrect -> Correct
+If no errors, write: No errors found
+Do not use *, -, or Markdown styling
+Keep under 30 words
+
+${transcript}
+`;
+
+      const grammarResult = await model.generateContent(grammarPrompt, {
+        maxOutputTokens: 100,
+      });
+      const grammarResponse = await grammarResult.response;
+      const grammarText = grammarResponse.text().trim();
+
+      res.json({
+        isCorrect: true,
+        spellAndGrammar: grammarText,
+        message: 'Great job! Your answer is correct.'
+      });
+    } else {
+      // If incorrect, show the correct answer as a sample
+      res.json({
+        isCorrect: false,
+        correctAnswer: correctAnswer,
+        message: 'Your answer needs improvement. Here is the correct version:'
+      });
+    }
+
+  } catch (error) {
+    console.error('L1 Listening analysis error:', error.message);
+    res.status(500).json({ message: 'Error analyzing listening response', error: error.message });
+  }
+});
+
+// Speech-to-Text endpoint using Deepgram
+app.post('/api/transcribe-audio', upload.single('audio'), async (req, res) => {
+  try {
+    console.log('Received audio transcription request');
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'No audio file provided' });
+    }
+
+    const audioBuffer = req.file.buffer;
+    
+    // Transcribe audio using Deepgram
+    const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
+      audioBuffer,
+      {
+        model: 'nova-2',
+        smart_format: true,
+        punctuate: true,
+        language: 'en'
+      }
+    );
+
+    if (error) {
+      console.error('Deepgram transcription error:', error);
+      return res.status(500).json({ message: 'Error transcribing audio', error: error.message });
+    }
+
+    const transcript = result.results.channels[0].alternatives[0].transcript;
+    console.log('Transcription successful:', transcript);
+
+    // Save transcription to database if student_id and lesson_id are provided
+    const { student_id, lesson_id, input_field } = req.body;
+    
+    if (student_id && lesson_id && input_field) {
+      try {
+        await pool.execute(
+          'INSERT INTO lesson_inputs (student_id, lesson_id, input_field, input_value) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE input_value = VALUES(input_value), updated_at = CURRENT_TIMESTAMP',
+          [student_id, lesson_id, input_field, transcript]
+        );
+        console.log('Transcription saved to database');
+      } catch (dbError) {
+        console.error('Error saving transcription to database:', dbError);
+        // Continue even if database save fails
+      }
+    }
+
+    res.json({
+      transcript: transcript,
+      confidence: result.results.channels[0].alternatives[0].confidence
+    });
+
+  } catch (error) {
+    console.error('Transcription error:', error);
+    res.status(500).json({ message: 'Error processing audio', error: error.message });
   }
 });
 
