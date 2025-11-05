@@ -708,7 +708,7 @@ const Modules = () => {
                   transition: 'all 0.3s ease'
                 }}
               >
-                🎧 Listening
+                🎧 Verbal
               </button>
             </div>
             
