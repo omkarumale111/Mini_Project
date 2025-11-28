@@ -212,6 +212,13 @@ const TeacherDashboard = () => {
             </li>
             <li 
               className="nav-item"
+              onClick={() => navigateToSection('/my-students')}
+            >
+              <RiGroupLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Students</span>}
+            </li>
+            <li 
+              className="nav-item"
               onClick={() => navigateToSection('/reports')}
             >
               <RiBarChartLine className="nav-icon" />

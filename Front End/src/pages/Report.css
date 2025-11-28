@@ -1,3 +1,6 @@
+/* Import Teacher Sidebar Styles */
+@import url('../components/TeacherProfile/TeacherProfile.css');
+
 /* ===========================
    Teacher Report Container
 =========================== */
@@ -8,9 +11,6 @@
   font-family: 'Inter', Arial, sans-serif;
   overflow-x: hidden;
 }
-
-/* Import Teacher Sidebar Styles */
-@import url('../components/TeacherProfile/TeacherProfile.css');
 
 /* Report Content Wrapper */
 .report-content-wrapper {

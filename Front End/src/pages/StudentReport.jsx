@@ -14,7 +14,9 @@ import {
   RiBarChartLine,
   RiCheckboxCircleLine,
   RiTimeLine,
-  RiUserLine as RiTeacherIcon
+  RiUserLine as RiTeacherIcon,
+  RiEyeLine,
+  RiDownloadLine
 } from "react-icons/ri";
 import logo from '../assets/Logo.png';
 
@@ -289,6 +291,22 @@ const StudentReport = () => {
                               <RiCheckboxCircleLine className="status-icon" />
                               <span>Completed</span>
                             </div>
+                          </div>
+                          <div className="test-actions">
+                            <button 
+                              className="action-btn view-btn"
+                              onClick={() => navigate('/test-report', { state: { submissionId: test.submission_id } })}
+                            >
+                              <RiEyeLine />
+                              View Report
+                            </button>
+                            <button 
+                              className="action-btn download-btn"
+                              onClick={() => navigate('/test-report', { state: { submissionId: test.submission_id } })}
+                            >
+                              <RiDownloadLine />
+                              Download PDF
+                            </button>
                           </div>
                         </div>
                       );

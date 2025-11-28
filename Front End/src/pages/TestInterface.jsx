@@ -77,8 +77,9 @@ const TestInterface = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(isAutoSubmit ? 'Test submitted automatically due to time limit!' : 'Test submitted successfully!');
-        navigate('/dashboard');
+        // Show success message and navigate to My Reports
+        alert('Test submitted successfully! You can view your report in "My Reports" section.');
+        navigate('/my-reports', { replace: true });
       } else {
         alert(result.error || 'Failed to submit test');
       }

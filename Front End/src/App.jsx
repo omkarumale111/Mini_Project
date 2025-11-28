@@ -12,6 +12,7 @@ import TeacherAbout from './pages/TeacherAbout';
 import Modules from './pages/Modules';
 import StudentProfile from './pages/StudentProfile';
 import TakeTest from './pages/TakeTest';
+import TestReport from './pages/TestReport';
 import SignupScreen from "./components/SignUpScreen/SignupScreen";
 
 // Test Management Components
@@ -22,6 +23,8 @@ import StudentDetails from './pages/StudentDetails';
 import TeacherDetails from './pages/TeacherDetails';
 import Report from './pages/Report';
 import StudentReport from './pages/StudentReport';
+import MyStudents from './pages/MyStudentsRedesigned';
+import StudentPerformanceDetails from './pages/StudentPerformanceDetails';
 
 // Module 1 Lessons
 import Module1Lesson1 from './pages/lessons/Module1Lesson1';
@@ -104,6 +107,8 @@ function App() {
       <Route path="/profile" element={<StudentProfile />} />
       {/* Take Test page */}
       <Route path="/take-test" element={<TakeTest />} />
+      {/* Test Report page */}
+      <Route path="/test-report" element={<TestReport />} />
       
       {/* Test Management Routes */}
       <Route path="/create-test" element={<CreateTest />} />
@@ -113,6 +118,9 @@ function App() {
       <Route path="/teacher-details" element={<TeacherDetails />} />
       <Route path="/reports" element={<Report />} />
       <Route path="/student-report" element={<StudentReport />} />
+      <Route path="/my-reports" element={<StudentReport />} />
+      <Route path="/my-students" element={<MyStudents />} />
+      <Route path="/student-performance/:studentId" element={<StudentPerformanceDetails />} />
       
       {/* Module 1 Lesson Routes */}
       <Route path="/module1/lesson1" element={<Module1Lesson1 />} />
