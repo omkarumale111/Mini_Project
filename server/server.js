@@ -128,6 +128,24 @@ async function initializeDatabase() {
       )
     `);
 
+    // Create AI evaluations table to cache AI-generated reports
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS ai_test_evaluations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        submission_id INT NOT NULL UNIQUE,
+        review_score INT NOT NULL,
+        grammar_score INT NOT NULL,
+        content_score INT NOT NULL,
+        creativity_score INT NOT NULL,
+        summary_feedback TEXT NOT NULL,
+        grammar_issues TEXT NOT NULL,
+        suggestions TEXT NOT NULL,
+        final_remarks TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (submission_id) REFERENCES student_test_submissions(id) ON DELETE CASCADE
+      )
+    `);
+
     await connection.query(`
       CREATE TABLE IF NOT EXISTS student_profiles (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -272,6 +290,25 @@ async function initializeDatabase() {
       )
     `);
 
+    // Create writing_evaluations table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS writing_evaluations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id INT NOT NULL,
+        student_name VARCHAR(255),
+        teacher_name VARCHAR(255),
+        essay_text LONGTEXT NOT NULL,
+        score INT NOT NULL,
+        grammatical_accuracy TEXT,
+        content_quality TEXT,
+        feedback_summary TEXT,
+        suggestions TEXT,
+        final_remarks TEXT,
+        submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
     // Create stored procedure for getting student test count
     await connection.query('DROP PROCEDURE IF EXISTS GetStudentTestCount');
     await connection.query(`
@@ -298,7 +335,39 @@ async function initializeDatabase() {
       GROUP BY u.id, u.email
     `);
 
-    console.log('Database tables and procedures initialized successfully');
+    // Create view for student-teacher performance mapping
+    await connection.query('DROP VIEW IF EXISTS student_teacher_performance');
+    await connection.query(`
+      CREATE VIEW student_teacher_performance AS
+      SELECT 
+          sts.student_id,
+          t.teacher_id,
+          u.email as student_email,
+          sp.first_name as student_first_name,
+          sp.last_name as student_last_name,
+          tu.email as teacher_email,
+          tp.first_name as teacher_first_name,
+          tp.last_name as teacher_last_name,
+          COUNT(DISTINCT sts.id) as total_tests,
+          AVG(ate.review_score) as avg_overall_score,
+          AVG(ate.grammar_score) as avg_grammar_score,
+          AVG(ate.content_score) as avg_content_score,
+          AVG(ate.creativity_score) as avg_creativity_score,
+          MIN(sts.submitted_at) as first_test_date,
+          MAX(sts.submitted_at) as last_test_date
+      FROM student_test_submissions sts
+      JOIN tests t ON sts.test_id = t.id
+      JOIN users u ON sts.student_id = u.id
+      JOIN users tu ON t.teacher_id = tu.id
+      LEFT JOIN student_profiles sp ON u.id = sp.user_id
+      LEFT JOIN teacher_profiles tp ON tu.id = tp.user_id
+      LEFT JOIN ai_test_evaluations ate ON sts.id = ate.submission_id
+      WHERE t.deleted_at IS NULL
+      GROUP BY sts.student_id, t.teacher_id, u.email, sp.first_name, sp.last_name,
+               tu.email, tp.first_name, tp.last_name
+    `);
+
+    console.log('Database tables, procedures, and views initialized successfully');
     
     // Check existing lesson completions
     const [completions] = await connection.query('SELECT * FROM lesson_completions');
@@ -508,33 +577,60 @@ app.get('/api/lesson-progress/:student_id', async (req, res) => {
     console.log('Fetching lesson progress for student:', student_id);
     
     const [rows] = await pool.execute(
-      'SELECT lesson_id FROM lesson_completions WHERE student_id = ?',
+      'SELECT lesson_id, completed_at FROM lesson_completions WHERE student_id = ?',
       [student_id]
     );
 
     const completedLessons = rows.map(row => row.lesson_id);
     console.log('Completed lessons:', completedLessons);
     
-    // Define lesson progression logic
-    const lessonOrder = [
+    // Define lesson progression logic for writing modules
+    const writingLessonOrder = [
       'm1l1', 'm1l2', 'm1l3', 'm1l4',
       'm2l1', 'm2l2', 'm2l3', 'm2l4', 
       'm3l1', 'm3l2', 'm3l3', 'm3l4',
       'm4l1', 'm4l2', 'm4l3', 'm4l4'
     ];
 
+    // Define lesson progression logic for listening modules
+    const listeningLessonOrder = [
+      'L1l1', 'L1l2', 'L1l3', 'L1l4', 'L1l5', 'L1l6', 'L1l7', 'L1l8', 'L1l9', 'L1l10',
+      'L2l1', 'L2l2', 'L2l3', 'L2l4', 'L2l5', 'L2l6', 'L2l7', 'L2l8', 'L2l9', 'L2l10'
+    ];
+
     const progress = {};
-    lessonOrder.forEach((lessonId, index) => {
+    
+    // Process writing lessons
+    writingLessonOrder.forEach((lessonId, index) => {
       const isCompleted = completedLessons.includes(lessonId);
-      const isUnlocked = index === 0 || completedLessons.includes(lessonOrder[index - 1]);
-      
-      // Debug logging for all lessons
-      console.log(`${lessonId} Debug - isCompleted:`, isCompleted, `(in completedLessons: ${completedLessons.includes(lessonId)})`);
+      const isUnlocked = index === 0 || completedLessons.includes(writingLessonOrder[index - 1]);
       
       progress[lessonId] = {
         completed: isCompleted,
         unlocked: isUnlocked,
-        status: isCompleted ? 'completed' : (isUnlocked ? 'available' : 'locked')
+        status: isCompleted ? 'completed' : (isUnlocked ? 'available' : 'locked'),
+        completed_at: isCompleted ? rows.find(r => r.lesson_id === lessonId)?.completed_at : null
+      };
+    });
+
+    // Process listening lessons
+    listeningLessonOrder.forEach((lessonId, index) => {
+      const isCompleted = completedLessons.includes(lessonId);
+      // L1l1 is always unlocked, L2l1 unlocks after L1l10, others unlock after previous lesson
+      let isUnlocked;
+      if (lessonId === 'L1l1') {
+        isUnlocked = true;
+      } else if (lessonId === 'L2l1') {
+        isUnlocked = completedLessons.includes('L1l10');
+      } else {
+        isUnlocked = completedLessons.includes(listeningLessonOrder[index - 1]);
+      }
+      
+      progress[lessonId] = {
+        completed: isCompleted,
+        unlocked: isUnlocked,
+        status: isCompleted ? 'completed' : (isUnlocked ? 'available' : 'locked'),
+        completed_at: isCompleted ? rows.find(r => r.lesson_id === lessonId)?.completed_at : null
       };
     });
 
@@ -886,12 +982,17 @@ app.post('/api/submit-test', async (req, res) => {
     // Insert answers
     for (const answer of answers) {
       await connection.execute(
-        'INSERT INTO student_answers (submission_id, question_id, answer_text) VALUES (?, ?, ?)',
+        'INSERT INTO student_answers (submission_id, question_id, answer) VALUES (?, ?, ?)',
         [submissionId, answer.questionId, answer.answerText]
       );
     }
     
     connection.release();
+    
+    // Trigger AI evaluation asynchronously (don't wait for it)
+    generateAndSaveAIEvaluation(submissionId).catch(err => {
+      console.error('Error generating AI evaluation:', err);
+    });
     
     res.json({ 
       success: true, 
@@ -959,7 +1060,7 @@ app.get('/api/test-submissions/:testId', async (req, res) => {
     for (let submission of submissions) {
       const [answers] = await connection.execute(`
         SELECT 
-          sa.answer_text,
+          sa.answer,
           tq.question_text,
           tq.id as question_id
         FROM student_answers sa
@@ -1425,6 +1526,49 @@ app.get('/api/student-report/:studentId', async (req, res) => {
   }
 });
 
+// Get detailed student submissions with answers and questions
+app.get('/api/student-submissions/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const connection = await pool.getConnection();
+    
+    // Get student's test submissions with detailed information
+    const [submissions] = await connection.query(`
+      SELECT 
+        sts.id as submission_id,
+        t.id as test_id,
+        t.test_name,
+        t.test_code,
+        t.time_limit_minutes,
+        sts.submitted_at,
+        t.created_at,
+        COUNT(DISTINCT tq.id) as total_questions,
+        COUNT(DISTINCT sa.id) as answered_questions,
+        u.email as teacher_email,
+        tp.first_name as teacher_first_name,
+        tp.last_name as teacher_last_name
+      FROM student_test_submissions sts
+      JOIN tests t ON sts.test_id = t.id
+      JOIN users u ON t.teacher_id = u.id
+      LEFT JOIN teacher_profiles tp ON u.id = tp.user_id
+      LEFT JOIN test_questions tq ON t.id = tq.test_id
+      LEFT JOIN student_answers sa ON sts.id = sa.submission_id
+      WHERE sts.student_id = ?
+      GROUP BY sts.id, t.id, t.test_name, t.test_code, t.time_limit_minutes, 
+               sts.submitted_at, t.created_at, u.email, tp.first_name, tp.last_name
+      ORDER BY sts.submitted_at DESC
+    `, [studentId]);
+    
+    connection.release();
+    
+    res.json({ submissions });
+    
+  } catch (error) {
+    console.error('Error fetching student submissions:', error);
+    res.status(500).json({ error: 'Failed to fetch student submissions' });
+  }
+});
+
 // Get recent submissions for ongoing tests (teacher dashboard)
 app.get('/api/recent-submissions/:teacherId', async (req, res) => {
   try {
@@ -1488,6 +1632,695 @@ app.get('/api/recent-submissions/:teacherId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching recent submissions:', error);
     res.status(500).json({ error: 'Failed to fetch recent submissions' });
+  }
+});
+
+// Get single submission details for report
+app.get('/api/submission-details/:submissionId', async (req, res) => {
+  try {
+    const { submissionId } = req.params;
+    const connection = await pool.getConnection();
+    
+    // Get submission with test and student details
+    const [submissions] = await connection.execute(`
+      SELECT 
+        sts.id as submission_id,
+        sts.submitted_at,
+        t.id as test_id,
+        t.test_name,
+        t.test_code,
+        t.description,
+        t.time_limit_minutes,
+        u.email as student_email,
+        sp.first_name as student_first_name,
+        sp.last_name as student_last_name,
+        tu.email as teacher_email,
+        tp.first_name as teacher_first_name,
+        tp.last_name as teacher_last_name
+      FROM student_test_submissions sts
+      JOIN tests t ON sts.test_id = t.id
+      JOIN users u ON sts.student_id = u.id
+      LEFT JOIN student_profiles sp ON u.id = sp.user_id
+      JOIN users tu ON t.teacher_id = tu.id
+      LEFT JOIN teacher_profiles tp ON tu.id = tp.user_id
+      WHERE sts.id = ?
+    `, [submissionId]);
+    
+    if (submissions.length === 0) {
+      connection.release();
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+    
+    const submission = submissions[0];
+    
+    // Get questions and answers
+    const [answers] = await connection.execute(`
+      SELECT 
+        tq.id as question_id,
+        tq.question_text,
+        tq.question_order,
+        tq.word_limit,
+        sa.answer
+      FROM test_questions tq
+      LEFT JOIN student_answers sa ON tq.id = sa.question_id AND sa.submission_id = ?
+      WHERE tq.test_id = ?
+      ORDER BY tq.question_order
+    `, [submissionId, submission.test_id]);
+    
+    submission.questions_and_answers = answers;
+    
+    connection.release();
+    
+    res.json({ submission });
+    
+  } catch (error) {
+    console.error('Error fetching submission details:', error);
+    res.status(500).json({ error: 'Failed to fetch submission details' });
+  }
+});
+
+// Helper function to generate and save AI evaluation
+async function generateAndSaveAIEvaluation(submissionId) {
+  const connection = await pool.getConnection();
+  
+  try {
+    // Check if evaluation already exists
+    const [existingEval] = await connection.execute(
+      'SELECT id FROM ai_test_evaluations WHERE submission_id = ?',
+      [submissionId]
+    );
+    
+    if (existingEval.length > 0) {
+      console.log(`AI evaluation already exists for submission ${submissionId}`);
+      connection.release();
+      return;
+    }
+    
+    // Get submission with all answers
+    const [submissions] = await connection.execute(`
+      SELECT 
+        sts.id as submission_id,
+        t.test_name,
+        u.email as student_email,
+        sp.first_name as student_first_name,
+        sp.last_name as student_last_name
+      FROM student_test_submissions sts
+      JOIN tests t ON sts.test_id = t.id
+      JOIN users u ON sts.student_id = u.id
+      LEFT JOIN student_profiles sp ON u.id = sp.user_id
+      WHERE sts.id = ?
+    `, [submissionId]);
+    
+    if (submissions.length === 0) {
+      connection.release();
+      console.log(`Submission ${submissionId} not found`);
+      return;
+    }
+    
+    const submission = submissions[0];
+    
+    // Get all questions and answers
+    const [answers] = await connection.execute(`
+      SELECT 
+        tq.question_text,
+        tq.question_order,
+        sa.answer
+      FROM test_questions tq
+      LEFT JOIN student_answers sa ON tq.id = sa.question_id AND sa.submission_id = ?
+      WHERE tq.test_id = (SELECT test_id FROM student_test_submissions WHERE id = ?)
+      ORDER BY tq.question_order
+    `, [submissionId, submissionId]);
+    
+    // Don't release connection yet - we'll need it later for saving
+    
+    // Combine all answers into one text for evaluation
+    const combinedText = answers.map((qa, index) => 
+      `Question ${index + 1}: ${qa.question_text}\nAnswer: ${qa.answer || 'No answer provided'}`
+    ).join('\n\n');
+    
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    
+    // OPTIMIZED: Single AI call instead of 8 separate calls
+    const combinedPrompt = `
+Evaluate this student's test submission and provide a comprehensive analysis in the following EXACT format:
+
+REVIEW_SCORE: [number 0-100]
+GRAMMAR_SCORE: [number 0-10]
+CONTENT_SCORE: [number 0-10]
+CREATIVITY_SCORE: [number 0-10]
+
+SUMMARY_FEEDBACK:
+[2-3 sentences providing overall assessment, be encouraging but honest]
+
+GRAMMAR_ISSUES:
+[Analyze grammar, spelling, and language errors. For each error use this format:
+EXCERPT: [incorrect text, max 10 words]
+ERROR_TYPE: [type of error]
+CORRECTION: [corrected text]
+---
+If no errors, write: "No significant errors found."
+Limit to maximum 8 most important errors.]
+
+SUGGESTIONS:
+1. [Specific actionable suggestion]
+2. [Specific actionable suggestion]
+3. [Specific actionable suggestion]
+4. [Specific actionable suggestion]
+5. [Specific actionable suggestion]
+
+FINAL_REMARKS:
+[2-3 encouraging sentences acknowledging effort and motivating improvement]
+
+Student's Test Submission:
+${combinedText}
+`;
+    
+    console.log(`Generating AI evaluation for submission ${submissionId}...`);
+    const result = await model.generateContent(combinedPrompt);
+    const responseText = result.response.text().trim();
+    
+    // Parse the response
+    const reviewScore = parseInt(responseText.match(/REVIEW_SCORE:\s*(\d+)/)?.[1] || '0');
+    const grammarScore = parseInt(responseText.match(/GRAMMAR_SCORE:\s*(\d+)/)?.[1] || '0');
+    const contentScore = parseInt(responseText.match(/CONTENT_SCORE:\s*(\d+)/)?.[1] || '0');
+    const creativityScore = parseInt(responseText.match(/CREATIVITY_SCORE:\s*(\d+)/)?.[1] || '0');
+    
+    const summaryFeedback = responseText.match(/SUMMARY_FEEDBACK:\s*([\s\S]*?)(?=GRAMMAR_ISSUES:|$)/)?.[1]?.trim() || 'No feedback available';
+    const grammarIssues = responseText.match(/GRAMMAR_ISSUES:\s*([\s\S]*?)(?=SUGGESTIONS:|$)/)?.[1]?.trim() || 'No significant errors found.';
+    const suggestions = responseText.match(/SUGGESTIONS:\s*([\s\S]*?)(?=FINAL_REMARKS:|$)/)?.[1]?.trim() || '1. Continue practicing';
+    const finalRemarks = responseText.match(/FINAL_REMARKS:\s*([\s\S]*?)$/)?.[1]?.trim() || 'Keep up the good work!';
+    
+    // Save evaluation to database
+    await connection.execute(
+      `INSERT INTO ai_test_evaluations 
+       (submission_id, review_score, grammar_score, content_score, creativity_score, 
+        summary_feedback, grammar_issues, suggestions, final_remarks) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [submissionId, reviewScore, grammarScore, contentScore, creativityScore,
+       summaryFeedback, grammarIssues, suggestions, finalRemarks]
+    );
+    
+    connection.release();
+    console.log(`AI evaluation generated and saved for submission ${submissionId}`);
+    
+  } catch (error) {
+    console.error('Error generating AI evaluation:', error);
+    try {
+      connection.release();
+    } catch (releaseError) {
+      // Connection might already be released
+    }
+  }
+}
+
+// AI Test Evaluation Endpoint - Check cache first
+app.post('/api/evaluate-test-submission', async (req, res) => {
+  try {
+    const { submissionId } = req.body;
+    
+    if (!submissionId) {
+      return res.status(400).json({ error: 'Submission ID is required' });
+    }
+
+    const connection = await pool.getConnection();
+    
+    // Check if evaluation exists in cache
+    const [cachedEval] = await connection.execute(
+      'SELECT * FROM ai_test_evaluations WHERE submission_id = ?',
+      [submissionId]
+    );
+    
+    if (cachedEval.length > 0) {
+      // Return cached evaluation
+      connection.release();
+      return res.json({
+        evaluation: {
+          reviewScore: cachedEval[0].review_score,
+          grammarScore: cachedEval[0].grammar_score,
+          contentScore: cachedEval[0].content_score,
+          creativityScore: cachedEval[0].creativity_score,
+          summaryFeedback: cachedEval[0].summary_feedback,
+          grammarIssues: cachedEval[0].grammar_issues,
+          suggestions: cachedEval[0].suggestions,
+          finalRemarks: cachedEval[0].final_remarks
+        },
+        cached: true
+      });
+    }
+    
+    connection.release();
+    
+    // If not cached, trigger generation and return pending status
+    generateAndSaveAIEvaluation(submissionId).catch(err => {
+      console.error('Error generating AI evaluation:', err);
+    });
+    
+    res.json({ 
+      message: 'Evaluation is being generated. Please try again in a moment.',
+      pending: true 
+    });
+    
+  } catch (error) {
+    console.error('Test evaluation error:', error);
+    res.status(500).json({ error: 'Failed to evaluate test submission', details: error.message });
+  }
+});
+
+// Writing Evaluation API Endpoint
+app.post('/api/evaluate-writing', async (req, res) => {
+  try {
+    const { text, studentName, teacherName, studentId } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ message: 'Text content is required' });
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    
+    // Get overall score (0-100)
+    const scorePrompt = `
+Evaluate this essay and provide ONLY a numeric score from 0 to 100 based on:
+- Writing quality (grammar, vocabulary, sentence structure)
+- Clarity and coherence
+- Content relevance and depth
+- Organization and structure
+
+Return ONLY the number, nothing else.
+
+Essay:
+${text}
+`;
+    
+    const scoreResult = await model.generateContent(scorePrompt);
+    const scoreText = scoreResult.response.text().trim();
+    const score = parseInt(scoreText) || 0;
+
+    // Get grammatical errors and corrections
+    const grammarPrompt = `
+Analyze this text for grammatical errors. For each error found, provide:
+1. The incorrect phrase/sentence
+2. The correction
+3. Brief explanation
+
+Format each error as:
+ERROR: [incorrect text]
+CORRECTION: [corrected text]
+EXPLANATION: [brief explanation]
+
+If no errors, write: "No grammatical errors found."
+
+Text:
+${text}
+`;
+
+    const grammarResult = await model.generateContent(grammarPrompt);
+    const grammarText = grammarResult.response.text().trim();
+
+    // Get content quality evaluation
+    const contentPrompt = `
+Evaluate this essay's content quality. Provide a brief assessment (2-3 sentences) covering:
+- Coherence and logical flow
+- Structure and organization
+- Originality and depth of ideas
+
+Text:
+${text}
+`;
+
+    const contentResult = await model.generateContent(contentPrompt);
+    const contentQuality = contentResult.response.text().trim();
+
+    // Get feedback summary
+    const feedbackPrompt = `
+Provide feedback on this essay in two parts:
+
+STRENGTHS (what the student did well):
+[List 2-3 specific strengths]
+
+AREAS FOR IMPROVEMENT:
+[List 2-3 specific areas to improve]
+
+Text:
+${text}
+`;
+
+    const feedbackResult = await model.generateContent(feedbackPrompt);
+    const feedbackSummary = feedbackResult.response.text().trim();
+
+    // Get detailed suggestions
+    const suggestionsPrompt = `
+Provide exactly 5 actionable suggestions to improve this essay. Focus on:
+- Clarity and precision
+- Tone and style
+- Structure and organization
+- Vocabulary enhancement
+- Argument strength
+
+Format as:
+1. [Suggestion 1]
+2. [Suggestion 2]
+3. [Suggestion 3]
+4. [Suggestion 4]
+5. [Suggestion 5]
+
+Text:
+${text}
+`;
+
+    const suggestionsResult = await model.generateContent(suggestionsPrompt);
+    const suggestions = suggestionsResult.response.text().trim();
+
+    // Get final remarks
+    const remarksPrompt = `
+Write a brief, encouraging closing comment (2-3 sentences) for a student based on their essay. 
+Be positive and motivating while acknowledging their effort.
+
+Text:
+${text}
+`;
+
+    const remarksResult = await model.generateContent(remarksPrompt);
+    const finalRemarks = remarksResult.response.text().trim();
+
+    // Save to database if studentId is provided
+    let evaluationId = null;
+    if (studentId) {
+      const connection = await pool.getConnection();
+      try {
+        const [result] = await connection.execute(
+          `INSERT INTO writing_evaluations 
+          (student_id, student_name, teacher_name, essay_text, score, grammatical_accuracy, 
+           content_quality, feedback_summary, suggestions, final_remarks)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [studentId, studentName, teacherName, text, score, grammarText, 
+           contentQuality, feedbackSummary, suggestions, finalRemarks]
+        );
+        evaluationId = result.insertId;
+      } finally {
+        connection.release();
+      }
+    }
+
+    res.json({
+      evaluationId,
+      score,
+      grammaticalAccuracy: grammarText,
+      contentQuality,
+      feedbackSummary,
+      suggestions,
+      finalRemarks,
+      studentName: studentName || 'Student',
+      teacherName: teacherName || 'Teacher',
+      submissionTime: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Writing evaluation error:', error);
+    res.status(500).json({ message: 'Error evaluating writing', error: error.message });
+  }
+});
+
+// ============================================================================
+// STUDENT-TEACHER MAPPING & PERFORMANCE TRACKING ENDPOINTS
+// ============================================================================
+
+// Get all students for a teacher with average performance
+app.get('/api/teacher/:teacherId/students', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const connection = await pool.getConnection();
+    
+    try {
+      // Use the student_teacher_performance view
+      const [students] = await connection.query(`
+        SELECT 
+          student_id,
+          student_email,
+          student_first_name,
+          student_last_name,
+          total_tests,
+          ROUND(avg_overall_score, 1) as avg_overall_score,
+          ROUND(avg_grammar_score, 1) as avg_grammar_score,
+          ROUND(avg_content_score, 1) as avg_content_score,
+          ROUND(avg_creativity_score, 1) as avg_creativity_score,
+          first_test_date,
+          last_test_date
+        FROM student_teacher_performance
+        WHERE teacher_id = ?
+        ORDER BY avg_overall_score DESC, student_last_name, student_first_name
+      `, [teacherId]);
+      
+      // Also get additional student info
+      const studentsWithDetails = await Promise.all(students.map(async (student) => {
+        const [profileData] = await connection.query(`
+          SELECT school_college, grade_year
+          FROM student_profiles
+          WHERE user_id = ?
+        `, [student.student_id]);
+        
+        return {
+          studentId: student.student_id,
+          email: student.student_email,
+          firstName: student.student_first_name || 'N/A',
+          lastName: student.student_last_name || 'N/A',
+          schoolCollege: profileData[0]?.school_college || 'N/A',
+          gradeYear: profileData[0]?.grade_year || 'N/A',
+          totalTests: student.total_tests,
+          avgOverallScore: student.avg_overall_score,
+          avgGrammarScore: student.avg_grammar_score,
+          avgContentScore: student.avg_content_score,
+          avgCreativityScore: student.avg_creativity_score,
+          firstTestDate: student.first_test_date,
+          lastTestDate: student.last_test_date
+        };
+      }));
+      
+      res.json({
+        students: studentsWithDetails,
+        totalStudents: studentsWithDetails.length
+      });
+      
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error('Error fetching teacher students:', error);
+    res.status(500).json({ message: 'Error fetching students', error: error.message });
+  }
+});
+
+// Get detailed performance for a specific student under a teacher
+app.get('/api/teacher/:teacherId/student/:studentId/performance', async (req, res) => {
+  try {
+    const { teacherId, studentId } = req.params;
+    const connection = await pool.getConnection();
+    
+    try {
+      // Get student info
+      const [studentInfo] = await connection.query(`
+        SELECT u.id, u.email, sp.first_name, sp.last_name,
+               sp.school_college, sp.grade_year
+        FROM users u
+        LEFT JOIN student_profiles sp ON u.id = sp.user_id
+        WHERE u.id = ?
+      `, [studentId]);
+      
+      if (studentInfo.length === 0) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+      
+      // Get teacher info
+      const [teacherInfo] = await connection.query(`
+        SELECT u.id, u.email, tp.first_name, tp.last_name
+        FROM users u
+        LEFT JOIN teacher_profiles tp ON u.id = tp.user_id
+        WHERE u.id = ?
+      `, [teacherId]);
+      
+      // Get overall statistics from view
+      const [overallStats] = await connection.query(`
+        SELECT 
+          total_tests,
+          ROUND(avg_overall_score, 1) as avg_overall_score,
+          ROUND(avg_grammar_score, 1) as avg_grammar_score,
+          ROUND(avg_content_score, 1) as avg_content_score,
+          ROUND(avg_creativity_score, 1) as avg_creativity_score,
+          first_test_date,
+          last_test_date
+        FROM student_teacher_performance
+        WHERE student_id = ? AND teacher_id = ?
+      `, [studentId, teacherId]);
+      
+      // Get individual test results
+      const [individualTests] = await connection.query(`
+        SELECT 
+          sts.id as submission_id,
+          sts.submitted_at,
+          t.test_name,
+          t.test_code,
+          ate.review_score,
+          ate.grammar_score,
+          ate.content_score,
+          ate.creativity_score
+        FROM student_test_submissions sts
+        JOIN tests t ON sts.test_id = t.id
+        LEFT JOIN ai_test_evaluations ate ON sts.id = ate.submission_id
+        WHERE sts.student_id = ?
+          AND t.teacher_id = ?
+          AND t.deleted_at IS NULL
+        ORDER BY sts.submitted_at DESC
+      `, [studentId, teacherId]);
+      
+      // Calculate trends
+      let trends = {
+        improvement: 0,
+        strongestArea: 'N/A',
+        weakestArea: 'N/A',
+        consistency: 0
+      };
+      
+      if (individualTests.length >= 2) {
+        const firstScore = individualTests[individualTests.length - 1].review_score || 0;
+        const lastScore = individualTests[0].review_score || 0;
+        trends.improvement = ((lastScore - firstScore) / (firstScore || 1) * 100).toFixed(1);
+        
+        // Calculate consistency (standard deviation)
+        const scores = individualTests.map(t => t.review_score || 0);
+        const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
+        const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
+        const stdDev = Math.sqrt(variance);
+        trends.consistency = Math.max(0, 100 - stdDev).toFixed(1);
+      }
+      
+      if (overallStats.length > 0) {
+        const stats = overallStats[0];
+        const areas = {
+          grammar: stats.avg_grammar_score || 0,
+          content: stats.avg_content_score || 0,
+          creativity: stats.avg_creativity_score || 0
+        };
+        
+        trends.strongestArea = Object.keys(areas).reduce((a, b) => areas[a] > areas[b] ? a : b);
+        trends.weakestArea = Object.keys(areas).reduce((a, b) => areas[a] < areas[b] ? a : b);
+      }
+      
+      res.json({
+        studentInfo: {
+          id: studentInfo[0].id,
+          email: studentInfo[0].email,
+          firstName: studentInfo[0].first_name || 'N/A',
+          lastName: studentInfo[0].last_name || 'N/A',
+          schoolCollege: studentInfo[0].school_college || 'N/A',
+          gradeYear: studentInfo[0].grade_year || 'N/A'
+        },
+        teacherInfo: {
+          id: teacherInfo[0]?.id,
+          email: teacherInfo[0]?.email,
+          firstName: teacherInfo[0]?.first_name || 'N/A',
+          lastName: teacherInfo[0]?.last_name || 'N/A'
+        },
+        overallStats: overallStats.length > 0 ? {
+          avgOverallScore: overallStats[0].avg_overall_score,
+          avgGrammarScore: overallStats[0].avg_grammar_score,
+          avgContentScore: overallStats[0].avg_content_score,
+          avgCreativityScore: overallStats[0].avg_creativity_score,
+          totalTests: overallStats[0].total_tests,
+          firstTestDate: overallStats[0].first_test_date,
+          lastTestDate: overallStats[0].last_test_date
+        } : null,
+        individualTests: individualTests.map(test => ({
+          submissionId: test.submission_id,
+          testName: test.test_name,
+          testCode: test.test_code,
+          submittedAt: test.submitted_at,
+          reviewScore: test.review_score,
+          grammarScore: test.grammar_score,
+          contentScore: test.content_score,
+          creativityScore: test.creativity_score
+        })),
+        trends
+      });
+      
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error('Error fetching student performance:', error);
+    res.status(500).json({ message: 'Error fetching performance data', error: error.message });
+  }
+});
+
+// Get teacher's student statistics summary
+app.get('/api/teacher/:teacherId/statistics', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const connection = await pool.getConnection();
+    
+    try {
+      // Get all students and their scores
+      const [students] = await connection.query(`
+        SELECT 
+          student_id,
+          student_first_name,
+          student_last_name,
+          total_tests,
+          ROUND(avg_overall_score, 1) as avg_score
+        FROM student_teacher_performance
+        WHERE teacher_id = ?
+      `, [teacherId]);
+      
+      // Calculate statistics
+      const totalStudents = students.length;
+      const totalTestsGiven = students.reduce((sum, s) => sum + s.total_tests, 0);
+      const averageClassScore = students.length > 0
+        ? (students.reduce((sum, s) => sum + (s.avg_score || 0), 0) / students.length).toFixed(1)
+        : 0;
+      
+      // Top performers (top 5)
+      const topPerformers = students
+        .filter(s => s.avg_score !== null)
+        .sort((a, b) => b.avg_score - a.avg_score)
+        .slice(0, 5)
+        .map(s => ({
+          studentId: s.student_id,
+          name: `${s.student_first_name || ''} ${s.student_last_name || ''}`.trim() || 'N/A',
+          avgScore: s.avg_score
+        }));
+      
+      // Students needing attention (bottom 5 with scores below 60)
+      const needsAttention = students
+        .filter(s => s.avg_score !== null && s.avg_score < 60)
+        .sort((a, b) => a.avg_score - b.avg_score)
+        .slice(0, 5)
+        .map(s => ({
+          studentId: s.student_id,
+          name: `${s.student_first_name || ''} ${s.student_last_name || ''}`.trim() || 'N/A',
+          avgScore: s.avg_score
+        }));
+      
+      // Score distribution
+      const scoreDistribution = {
+        excellent: students.filter(s => s.avg_score >= 90).length,
+        good: students.filter(s => s.avg_score >= 75 && s.avg_score < 90).length,
+        average: students.filter(s => s.avg_score >= 60 && s.avg_score < 75).length,
+        needsWork: students.filter(s => s.avg_score < 60).length
+      };
+      
+      res.json({
+        totalStudents,
+        totalTestsGiven,
+        averageClassScore: parseFloat(averageClassScore),
+        topPerformers,
+        needsAttention,
+        scoreDistribution
+      });
+      
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error('Error fetching teacher statistics:', error);
+    res.status(500).json({ message: 'Error fetching statistics', error: error.message });
   }
 });
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./StudentProfile.css";
+import { storage } from '../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -12,7 +13,8 @@ import {
   RiMenuUnfoldLine,
   RiFileEditLine,
   RiSaveLine,
-  RiFileTextLine   
+  RiFileTextLine,
+  RiBarChartLine
 } from "react-icons/ri";
 import logo from '../assets/Logo.png';
 
@@ -44,23 +46,22 @@ const StudentProfile = () => {
   
   const navigate = useNavigate();
 
-  // Get user data and profile from localStorage and API
+  // Get user data and profile from sessionStorage and API
   useEffect(() => {
     const fetchProfile = async () => {
-      const userData = localStorage.getItem('user');
+      const userData = storage.getUser();
       if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+        setUser(userData);
         
         try {
-          const response = await fetch(`http://localhost:5001/api/student-profile/${parsedUser.id}`);
+          const response = await fetch(`http://localhost:5001/api/student-profile/${userData.id}`);
           const data = await response.json();
           
           if (response.ok && data.profile) {
             const loadedProfile = {
               firstName: data.profile.first_name || '',
               lastName: data.profile.last_name || '',
-              email: parsedUser.email,
+              email: userData.email,
               dateOfBirth: data.profile.date_of_birth || '',
               phone: data.profile.phone || '',
               address: data.profile.address || '',
@@ -135,7 +136,7 @@ const StudentProfile = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 
@@ -217,10 +218,10 @@ const StudentProfile = () => {
       const result = await response.json();
 
       if (response.ok) {
-        // Update user data in localStorage if email was changed
+        // Update user data in sessionStorage if email was changed
         if (result.email && result.email !== user.email) {
           const updatedUser = { ...user, email: result.email };
-          localStorage.setItem('user', JSON.stringify(updatedUser));
+          storage.setUser(updatedUser);
           setUser(updatedUser);
         }
         
@@ -329,6 +330,13 @@ const StudentProfile = () => {
             >
               <RiFileTextLine className="nav-icon" />
               {!sidebarCollapsed && <span>Take Test</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/student-report')}
+            >
+              <RiBarChartLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Reports</span>}
             </li>
           </ul>
         </nav>

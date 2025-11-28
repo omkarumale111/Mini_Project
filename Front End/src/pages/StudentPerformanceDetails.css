@@ -1,0 +1,460 @@
+/* Import Teacher Sidebar Styles */
+@import url('../components/TeacherProfile/TeacherProfile.css');
+
+.performance-details-container {
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.2rem;
+  color: #6b7280;
+}
+
+.no-data {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.no-data h2 {
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.no-data p {
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+.no-data button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #0a2440 0%, #1a3a5c 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.no-data button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(10, 36, 64, 0.3);
+  background: linear-gradient(135deg, #0d2d4f 0%, #1f4a6f 100%);
+}
+
+/* Header */
+.performance-header {
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  border-color: #0a2440;
+  color: #0a2440;
+  background: #f9fafb;
+}
+
+.student-header-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.student-avatar-large {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0a2440 0%, #1a3a5c 100%);
+  color: #FFD700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(10, 36, 64, 0.2);
+}
+
+.student-header-info h1 {
+  font-size: 2rem;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.student-email {
+  color: #6b7280;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.student-school {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+/* Overall Statistics */
+.overall-stats-section {
+  margin-bottom: 2rem;
+}
+
+.overall-stats-section h2 {
+  font-size: 1.8rem;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.stats-grid-detailed {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card-detailed {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.stat-card-detailed:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card-detailed.main-score {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.stat-icon-large {
+  font-size: 3rem;
+  color: #f59e0b;
+}
+
+.stat-content-large h3 {
+  font-size: 1.2rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.score-circle-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-inner-large {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.progress-bar-large {
+  width: 100%;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-fill-large {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+.stat-icon-small {
+  font-size: 2rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+/* Trends Section */
+.trends-section {
+  margin-bottom: 2rem;
+}
+
+.trends-section h2 {
+  font-size: 1.8rem;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.trends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.trend-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 1rem;
+  transition: transform 0.2s;
+}
+
+.trend-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trend-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.trend-content h3 {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.trend-content p {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.trend-content p.positive {
+  color: #10b981;
+}
+
+.trend-content p.negative {
+  color: #ef4444;
+}
+
+.trend-content p.area-name {
+  text-transform: capitalize;
+  color: #0a2440;
+  font-weight: 600;
+}
+
+.trend-content p.consistency-score {
+  color: #3b82f6;
+}
+
+.trend-description {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+/* Charts Section */
+.charts-section {
+  margin-bottom: 2rem;
+}
+
+.charts-section h2 {
+  font-size: 1.8rem;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container h3 {
+  font-size: 1.2rem;
+  color: #374151;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Individual Tests Section */
+.individual-tests-section {
+  margin-bottom: 2rem;
+}
+
+.individual-tests-section h2 {
+  font-size: 1.8rem;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.tests-table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.tests-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tests-table thead {
+  background: #f9fafb;
+}
+
+.tests-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tests-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.tests-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.test-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.test-code {
+  font-family: monospace;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.test-date {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.score-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* Timeline Summary */
+.timeline-summary {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.timeline-summary p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.timeline-summary strong {
+  color: #1f2937;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .performance-details-container {
+    padding: 1rem;
+  }
+
+  .student-header-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .student-header-info h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats-grid-detailed {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card-detailed.main-score {
+    grid-column: span 1;
+    flex-direction: column;
+  }
+
+  .trends-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tests-table-container {
+    overflow-x: scroll;
+  }
+
+  .tests-table {
+    min-width: 600px;
+  }
+
+  .timeline-summary {
+    flex-direction: column;
+    text-align: center;
+  }
+}

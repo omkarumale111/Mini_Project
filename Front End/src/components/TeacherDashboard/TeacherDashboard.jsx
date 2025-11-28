@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import "./TeacherDashboard.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './TeacherDashboard.css';
+import { storage } from '../../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -29,21 +30,25 @@ const TeacherDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [upcomingTestsCount, setUpcomingTestsCount] = useState(0);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(window.innerWidth >= 1024);
   const [user, setUser] = useState(null);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
   const navigate = useNavigate();
 
-  // Get user data from localStorage
+  // Get user data from sessionStorage
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    console.log('TeacherDashboard mounted');
+    const userData = storage.getUser();
+    console.log('User data from storage:', userData);
     if (userData) {
-      const user = JSON.parse(userData);
-      setUser(user);
-      fetchUpcomingTests(user.id);
-      fetchRecentSubmissions(user.id);
+      setUser(userData);
+      fetchUpcomingTests(userData.id);
+      fetchRecentSubmissions(userData.id);
+    } else {
+      console.log('No user data found, redirecting to login');
+      navigate('/login');
     }
-  }, []);
+  }, [navigate]);
 
   // Poll for new submissions every 30 seconds
   useEffect(() => {
@@ -126,7 +131,7 @@ const TeacherDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 
@@ -204,6 +209,13 @@ const TeacherDashboard = () => {
             >
               <RiFileEditLine className="nav-icon" />
               {!sidebarCollapsed && <span>Manage Tests</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToSection('/my-students')}
+            >
+              <RiGroupLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Students</span>}
             </li>
             <li 
               className="nav-item"

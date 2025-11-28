@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './TestInterface.css';
 import { RiSendPlaneLine, RiTimeLine, RiFileTextLine } from 'react-icons/ri';
+import { storage } from '../utils/storage';
 
 const TestInterface = () => {
   const { testCode } = useParams();
@@ -16,9 +17,9 @@ const TestInterface = () => {
   const [testStartTime, setTestStartTime] = useState(null);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      setUser(JSON.parse(userData));
+      setUser(userData);
       fetchTestData();
     } else {
       navigate('/login');
@@ -76,8 +77,9 @@ const TestInterface = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(isAutoSubmit ? 'Test submitted automatically due to time limit!' : 'Test submitted successfully!');
-        navigate('/dashboard');
+        // Show success message and navigate to My Reports
+        alert('Test submitted successfully! You can view your report in "My Reports" section.');
+        navigate('/my-reports', { replace: true });
       } else {
         alert(result.error || 'Failed to submit test');
       }

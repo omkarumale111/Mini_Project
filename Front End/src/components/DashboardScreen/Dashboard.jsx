@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import "./Dashboard.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Dashboard.css';
+import { storage } from '../../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -13,7 +14,8 @@ import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiFileEditLine,
-  RiTimeLine
+  RiTimeLine,
+  RiBarChartLine
 } from "react-icons/ri";
 import logo from '../../assets/Logo.png';
 import { getTodaysWritingTip } from '../../data/writingTips';
@@ -34,11 +36,11 @@ const Dashboard = () => {
   const [upcomingTests, setUpcomingTests] = useState([]);
   const navigate = useNavigate();
 
-  // Get user data from localStorage
+  // Get user data from sessionStorage
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      setUser(JSON.parse(userData));
+      setUser(userData);
     }
   }, []);
 
@@ -148,7 +150,7 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 
@@ -244,6 +246,20 @@ const Dashboard = () => {
             >
               <RiFileTextLine className="nav-icon" />
               {!sidebarCollapsed && <span>Take Test</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/writing-evaluation')}
+            >
+              <RiBarChartLine className="nav-icon" />
+              {!sidebarCollapsed && <span>Writing Evaluation</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/student-report')}
+            >
+              <RiBarChartLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Reports</span>}
             </li>
           </ul>
         </nav>

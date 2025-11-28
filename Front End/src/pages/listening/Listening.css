@@ -1,0 +1,444 @@
+/* Additional styles for Listening Lessons - extends Lesson.css */
+
+/* Instruction box */
+.instruction-box {
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 4px solid #3b82f6;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.instruction-box h3 {
+  color: #1e40af;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.instruction-box p {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Exercise section */
+.exercise-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Incorrect sentence box (L1) */
+.incorrect-sentence {
+  background: rgba(239, 68, 68, 0.05);
+  border-left: 4px solid #ef4444;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.incorrect-sentence h3 {
+  color: #dc2626;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sentence-text {
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Correct answer section (L1) */
+.correct-answer-section {
+  background: rgba(16, 185, 129, 0.05);
+  border-left: 4px solid #10b981;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.correct-answer-section h3 {
+  color: #059669;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.explanation {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(16, 185, 129, 0.2);
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.explanation strong {
+  color: #059669;
+  font-weight: 600;
+}
+
+/* Scenario box (L2) */
+.scenario-box {
+  background: rgba(139, 92, 246, 0.05);
+  border-left: 4px solid #8b5cf6;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.scenario-box h3 {
+  color: #7c3aed;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scenario-text {
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Recording section */
+.recording-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.recording-section h3 {
+  color: #0a2440;
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recording-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Recording buttons */
+.record-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  min-width: 200px;
+}
+
+.record-button:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+.record-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.stop-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  min-width: 200px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.6);
+  }
+}
+
+.stop-button:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-2px);
+}
+
+.playback-controls {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.play-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  flex: 1;
+}
+
+.play-button:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.reset-button {
+  background: rgba(248, 250, 252, 0.8);
+  color: #666;
+  border: 2px solid rgba(226, 232, 240, 0.8);
+  padding: 14px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1;
+}
+
+.reset-button:hover {
+  background: rgba(226, 232, 240, 0.8);
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}
+
+/* Tips section (L2) */
+.tips-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.tips-section h3 {
+  color: #0a2440;
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tips-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tips-section li {
+  padding: 10px 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  padding-left: 24px;
+}
+
+.tips-section li::before {
+  content: "✓";
+  color: #10b981;
+  font-weight: bold;
+  font-size: 16px;
+  position: absolute;
+  left: 0;
+}
+
+/* Example section (L2) */
+.example-section {
+  background: rgba(248, 250, 252, 0.6);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.example-section h3 {
+  color: #0a2440;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.example-text {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 0;
+  font-style: italic;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+/* Lesson actions */
+.lesson-actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
+  display: flex;
+  justify-content: center;
+}
+
+.lesson-actions .submit-button {
+  min-width: 200px;
+  max-width: 300px;
+}
+
+/* Lesson header */
+.lesson-header h1 {
+  color: #0a2440;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lesson-header h2 {
+  color: #64748b;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+  .playback-controls {
+    flex-direction: column;
+    max-width: 100%;
+  }
+  
+  .play-button,
+  .reset-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .lesson-header h1 {
+    font-size: 26px;
+  }
+  
+  .lesson-header h2 {
+    font-size: 18px;
+  }
+  
+  .instruction-box,
+  .incorrect-sentence,
+  .correct-answer-section,
+  .scenario-box,
+  .recording-section,
+  .tips-section,
+  .example-section {
+    padding: 16px;
+  }
+  
+  .record-button,
+  .stop-button {
+    min-width: 160px;
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lesson-header h1 {
+    font-size: 22px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .lesson-header h2 {
+    font-size: 16px;
+  }
+  
+  .instruction-box h3,
+  .incorrect-sentence h3,
+  .correct-answer-section h3,
+  .scenario-box h3,
+  .recording-section h3,
+  .tips-section h3,
+  .example-section h3 {
+    font-size: 16px;
+  }
+  
+  .sentence-text,
+  .scenario-text {
+    font-size: 15px;
+  }
+  
+  .record-button,
+  .stop-button {
+    width: 100%;
+    min-width: 0;
+  }
+}

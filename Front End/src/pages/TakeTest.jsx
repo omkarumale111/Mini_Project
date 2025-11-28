@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../utils/storage';
 import { 
   RiDashboardLine, 
   RiUserLine, 
@@ -9,7 +10,8 @@ import {
   RiQuestionLine, 
   RiLogoutCircleRLine, 
   RiMenuFoldLine,
-  RiMenuUnfoldLine
+  RiMenuUnfoldLine,
+  RiBarChartLine
 } from 'react-icons/ri';
 import logo from '../assets/Logo.png';
 import './TakeTest.css';
@@ -28,11 +30,11 @@ const TakeTest = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Get user data from localStorage
+  // Get user data from sessionStorage
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = storage.getUser();
     if (userData) {
-      setUser(JSON.parse(userData));
+      setUser(userData);
     }
   }, []);
 
@@ -74,7 +76,7 @@ const TakeTest = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    storage.removeUser();
     navigate('/login');
   };
 
@@ -184,6 +186,13 @@ const TakeTest = () => {
             >
               <RiFileTextLine className="nav-icon" />
               {!sidebarCollapsed && <span>Take Test</span>}
+            </li>
+            <li 
+              className="nav-item"
+              onClick={() => navigateToModule('/student-report')}
+            >
+              <RiBarChartLine className="nav-icon" />
+              {!sidebarCollapsed && <span>My Reports</span>}
             </li>
           </ul>
         </nav>

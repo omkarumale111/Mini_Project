@@ -4,6 +4,29 @@
   color: #081c34;
 }
 
+/* Section Toggle Styles */
+.section-toggle {
+  display: flex;
+  gap: 0;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.section-btn {
+  transition: all 0.3s ease;
+}
+
+.section-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.section-btn:active {
+  transform: translateY(0);
+}
+
 /* Sidebar Styles - Consistent across all pages */
 .sidebar {
   position: fixed;
