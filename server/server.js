@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import multer from 'multer';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -15,6 +17,12 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Configure multer for file uploads
+const upload = multer({ 
+  dest: 'uploads/',
+  limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
+});
 
 // Database connection
 const pool = mysql.createPool({
@@ -727,6 +735,302 @@ const suggestionsText = suggestionsResponse.text().trim();
     console.error('Text analysis error with Gemini:', error.message);
     console.error('Full error:', error);
     res.status(500).json({ message: 'Error analyzing text with Gemini', error: error.message });
+  }
+});
+
+// Audio transcription endpoint using Google's Generative AI
+app.post('/api/transcribe-audio', upload.single('audio'), async (req, res) => {
+  try {
+    console.log('Received transcription request');
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'Audio file is required' });
+    }
+
+    const { student_id, lesson_id, input_field } = req.body;
+    const audioPath = req.file.path;
+
+    console.log('Audio file path:', audioPath);
+    console.log('Request body:', { student_id, lesson_id, input_field });
+
+    // Read the audio file
+    const audioBuffer = fs.readFileSync(audioPath);
+    const base64Audio = audioBuffer.toString('base64');
+
+    // Determine MIME type based on file extension
+    const mimeType = 'audio/wav'; // Default to wav since frontend sends wav
+
+    // Get the Gemini model
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    console.log('Starting audio transcription with Gemini...');
+
+    // Use Gemini's multimodal capabilities to transcribe audio
+    const response = await model.generateContent([
+      {
+        inlineData: {
+          mimeType: mimeType,
+          data: base64Audio,
+        },
+      },
+      {
+        text: 'Please transcribe this audio. Provide only the transcribed text without any additional commentary or formatting.',
+      },
+    ]);
+
+    const result = await response.response;
+    const transcript = result.text().trim();
+
+    console.log('Transcription successful:', transcript);
+
+    // Save to database if student_id and lesson_id are provided
+    if (student_id && lesson_id && input_field) {
+      try {
+        await pool.execute(
+          'INSERT INTO lesson_inputs (student_id, lesson_id, input_field, input_value) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE input_value = VALUES(input_value), updated_at = CURRENT_TIMESTAMP',
+          [student_id, lesson_id, input_field, transcript]
+        );
+        console.log('Transcript saved to database');
+      } catch (dbError) {
+        console.error('Error saving transcript to database:', dbError);
+        // Continue anyway - transcription was successful
+      }
+    }
+
+    // Clean up uploaded file
+    fs.unlinkSync(audioPath);
+
+    res.json({
+      transcript: transcript,
+      message: 'Audio transcribed successfully'
+    });
+
+  } catch (error) {
+    console.error('Audio transcription error:', error.message);
+    console.error('Full error:', error);
+    
+    // Clean up uploaded file if it exists
+    if (req.file && req.file.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        console.error('Error deleting uploaded file:', unlinkError);
+      }
+    }
+    
+    res.status(500).json({ message: 'Error transcribing audio', error: error.message });
+  }
+});
+
+// Endpoint for analyzing listening comprehension (L1 specific)
+app.post('/api/analyze-listening-l1', async (req, res) => {
+  try {
+    console.log('Received L1 listening analysis request');
+    const { transcript, correctAnswer } = req.body;
+    
+    if (!transcript || !correctAnswer) {
+      return res.status(400).json({ message: 'Transcript and correctAnswer are required' });
+    }
+
+    // Get the Gemini model
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    const analysisPrompt = `
+Compare the student's transcription with the correct answer and provide feedback.
+
+Student's transcription: "${transcript}"
+Correct answer: "${correctAnswer}"
+
+Provide feedback in the following format:
+1. Accuracy: [percentage match, e.g., "85% accurate"]
+2. Missing words: [list any words that were missed, or "None"]
+3. Extra words: [list any extra words added, or "None"]
+4. Suggestions: [1-2 brief suggestions for improvement]
+
+Keep the response concise and constructive.
+`;
+
+    const response = await model.generateContent(analysisPrompt, {
+      maxOutputTokens: 200,
+    });
+
+    const result = await response.response;
+    const feedback = result.text().trim();
+
+    console.log('L1 listening analysis complete');
+
+    res.json({
+      feedback: feedback,
+      studentTranscript: transcript,
+      correctAnswer: correctAnswer
+    });
+
+  } catch (error) {
+    console.error('L1 listening analysis error:', error.message);
+    res.status(500).json({ message: 'Error analyzing listening response', error: error.message });
+  }
+});
+
+// Comprehensive listening comprehension feedback endpoint (similar to writing evaluation)
+app.post('/api/analyze-listening', async (req, res) => {
+  try {
+    console.log('Received comprehensive listening analysis request');
+    const { transcript, studentId } = req.body;
+    
+    if (!transcript) {
+      return res.status(400).json({ message: 'Transcript is required' });
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    // Get overall score (0-100)
+    const scorePrompt = `
+Evaluate this transcribed audio response and provide ONLY a numeric score from 0 to 100 based on:
+- Clarity and articulation
+- Grammar and vocabulary usage
+- Coherence and logical flow
+- Completeness of response
+- Pronunciation accuracy (inferred from transcription)
+
+Return ONLY the number, nothing else.
+
+Transcript:
+${transcript}
+`;
+    
+    const scoreResult = await model.generateContent(scorePrompt);
+    const scoreText = scoreResult.response.text().trim();
+    const score = parseInt(scoreText) || 0;
+
+    // Get pronunciation and clarity feedback
+    const pronunciationPrompt = `
+Analyze this transcribed audio for pronunciation and clarity. Provide feedback on:
+1. Clarity of speech
+2. Pace and rhythm
+3. Accent or pronunciation issues (if any)
+4. Overall intelligibility
+
+Format as:
+CLARITY: [assessment]
+PACE: [assessment]
+PRONUNCIATION: [assessment]
+INTELLIGIBILITY: [assessment]
+
+Keep each assessment to 1-2 sentences.
+
+Transcript:
+${transcript}
+`;
+
+    const pronunciationResult = await model.generateContent(pronunciationPrompt);
+    const pronunciationFeedback = pronunciationResult.response.text().trim();
+
+    // Get grammar and vocabulary evaluation
+    const grammarPrompt = `
+Evaluate the grammar and vocabulary in this transcribed audio response.
+
+Provide feedback in this format:
+GRAMMAR ISSUES: [list any grammar errors found, or "No significant errors"]
+VOCABULARY USAGE: [assessment of vocabulary level and appropriateness]
+SENTENCE STRUCTURE: [assessment of how sentences are constructed]
+
+Transcript:
+${transcript}
+`;
+
+    const grammarResult = await model.generateContent(grammarPrompt);
+    const grammarFeedback = grammarResult.response.text().trim();
+
+    // Get content quality evaluation
+    const contentPrompt = `
+Evaluate the content quality of this transcribed audio response. Provide assessment on:
+- Relevance to the topic
+- Completeness of ideas
+- Logical organization
+- Supporting details
+
+Format as:
+RELEVANCE: [assessment]
+COMPLETENESS: [assessment]
+ORGANIZATION: [assessment]
+DETAILS: [assessment]
+
+Transcript:
+${transcript}
+`;
+
+    const contentResult = await model.generateContent(contentPrompt);
+    const contentQuality = contentResult.response.text().trim();
+
+    // Get strengths and areas for improvement
+    const feedbackPrompt = `
+Provide constructive feedback on this transcribed audio response:
+
+STRENGTHS (what the student did well):
+[List 2-3 specific strengths]
+
+AREAS FOR IMPROVEMENT:
+[List 2-3 specific areas to improve]
+
+Transcript:
+${transcript}
+`;
+
+    const feedbackResult = await model.generateContent(feedbackPrompt);
+    const feedbackSummary = feedbackResult.response.text().trim();
+
+    // Get actionable suggestions
+    const suggestionsPrompt = `
+Provide exactly 5 actionable suggestions to improve this listening comprehension response. Focus on:
+- Listening skills
+- Speaking clarity
+- Grammar improvement
+- Vocabulary expansion
+- Response completeness
+
+Format as:
+1. [Suggestion 1]
+2. [Suggestion 2]
+3. [Suggestion 3]
+4. [Suggestion 4]
+5. [Suggestion 5]
+
+Transcript:
+${transcript}
+`;
+
+    const suggestionsResult = await model.generateContent(suggestionsPrompt);
+    const suggestions = suggestionsResult.response.text().trim();
+
+    // Get final remarks
+    const remarksPrompt = `
+Write a brief, encouraging closing comment (2-3 sentences) for a student based on their listening comprehension response. 
+Be positive and motivating while acknowledging their effort.
+
+Transcript:
+${transcript}
+`;
+
+    const remarksResult = await model.generateContent(remarksPrompt);
+    const finalRemarks = remarksResult.response.text().trim();
+
+    console.log('Comprehensive listening analysis complete');
+
+    res.json({
+      score,
+      pronunciationFeedback,
+      grammarFeedback,
+      contentQuality,
+      feedbackSummary,
+      suggestions,
+      finalRemarks,
+      studentTranscript: transcript,
+      submissionTime: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Comprehensive listening analysis error:', error.message);
+    res.status(500).json({ message: 'Error analyzing listening response', error: error.message });
   }
 });
 
