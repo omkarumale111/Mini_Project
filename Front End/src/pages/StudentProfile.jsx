@@ -395,8 +395,7 @@ const StudentProfile = () => {
                   <p className="profile-department">{profileData.schoolCollege}</p>
                   <p className="profile-institution">{profileData.gradeYear}</p>
                 </div>
-
-            </div>
+              </div>
 
             {/* Personal Information */}
             <div className="personal-info">

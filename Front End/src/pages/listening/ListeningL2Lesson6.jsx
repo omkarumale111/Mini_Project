@@ -167,23 +167,29 @@ const ListeningL2Lesson6 = () => {
     setShowFeedback(false);
 
     try {
-      const response = await fetch('http://localhost:5001/api/analyze-text', {
+      console.log('Sending transcript for feedback:', transcript);
+      const response = await fetch('http://localhost:5001/api/analyze-listening', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: transcript }),
+        body: JSON.stringify({ 
+          transcript: transcript,
+          studentId: user?.id || ''
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to analyze text');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to analyze listening response');
       }
 
       const result = await response.json();
+      console.log('Feedback received:', result);
       setFeedback(result);
       setShowFeedback(true);
     } catch (error) {
-      console.error('Error analyzing text:', error);
+      console.error('Error analyzing listening response:', error);
       alert('Error analyzing your response. Please try again.');
     } finally {
       setIsLoadingFeedback(false);
@@ -399,33 +405,85 @@ const ListeningL2Lesson6 = () => {
                 border: '1px solid rgba(226, 232, 240, 0.6)'
               }}>
                 <h3 style={{ color: '#0a2440', marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
-                  🤖 AI Feedback
+                  🤖 AI Listening Feedback
                 </h3>
 
+                {/* Overall Score */}
+                <div style={{ 
+                  marginBottom: '20px', 
+                  padding: '16px', 
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  fontSize: '28px',
+                  fontWeight: 'bold'
+                }}>
+                  Score: {feedback.score}/100
+                </div>
+
+                {/* Pronunciation & Clarity */}
                 <div style={{ marginBottom: '20px' }}>
                   <h4 style={{ color: '#ef4444', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
-                    Spelling & Grammar:
+                    🎤 Pronunciation & Clarity:
                   </h4>
                   <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
-                    {feedback.spellAndGrammar}
+                    {feedback.pronunciationFeedback}
                   </p>
                 </div>
 
+                {/* Grammar & Vocabulary */}
                 <div style={{ marginBottom: '20px' }}>
                   <h4 style={{ color: '#3b82f6', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
-                    Content Feedback:
+                    📚 Grammar & Vocabulary:
                   </h4>
                   <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
-                    {feedback.contentFeedback}
+                    {feedback.grammarFeedback}
                   </p>
                 </div>
 
-                <div>
+                {/* Content Quality */}
+                <div style={{ marginBottom: '20px' }}>
+                  <h4 style={{ color: '#8b5cf6', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
+                    💡 Content Quality:
+                  </h4>
+                  <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+                    {feedback.contentQuality}
+                  </p>
+                </div>
+
+                {/* Strengths & Areas for Improvement */}
+                <div style={{ marginBottom: '20px' }}>
                   <h4 style={{ color: '#10b981', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
-                    Suggestions:
+                    ✨ Feedback Summary:
+                  </h4>
+                  <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+                    {feedback.feedbackSummary}
+                  </p>
+                </div>
+
+                {/* Suggestions */}
+                <div style={{ marginBottom: '20px' }}>
+                  <h4 style={{ color: '#f59e0b', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
+                    🎯 Suggestions for Improvement:
                   </h4>
                   <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
                     {feedback.suggestions}
+                  </p>
+                </div>
+
+                {/* Final Remarks */}
+                <div style={{ 
+                  padding: '16px', 
+                  background: '#e8f5e9',
+                  borderRadius: '12px',
+                  borderLeft: '4px solid #4caf50'
+                }}>
+                  <h4 style={{ color: '#2e7d32', fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
+                    💬 Final Remarks:
+                  </h4>
+                  <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line', fontStyle: 'italic' }}>
+                    {feedback.finalRemarks}
                   </p>
                 </div>
               </div>
