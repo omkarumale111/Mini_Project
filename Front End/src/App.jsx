@@ -12,7 +12,6 @@ import TeacherAbout from './pages/TeacherAbout';
 import Modules from './pages/Modules';
 import StudentProfile from './pages/StudentProfile';
 import TakeTest from './pages/TakeTest';
-import WritingEvaluation from './pages/WritingEvaluation';
 import TestReport from './pages/TestReport';
 import SignupScreen from "./components/SignUpScreen/SignupScreen";
 
@@ -108,8 +107,6 @@ function App() {
       <Route path="/profile" element={<StudentProfile />} />
       {/* Take Test page */}
       <Route path="/take-test" element={<TakeTest />} />
-      {/* Writing Evaluation page */}
-      <Route path="/writing-evaluation" element={<WritingEvaluation />} />
       {/* Test Report page */}
       <Route path="/test-report" element={<TestReport />} />
       

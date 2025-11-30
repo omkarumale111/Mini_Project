@@ -395,26 +395,7 @@ const StudentProfile = () => {
                   <p className="profile-department">{profileData.schoolCollege}</p>
                   <p className="profile-institution">{profileData.gradeYear}</p>
                 </div>
-
-              {/* Student Stats */}
-              <div className="student-stats">
-                <h4>Learning Progress</h4>
-                <div className="stats-list">
-                  <div className="stat-item">
-                    <span className="stat-label">Modules Completed</span>
-                    <span className="stat-value">2/4</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Exercises Done</span>
-                    <span className="stat-value">8</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Overall Progress</span>
-                    <span className="stat-value">65%</span>
-                  </div>
-                </div>
               </div>
-            </div>
 
             {/* Personal Information */}
             <div className="personal-info">

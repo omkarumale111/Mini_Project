@@ -249,13 +249,6 @@ const Dashboard = () => {
             </li>
             <li 
               className="nav-item"
-              onClick={() => navigateToModule('/writing-evaluation')}
-            >
-              <RiBarChartLine className="nav-icon" />
-              {!sidebarCollapsed && <span>Writing Evaluation</span>}
-            </li>
-            <li 
-              className="nav-item"
               onClick={() => navigateToModule('/student-report')}
             >
               <RiBarChartLine className="nav-icon" />
